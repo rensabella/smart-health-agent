@@ -1,1 +1,1 @@
-"""Versioned, offline-built knowledge retrieval; no user supplied URL fetching."""
+"""Compatibility namespace; new code should import smarthealth.retrieval."""

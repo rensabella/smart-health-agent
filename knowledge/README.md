@@ -1,6 +1,6 @@
 **SmartHealth 受控知识语料 v1.0**
 
-[corpus.json](./corpus.json) 包含 8 篇短中文参考笔记，用于检索心率、EDA、EEG、活动背景、睡眠指标和可穿戴设备测量限制。原始来源均为官方机构、设备厂商文档或原始研究论文；核对日期为 **2026-09-08**。具体 URL、页面日期、章节和使用范围见 [来源说明](../docs/rag_sources.md)。
+[corpus.json](./corpus.json) 包含 8 篇短中文参考笔记，用于检索心率、EDA、EEG、活动背景、睡眠指标和可穿戴设备测量限制。原始来源均为官方机构、设备厂商文档或原始研究论文；核对日期为 **2026-09-08**。具体 URL、页面日期、章节和使用范围见 [来源说明](https://github.com/rensabella/smart-health-agent/blob/main/docs/rag_sources.md)。
 
 每篇笔记明确分为“来源事实”和“项目适用边界”。前者是对所列来源的有限事实转述；后者来自本项目的数据协议和模型范围，不能被归因为来源作者的结论。正文保留 `heart_rate`、HR、EDA、EEG、PPG、`activity`、`sleep_quality` 等检索词，支持中英文问题与特征名称的对应。
 

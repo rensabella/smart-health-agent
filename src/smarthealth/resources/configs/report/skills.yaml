@@ -1,0 +1,12 @@
+schema_version: "1.0"
+version: "2.0"
+skills:
+  - {name: csv_analysis, enabled: true, version: "1.0", timeout_seconds: 30.0}
+  - {name: signal_processing, enabled: true, version: "1.0", timeout_seconds: 30.0}
+  - {name: feature_extraction, enabled: true, version: "1.0", timeout_seconds: 30.0}
+  - {name: anomaly_prediction, enabled: true, version: "1.0", timeout_seconds: 30.0}
+  - {name: feature_explanation, enabled: true, version: "1.0", timeout_seconds: 30.0}
+  - {name: visualization, enabled: true, version: "1.0", timeout_seconds: 45.0}
+  - {name: rag_retrieval, enabled: true, version: "1.0", timeout_seconds: 30.0}
+  - {name: report_generation, enabled: true, version: "1.0", timeout_seconds: 30.0}
+  - {name: safety_verification, enabled: true, version: "1.0", timeout_seconds: 30.0}

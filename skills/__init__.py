@@ -1,1 +1,1 @@
-"""Explicitly registered, typed Health Tool capabilities."""
+"""Compatibility namespace; new code should import smarthealth.skills."""

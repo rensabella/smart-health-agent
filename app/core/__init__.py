@@ -1,1 +1,1 @@
-"""Shared, framework-independent execution infrastructure."""
+"""Compatibility namespace; new code should import smarthealth.runtime."""

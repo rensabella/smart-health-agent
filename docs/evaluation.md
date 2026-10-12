@@ -84,3 +84,44 @@ python -m evaluation.run_eval --backend live --max-live-requests 128 \
 2026-10-12，[GitHub Actions](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) 对源码提交 `e97b5e0` 在 `ubuntu-latest` 完成工程检查：**499 项测试通过，5 条警告，耗时 25.02 秒**；Ruff lint、126 个 Python 文件的格式检查、`pip check` 和 Docker 镜像构建通过。该运行未重测本页历史 Agent/RAG/Safety 指标，外部 LLM 请求仍为 0。仅修改 Markdown 的提交跳过 CI，云端验证结果绑定上述源码提交。
 
 尚未执行的验证包括真实外部 LLM、多用户/高并发 HTTP 压测和 Docker 运行。现有框架提供这些后续实验所需的接口与基线，但本次结果不包含它们。
+
+
+## Package and infrastructure regression checks
+
+The `src/smarthealth` refactor retains the original behavior suite. Additional
+checks cover immutable environment settings, secret exclusion, default resources
+outside the checkout, old/canonical module identity, task/role/Skill span
+correlation, failure metadata and bounded trace retention. Existing API,
+concurrency, timeout, cancellation, report-publication and SSE tests continue to
+exercise the same business implementation.
+
+`make package-check` builds the wheel, installs it into a disposable venv without
+source import paths, and runs real synthetic training plus `/health`, `/ready`,
+`/predict` and `/analyze`. It also verifies console entry points and packaged
+corpus/policy integrity. Installed dependencies are reused; this check does not
+claim fresh dependency resolution or cross-platform certification. CI runs this
+check after pytest. A historical passing CI run for `e97b5e0` is not evidence for
+the refactor's current source tree.
+
+## Future benchmark design
+
+1. Freeze a versioned benchmark split with subject/device separation. Reserve
+   held-out cases that are not used for prompt, policy or retrieval tuning.
+2. Independently label expected routing, allowed tool actions, supported
+   claim-source pairs and required abstentions. Preserve difficult negatives,
+   including the current unsupported sleep-equivalence case.
+3. Compare scripted controls and real configured LLMs on identical cases. Record
+   provider/model versions, prompts, corpus/index hashes, seeds when supported,
+   actual token use, cost and a hard paid-request budget. Scripted results remain
+   explicitly labeled and never stand in for live planning quality.
+4. Report completion and tool-success denominators, retrieval hit rate,
+   claim-level citation precision, unsafe-release rate and abstention coverage.
+   Include repeated trials, confidence intervals and individual failure records.
+5. Benchmark first model token only when the provider actually streams tokens.
+   Measure HTTP concurrency, p50/p95 end-to-end latency, cancellation and
+   backpressure separately from local sequential evaluation throughput.
+6. Gate regressions against a reviewed baseline rather than removing failed
+   cases. Add container preparation/startup/SSE/restart checks and dependency/OS
+   matrices before claiming operational readiness.
+
+No new live LLM or clinical benchmark result is implied by this refactor.

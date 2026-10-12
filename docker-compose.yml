@@ -23,7 +23,7 @@ services:
   api:
     <<: *runtime
     restart: unless-stopped
-    command: [python, -m, uvicorn, "app.main:app", --host, "0.0.0.0", --port, "8000", --workers, "1", --limit-concurrency, "16", --no-access-log, --log-config, configs/logging.json]
+    command: [python, -m, uvicorn, "smarthealth.api.application:app", --host, "0.0.0.0", --port, "8000", --workers, "1", --limit-concurrency, "16", --no-access-log, --log-config, configs/logging.json]
     ports:
       - "127.0.0.1:${HEALTH_API_PORT:-8000}:8000"
     environment:
@@ -32,6 +32,7 @@ services:
       HEALTH_LLM_BASE_URL: "${HEALTH_LLM_BASE_URL:-https://api.openai.com/v1}"
       HEALTH_LLM_MODEL: "${HEALTH_LLM_MODEL:-}"
       HEALTH_LLM_API_KEY: "${HEALTH_LLM_API_KEY:-}"
+      HEALTH_LOG_LEVEL: "${HEALTH_LOG_LEVEL:-INFO}"
       HEALTH_MODEL_DIR: /var/lib/smarthealth/models/lightgbm_v1.0
       HEALTH_HARNESS_CONFIG_DIR: /opt/smarthealth/configs/report
       HEALTH_RAG_MODE: local
@@ -57,11 +58,7 @@ services:
     <<: *runtime
     restart: unless-stopped
     command:
-      - python
-      - -m
-      - streamlit
-      - run
-      - frontend/streamlit_app.py
+      - smarthealth-ui
       - --server.address=0.0.0.0
       - --server.port=8501
       - --server.headless=true
@@ -88,7 +85,7 @@ services:
     <<: *runtime
     profiles: [prepare]
     restart: "no"
-    command: [python, generate_demo_data.py, --output-dir, /var/lib/smarthealth/datasets, --seed, "42"]
+    command: [smarthealth-generate, --output-dir, /var/lib/smarthealth/datasets, --seed, "42"]
     volumes:
       - demo_data:/var/lib/smarthealth/datasets
     healthcheck:
@@ -101,8 +98,7 @@ services:
     profiles: [prepare]
     restart: "no"
     command:
-      - python
-      - train.py
+      - smarthealth-train
       - --data
       - /var/lib/smarthealth/datasets/generated/training.csv
       - --output-dir
@@ -122,11 +118,7 @@ services:
     profiles: [prepare]
     restart: "no"
     command:
-      - python
-      - -m
-      - scripts.build_knowledge_index
-      - --corpus
-      - knowledge/corpus.json
+      - smarthealth-index
       - --model-dir
       - /var/lib/smarthealth/embeddings/multilingual-e5-small
       - --output

@@ -1,1 +1,1 @@
-"""HTTP-only presentation client; no model, Artifact Store or provider access."""
+"""Compatibility namespace; new code should import smarthealth.frontend."""

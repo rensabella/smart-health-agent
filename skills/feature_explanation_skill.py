@@ -1,37 +1,10 @@
-"""Explain server-produced predictions without accepting untrusted model outputs."""
+"""Compatibility entry point for smarthealth.skills.feature_explanation_skill; business logic lives in src/."""
 
-from typing import Annotated, Literal
+import importlib
+import runpy
+import sys
 
-from pydantic import Field
-
-from app.core.context import SkillContext
-from app.schemas.response import Explanation, Ref
-from app.services.analysis_service import AnalysisService
-from skills.base_skill import BaseSkill, SkillModel
-
-
-class FeatureExplanationInput(SkillModel):
-    prediction_ref: Ref
-    top_k: Annotated[int, Field(ge=1, le=20)] = 5
-
-
-class FeatureExplanationOutput(Explanation):
-    schema_version: Literal["1.0"] = "1.0"
-    analysis_ref: Ref
-
-
-class FeatureExplanationSkill(BaseSkill[FeatureExplanationInput, FeatureExplanationOutput]):
-    name = "feature_explanation"
-    description = "Return global importance and highest-risk-window evidence with explicit attribution limits."
-    input_schema = FeatureExplanationInput
-    output_schema = FeatureExplanationOutput
-
-    def __init__(self, service: AnalysisService):
-        self.service = service
-
-    def execute(
-        self, input: FeatureExplanationInput, context: SkillContext
-    ) -> FeatureExplanationOutput:
-        return FeatureExplanationOutput.model_validate(
-            self.service.explain(input.prediction_ref, context, input.top_k)
-        )
+if __name__ == "__main__":
+    runpy.run_module("smarthealth.skills.feature_explanation_skill", run_name="__main__")
+else:
+    sys.modules[__name__] = importlib.import_module("smarthealth.skills.feature_explanation_skill")

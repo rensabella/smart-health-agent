@@ -1,21 +1,10 @@
-"""Liveness and model readiness are separate operational signals."""
+"""Compatibility entry point for smarthealth.api.health; business logic lives in src/."""
 
-from fastapi import APIRouter, Request
+import importlib
+import runpy
+import sys
 
-from app.core.errors import SkillError
-
-router = APIRouter()
-
-
-@router.get("/health")
-def health():
-    return {"status": "ok"}
-
-
-@router.get("/ready")
-def ready(request: Request):
-    if request.app.state.service.predictor is None:
-        raise SkillError(
-            "model_unavailable", "Train or configure a compatible model before inference."
-        )
-    return {"status": "ready"}
+if __name__ == "__main__":
+    runpy.run_module("smarthealth.api.health", run_name="__main__")
+else:
+    sys.modules[__name__] = importlib.import_module("smarthealth.api.health")

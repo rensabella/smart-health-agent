@@ -4,6 +4,8 @@
 !.dockerignore
 !pyproject.toml
 !README.md
+!src/
+!src/**
 !app/
 !app/**
 !skills/

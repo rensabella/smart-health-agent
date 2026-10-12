@@ -1,15 +1,10 @@
-"""Inference accepts an already loaded predictor; no loading on the request path."""
+"""Compatibility entry point for smarthealth.pipeline.inference; business logic lives in src/."""
 
-from app.models.base import BasePredictor
-from app.pipeline.feature_engineering import extract_features
-from app.pipeline.preprocess import parse_csv, preprocess
+import importlib
+import runpy
+import sys
 
-
-def analyze_csv(content: bytes, predictor: BasePredictor) -> dict:
-    windows, quality = preprocess(parse_csv(content))
-    features = extract_features(windows)
-    return {
-        "prediction": predictor.predict(features),
-        "explanation": predictor.explain(features),
-        "data_quality": quality,
-    }
+if __name__ == "__main__":
+    runpy.run_module("smarthealth.pipeline.inference", run_name="__main__")
+else:
+    sys.modules[__name__] = importlib.import_module("smarthealth.pipeline.inference")

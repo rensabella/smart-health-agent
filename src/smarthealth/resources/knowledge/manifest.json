@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "knowledge_version": "1.0",
+  "accessed_at": "2026-09-08",
+  "corpus_file": "corpus.json",
+  "corpus_file_sha256": "a202a141bd4c0a02e7e7c95517cd6840d1d17b503f5ecf252a68b737fca483e3",
+  "hash_scope": "Local curated UTF-8 summaries and attribution metadata; not remote webpage or PDF bytes.",
+  "source_hash_serialization": "json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(comma, colon)).encode(utf-8)",
+  "sources": [
+    {
+      "source_id": "aha_heart_rate_activity",
+      "source_metadata_sha256": "0536dc93f0efe5fbc0e23d369b32d28ff798100c4b5f088af0ae8df9ab2f3879",
+      "content_hash": "1d3f0438b801bd3a3df01601615f376355ab7c4b6d925a97a81619f8e19cb33f"
+    },
+    {
+      "source_id": "empatica_eda_context",
+      "source_metadata_sha256": "f4e6a9eaa08b01354cd382b93b666662e5e3469129dac25cdcb533f6fe3fe380",
+      "content_hash": "b8398acd4efd9f33de35b21f06e2a0e93ab35a5d19e94cef11b3ab8eeaacafc6"
+    },
+    {
+      "source_id": "apple_ppg_sampling",
+      "source_metadata_sha256": "a5f130aafbc9150ce3bafda8637072a1ec87e4ab8bcfbaaae567b755b5499790",
+      "content_hash": "03a90c8c333a42b0a564dd81b282f8479dc870af5846df031d3ba1483967ebeb"
+    },
+    {
+      "source_id": "apple_sensor_limitations",
+      "source_metadata_sha256": "a5428acbf9cad53fc909d7a2242ff2409fee94632a7349837452f625c4f09fcd",
+      "content_hash": "cb04f51286b5ebd6631f18d94f27c1b096851092fbbb29e52cea05325babf8a5"
+    },
+    {
+      "source_id": "ninds_eeg_measurement",
+      "source_metadata_sha256": "7e526a0f88c396f3c95347670d41426a5f6129287d022d9c012f3a78ed3697c6",
+      "content_hash": "a24abf118f74d799479392fd548bfff8b928cb35dafec315dc2530c49d3863fe"
+    },
+    {
+      "source_id": "cdc_sleep_quality",
+      "source_metadata_sha256": "15cf50ce80423155e2453d2ad37f81c157bbfd48e88df652f6ff2e4dc95dff44",
+      "content_hash": "07461f968dffe81df159120558e3ced20320bbbaae4baad84d13d09d0641adf0"
+    },
+    {
+      "source_id": "fda_general_wellness_scope",
+      "source_metadata_sha256": "fc2c2112ffea71d083701766a67ef2566582f945890bcbdc360907189beee47d",
+      "content_hash": "a67fc22e04dc052c2cce7d91cba2de726809dde81a0ac916415ce42d0ae791c4"
+    },
+    {
+      "source_id": "smets_wearable_context_2018",
+      "source_metadata_sha256": "eab1952bb7af26acd9ccdfe256d461d708d0d5ba10afd5404714a14184dfda21",
+      "content_hash": "292248cbe173a0ef3f7c42e09cf6edc92e935b00b3b438bf7b4f1116fad414ec"
+    }
+  ]
+}

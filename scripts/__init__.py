@@ -1,1 +1,1 @@
-"""Explicit local build operations, never run automatically by the API."""
+"""Compatibility namespace; new code should import smarthealth.cli."""

@@ -1,1 +1,1 @@
-"""Bounded, observable Agent execution over the stable Skill layer."""
+"""Compatibility namespace; new code should import smarthealth.agents."""

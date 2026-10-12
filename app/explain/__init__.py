@@ -1,1 +1,1 @@
-"""Model-specific attribution with explicit scope and limitations."""
+"""Compatibility namespace; new code should import smarthealth.explain."""

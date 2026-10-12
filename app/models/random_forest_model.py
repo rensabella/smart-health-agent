@@ -1,10 +1,10 @@
-"""RandomForest baseline; reference deviations are not local attribution."""
+"""Compatibility entry point for smarthealth.models.random_forest_model; business logic lives in src/."""
 
-import numpy as np
+import importlib
+import runpy
+import sys
 
-from app.models.base import BasePredictor
-
-
-class RandomForestPredictor(BasePredictor):
-    def global_importance(self) -> np.ndarray:
-        return np.asarray(self.estimator.feature_importances_)
+if __name__ == "__main__":
+    runpy.run_module("smarthealth.models.random_forest_model", run_name="__main__")
+else:
+    sys.modules[__name__] = importlib.import_module("smarthealth.models.random_forest_model")

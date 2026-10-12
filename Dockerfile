@@ -21,17 +21,9 @@ RUN apt-get update \
 
 WORKDIR /opt/smarthealth
 COPY pyproject.toml README.md ./
-COPY app/ ./app/
-COPY skills/ ./skills/
-COPY scripts/ ./scripts/
-COPY frontend/ ./frontend/
-COPY evaluation/ ./evaluation/
-COPY examples/ ./examples/
+COPY src/ ./src/
 COPY configs/ ./configs/
 COPY .streamlit/ ./.streamlit/
-COPY knowledge/ ./knowledge/
-COPY train.py generate_demo_data.py ./
-COPY data/sample/demo.csv ./data/sample/demo.csv
 
 # Train and serve with this same dependency environment. The macOS snapshot is
 # intentionally not used as a Linux lock file. No model download occurs here.
@@ -53,4 +45,4 @@ USER 10001:10001
 EXPOSE 8000 8501
 HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=3 \
     CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=3).read()"]
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "16", "--no-access-log", "--log-config", "configs/logging.json"]
+CMD ["python", "-m", "uvicorn", "smarthealth.api.application:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--limit-concurrency", "16", "--no-access-log", "--log-config", "configs/logging.json"]

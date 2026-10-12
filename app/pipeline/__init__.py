@@ -1,1 +1,1 @@
-"""Shared, versioned training and inference transformations."""
+"""Compatibility namespace; new code should import smarthealth.pipeline."""

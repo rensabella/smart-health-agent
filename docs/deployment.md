@@ -1,8 +1,78 @@
-**Docker 部署与资产准备**
+# Installation and deployment
+
+## Local source installation
+
+Use Python 3.10+ (the exercised environment is Python 3.12). Linux requires
+`libgomp1`; macOS LightGBM requires the OpenMP runtime. From the repository root:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[dev,ui]'
+make data
+make train
+smarthealth-api
+# In another activated shell:
+smarthealth-ui
+```
+
+The default Tool API works without an external LLM or downloaded embedding
+model. Training refuses to overwrite existing model bundles; use a new
+`--output-dir` and set `HEALTH_MODEL_DIR` for another experiment. Examples and
+old entry points remain available; new integrations import `smarthealth`.
+
+## Wheel installation outside the checkout
+
+```bash
+python -m build --wheel
+python scripts/check_wheel.py --wheel dist/smart_health_agent-0.2.0-py3-none-any.whl
+# Copy the wheel to the target host, then in its virtual environment:
+python -m pip install 'smart_health_agent-0.2.0-py3-none-any.whl[ui]'
+export HEALTH_HOME="$PWD/smarthealth-state"
+smarthealth-generate
+smarthealth-train
+smarthealth-api
+```
+
+Default policies, logging configuration, knowledge corpus, evaluation cases and
+synthetic demo input are packaged resources. Models, indexes, journals and memory
+are generated outside the package. The wheel check uses a disposable venv,
+reuses the test environment's installed dependencies, removes source import paths,
+trains a real baseline and exercises HTTP endpoints from a temporary directory.
+It does not claim a new dependency-resolution test on every target platform.
+
+## Environment configuration
+
+`.env.example` documents all supported settings. Export values in the process
+manager or shell; the application does not auto-load a `.env`. Compose's own
+variable interpolation is separate. Explicit `Settings` may be passed to the
+application factory. Invalid settings fail validation at startup. Keep secrets
+out of CLI arguments, logs, source control and frontend configuration.
+
+| Variables | Purpose |
+|---|---|
+| `HEALTH_HOME`, `HEALTH_MODEL_DIR` | Mutable storage root; trusted ML bundle directory |
+| `HEALTH_API_TOKEN` | Optional single-identity API bearer token; required by Compose |
+| `HEALTH_AGENT_BACKEND` | `disabled` (default) or explicit `openai_compatible` |
+| `HEALTH_LLM_BASE_URL`, `HEALTH_LLM_MODEL`, `HEALTH_LLM_API_KEY` | Real provider configuration; never a scripted fallback |
+| `HEALTH_HARNESS_CONFIG_DIR` | Operator-owned policy override; restart to apply |
+| `HEALTH_RAG_MODE`, `HEALTH_RAG_MODEL_DIR`, `HEALTH_RAG_INDEX_DIR`, `HEALTH_RAG_MIN_SCORE` | Explicit local semantic retrieval and validated assets |
+| `HEALTH_MEMORY_MODE`, `HEALTH_MEMORY_DIR` | `local` Qdrant summaries or `ephemeral` |
+| `HEALTH_MEMORY_SESSION_TTL_SECONDS`, `HEALTH_MEMORY_RETENTION_SECONDS` | Session and summary retention |
+| `HEALTH_AGENT_TRACE_DIR`, `HEALTH_LOG_LEVEL` | Scoped journals and application JSON-log level |
+| `HEALTH_API_HOST`, `HEALTH_API_PORT` | `smarthealth-api` listener (one worker) |
+| `HEALTH_API_BASE_URL` | Streamlit backend URL |
+
+Defaults are read once per application lifespan. Do not mutate environment values
+as request-level configuration. Model schema versions, feature definitions and
+index collection identifiers are compatibility contracts, not tunable deployment
+settings. Remote Qdrant and Redis are not implemented adapters.
+
+## Docker deployment
 
 [Dockerfile](../Dockerfile) 使用 Python 3.12 slim、Linux `libgomp1` 和 UID/GID `10001`。同一镜像运行 FastAPI、Streamlit 及一次性准备命令，运行服务均使用非 root 用户。[Compose 配置](../docker-compose.yml) 将 API 固定为一个 Uvicorn worker，默认使用报告 Harness、真实 LightGBM、E5 ONNX 和本地 Qdrant。
 
-2026-10-12，[GitHub Actions](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) 已在 `ubuntu-latest` 对源码提交 `e97b5e0` 成功构建 Docker 镜像。本地开发环境没有 Docker 可执行程序；**容器内资产准备、服务启动及运行行为尚未验证**。该 CI 的 `container-build` 任务只构建镜像，Python 测试与 Compose 静态检查也不能作为容器运行验证。
+旧布局在 2026-10-12 的 [GitHub Actions](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) 已在 `ubuntu-latest` 对源码提交 `e97b5e0` 成功构建 Docker 镜像。该历史构建不代表本次 `src` 布局镜像已经验证；本次镜像仍须执行更新后的构建任务。本地开发环境没有 Docker 可执行程序；**容器内资产准备、服务启动及运行行为尚未验证**。该 CI 的 `container-build` 任务只构建镜像，Python 测试与 Compose 静态检查也不能作为容器运行验证。
 
 从仓库根目录执行以下命令，需要 Docker Engine/Desktop 和 Docker Compose v2。先在当前 shell 注入自己的 API bearer token；例如生成新的随机值：
 

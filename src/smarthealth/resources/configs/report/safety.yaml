@@ -1,0 +1,11 @@
+schema_version: "1.0"
+version: "2.0"
+publication_policy: evidence_report_v1
+# Educational physiological explanations only; this does not enable clinical diagnosis.
+medical_report_enabled: true
+safety_rules:
+  require_evidence: true
+  forbid_definitive_diagnosis: true
+  require_high_risk_recommendation: true
+  require_uncertainty: true
+  require_current_input: true

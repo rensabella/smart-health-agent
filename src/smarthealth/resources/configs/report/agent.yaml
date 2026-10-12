@@ -1,0 +1,31 @@
+schema_version: "1.0"
+version: "2.0"
+name: health_reasoning_agent
+limits:
+  max_tool_calls: 18
+  max_data_tool_calls: 8
+  max_rag_tool_calls: 4
+  max_writer_tool_calls: 3
+  max_safety_tool_calls: 3
+  max_decisions: 32
+  max_llm_requests: 32
+  max_delegations: 8
+  max_total_tokens: 65536
+  run_timeout_seconds: 180.0
+  decision_timeout_seconds: 30.0
+roles:
+  planner:
+    allowed_skills: []
+    allowed_delegates: [data_analysis, rag, report_writer, safety_verification]
+  data_analysis:
+    allowed_skills: [csv_analysis, signal_processing, feature_extraction, anomaly_prediction, feature_explanation, visualization]
+    allowed_delegates: []
+  rag:
+    allowed_skills: [rag_retrieval]
+    allowed_delegates: []
+  report_writer:
+    allowed_skills: [report_generation]
+    allowed_delegates: []
+  safety_verification:
+    allowed_skills: [safety_verification]
+    allowed_delegates: []

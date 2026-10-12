@@ -1,6 +1,6 @@
 # Contributing
 
-Start with the [README](README.md), [architecture and project report](docs/project_report.md), and [evaluation definitions](docs/evaluation.md). This repository currently supports a source checkout and a single API process. Changes should preserve the Tool API and make new behavior observable and reproducible.
+Start with the [README](README.md), [architecture](docs/architecture.md), and [evaluation definitions](docs/evaluation.md). This repository currently supports editable and wheel installation with a single API process. Changes should preserve the Tool API and make new behavior observable and reproducible.
 
 ## Local setup
 
@@ -13,12 +13,15 @@ python -m pip install -e '.[dev,ui]'
 mkdir -p data/generated/matplotlib-cache
 export MPLCONFIGDIR="$PWD/data/generated/matplotlib-cache"
 python -m pytest
-ruff check app skills scripts evaluation frontend tests examples train.py generate_demo_data.py
-ruff format --check app skills scripts evaluation frontend tests examples train.py generate_demo_data.py
+ruff check src app skills scripts evaluation frontend tests examples train.py generate_demo_data.py
+ruff format --check src app skills scripts evaluation frontend tests examples train.py generate_demo_data.py
 python -m pip check
+make package-check
 ```
 
 The test suite trains small model fixtures and uses explicit test embedding/decision backends. It does not require an API key or download the E5 model. Do not use the test adapters as a silent application fallback.
+
+Canonical code belongs in `src/smarthealth`. Root Python files are compatibility entry points; do not add a second implementation there. When changing default profiles or corpus assets, update their packaged resource copies; tests compare the copies.
 
 ## Change boundaries
 
@@ -34,7 +37,7 @@ The test suite trains small model fixtures and uses explicit test embedding/deci
 See [evaluation.md](docs/evaluation.md) for explicit model/index preparation and mode selection. A full local RAG evaluation requires the real pinned E5 assets and exclusive access to its Qdrant directory; stop other processes using that directory first.
 
 ```bash
-python -m evaluation.run_eval
+smarthealth-eval
 ```
 
 The checked-in scripted baseline includes one known semantic-review failure. `--fail-on-regression` intentionally returns a nonzero exit for that baseline. Unit-test success does not certify report semantics. Do not mix scripted and live results in one quality claim; live mode requires operator-supplied credentials and incurs provider usage.

@@ -4,9 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "smart-health-agent"
-version = "0.1.0"
+version = "0.2.0"
 description = "Observable health analysis agents with typed Skills, local RAG and source-bound report review"
 requires-python = ">=3.10"
+readme = "README.md"
 dependencies = [
   "pydantic>=2.10,<3", "fastapi>=0.115,<1", "uvicorn>=0.32,<1",
   "python-multipart>=0.0.20,<1", "pandas>=2.2,<3", "numpy>=1.26,<3",
@@ -18,12 +19,23 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "pytest-asyncio>=0.25,<2", "ruff>=0.9,<1"]
+dev = ["pytest>=8,<10", "pytest-asyncio>=0.25,<2", "ruff>=0.9,<1", "build>=1.2,<2"]
 ui = ["streamlit>=1.41,<2"]
 
+[project.scripts]
+smarthealth-api = "smarthealth.cli.serve:main"
+smarthealth-ui = "smarthealth.cli.ui:main"
+smarthealth-generate = "smarthealth.cli.generate_demo_data:main"
+smarthealth-train = "smarthealth.cli.train:main"
+smarthealth-index = "smarthealth.cli.build_knowledge_index:main"
+smarthealth-eval = "smarthealth.evaluation.run_eval:main"
+
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["app*", "skills*", "scripts*", "frontend*", "evaluation*", "examples*"]
+where = ["src"]
+include = ["smarthealth*"]
+
+[tool.setuptools.package-data]
+"smarthealth.resources" = ["configs/*.yaml", "configs/*.json", "configs/report/*.yaml", "knowledge/*.json", "knowledge/*.md", "data/sample/*.csv", "evaluation/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,1 +1,1 @@
-"""Reproducible evaluations with explicit modes, denominators and missing metrics."""
+"""Compatibility namespace; new code should import smarthealth.evaluation."""

@@ -1,10 +1,10 @@
-"""Stable error codes with messages safe to expose at API and Skill boundaries."""
+"""Compatibility entry point for smarthealth.runtime.errors; business logic lives in src/."""
 
+import importlib
+import runpy
+import sys
 
-class SkillError(Exception):
-    """A known domain failure; never put raw inputs or exception reprs in its message."""
-
-    def __init__(self, code: str, message: str):
-        super().__init__(message)
-        self.code = code
-        self.message = message
+if __name__ == "__main__":
+    runpy.run_module("smarthealth.runtime.errors", run_name="__main__")
+else:
+    sys.modules[__name__] = importlib.import_module("smarthealth.runtime.errors")

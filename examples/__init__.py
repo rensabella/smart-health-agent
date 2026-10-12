@@ -1,1 +1,1 @@
-"""Runnable synthetic demonstrations; scripted policies are explicitly offline fixtures."""
+"""Compatibility namespace; new code should import smarthealth.examples."""

@@ -1,0 +1,12 @@
+schema_version: "1.0"
+version: "1.0"
+# Version 1 permits only deterministic, source-backed synthetic model facts.
+# RAG, report writing and semantic Safety Agent are subsequent implementation work.
+publication_policy: tool_facts_only_v1
+medical_report_enabled: false
+safety_rules:
+  require_evidence: true
+  forbid_definitive_diagnosis: true
+  require_high_risk_recommendation: true
+  require_uncertainty: true
+  require_current_input: true

@@ -1,1 +1,1 @@
-"""Operator-owned policy; untrusted task content never supplies configuration."""
+"""Compatibility namespace; new code should import smarthealth.runtime.harness."""

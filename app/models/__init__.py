@@ -1,1 +1,1 @@
-"""Versioned baseline predictors loaded once by the application."""
+"""Compatibility namespace; new code should import smarthealth.models."""

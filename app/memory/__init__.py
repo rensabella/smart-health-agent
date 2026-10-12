@@ -1,1 +1,1 @@
-"""Scoped short-term context and summary-only long-term memory."""
+"""Compatibility namespace; new code should import smarthealth.runtime.memory."""

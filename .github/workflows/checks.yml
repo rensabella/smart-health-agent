@@ -32,9 +32,11 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y libgomp1
       - run: python -m pip install -e '.[dev,ui]'
       - run: python -m pip check
-      - run: ruff check app skills scripts evaluation frontend tests examples train.py generate_demo_data.py
-      - run: ruff format --check app skills scripts evaluation frontend tests examples train.py generate_demo_data.py
+      - run: ruff check src app skills scripts evaluation frontend tests examples train.py generate_demo_data.py
+      - run: ruff format --check src app skills scripts evaluation frontend tests examples train.py generate_demo_data.py
       - run: python -m pytest
+      - run: python -m build --wheel
+      - run: python scripts/check_wheel.py --wheel dist/smart_health_agent-0.2.0-py3-none-any.whl
   container-build:
     runs-on: ubuntu-latest
     timeout-minutes: 20

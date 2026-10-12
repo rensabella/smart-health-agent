@@ -1,8 +1,10 @@
 # 求职展示与待补充清单
 
-更新日期：2026-10-12。此页将已经具备的展示材料、发布状态和需要项目所有者补充的信息分开记录。它不是临床、合规或线上性能认证。
+更新日期：2026-10-13。此页将已经具备的展示材料、发布状态和需要项目所有者补充的信息分开记录。它不是临床、合规或线上性能认证。
 
 ## 当前可展示
+
+- `0.2.0` 工程重构：`src/smarthealth`、Settings、结构化执行追踪、Makefile 和独立 wheel 安装。当前本地 523 项测试通过，新增 24 项回归；脱离源码目录的真实训练/API/图表验证通过，见 [包重构验证](package_verification.md)。
 
 - 九个类型化 Skills、五种 Agent 角色、ReAct Runtime、Router、Memory、Harness、本地 RAG 和报告发布检查。
 - FastAPI Tool/Agent API、Streamlit、SSE 回放、来源与版本校验、脱敏审计。
@@ -11,7 +13,9 @@
 - 从 Git 暂存区导出完整源码（不含本机 `.venv`、模型和索引缓存），复用相同 Python 依赖进行第二次回归：499 项通过，26.93 秒。发布文件、合成测试资产与配置目录已一并核对，见 [发布验证记录](publication_verification.md)。
 - Docker/Compose、GitHub Actions、贡献及安全说明。2026-10-12 首轮 [云端 CI](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) 已通过：499 项测试、Ruff、依赖检查及 Docker 镜像构建；容器运行仍待验证。
 
-## 发布状态
+## 首次公开发布记录
+
+下表保留 `0.1` 首次发布的证据；`0.2.0` 重构的发布状态见 [包重构验证](package_verification.md)。
 
 | 项目 | 状态 |
 |---|---|
@@ -39,7 +43,7 @@
 
 ## 当前简历可以强调
 
-优先突出类型化能力层、角色权限、任务生命周期、审核与内容版本绑定、SSE 重连、摘要 Memory 和失败可见的 Evaluation。量化数字可以使用 9 Skills、5 角色、35 维特征、499 项工程测试，以及附带 `scripted` 限定的 14 个系统场景。
+优先突出类型化能力层、角色权限、任务生命周期、审核与内容版本绑定、SSE 重连、摘要 Memory 和失败可见的 Evaluation。量化数字可以使用 9 Skills、5 角色、35 维特征、523 项工程测试，以及附带 `scripted` 限定的 14 个系统场景。
 
 模型 F1/AUC 必须注明合成测试集；本地顺序计时不能写成生产 HTTP QPS；SSE 首报告块不能写成模型首 token。已知语义失败保留在 [评测报告](../evaluation/evaluation_report.md)，不通过删除负例营造安全保证。
 

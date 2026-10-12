@@ -1,1 +1,1 @@
-"""Bounded server-side figure rendering."""
+"""Compatibility namespace; new code should import smarthealth.visualization."""

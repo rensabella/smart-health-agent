@@ -34,9 +34,9 @@
 
 本地已导入并验证远端提交对象，`main` 与 `origin/main` 同步。发布前的 `7f59172` / `c9bd0d4` 历史保留在本地 `backup/pre-publication-20261012` 分支；工作文件没有因同步丢失或替换。
 
-## 当前边界
+## 首次发布的边界与后续改进
 
-本机没有 Docker；云端已验证镜像构建，仍需单独验证容器资产准备、启动、HTTP/SSE、重启和停止行为。源代码目前支持源码 checkout/editable 安装；独立 wheel 的配置资源打包属于后续增强。
+本机没有 Docker；云端已验证镜像构建，仍需单独验证容器资产准备、启动、HTTP/SSE、重启和停止行为。首次发布只验证源码 checkout/editable 安装；后续 `0.2.0` 已完成 `src/smarthealth` 和 wheel 资源打包，最新检查见 [包重构验证](package_verification.md)。
 
 登录凭据不进入仓库。已在工作区外层的本地工具目录准备官方 GitHub CLI，并核对下载资产 SHA-256；它不属于发布内容，也未改动系统安装。
 

@@ -1,0 +1,28 @@
+schema_version: "1.0"
+version: "1.0"
+name: health_reasoning_agent
+limits:
+  max_tool_calls: 18
+  max_data_tool_calls: 8
+  max_decisions: 32
+  max_llm_requests: 32
+  max_delegations: 8
+  max_total_tokens: 65536
+  run_timeout_seconds: 180.0
+  decision_timeout_seconds: 30.0
+  simple_max_decisions: 4
+  simple_max_llm_requests: 4
+  simple_timeout_seconds: 30.0
+roles:
+  planner:
+    allowed_skills: []
+    allowed_delegates: [data_analysis]
+  data_analysis:
+    allowed_skills:
+      - csv_analysis
+      - signal_processing
+      - feature_extraction
+      - anomaly_prediction
+      - feature_explanation
+      - visualization
+    allowed_delegates: []

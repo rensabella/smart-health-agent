@@ -1,1 +1,1 @@
-"""SmartHealth domain services. Importing this package does not load models."""
+"""Compatibility namespace; new code should import smarthealth."""
