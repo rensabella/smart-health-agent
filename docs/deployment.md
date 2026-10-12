@@ -2,7 +2,7 @@
 
 [Dockerfile](../Dockerfile) 使用 Python 3.12 slim、Linux `libgomp1` 和 UID/GID `10001`。同一镜像运行 FastAPI、Streamlit 及一次性准备命令，运行服务均使用非 root 用户。[Compose 配置](../docker-compose.yml) 将 API 固定为一个 Uvicorn worker，默认使用报告 Harness、真实 LightGBM、E5 ONNX 和本地 Qdrant。
 
-本次开发环境没有 Docker 可执行程序，因此**尚未实际构建或启动容器**。仓库提供静态配置检查和下述复现步骤；Python 原生测试的结果不能作为容器运行验证。
+2026-10-12，[GitHub Actions](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) 已在 `ubuntu-latest` 对源码提交 `e97b5e0` 成功构建 Docker 镜像。本地开发环境没有 Docker 可执行程序；**容器内资产准备、服务启动及运行行为尚未验证**。该 CI 的 `container-build` 任务只构建镜像，Python 测试与 Compose 静态检查也不能作为容器运行验证。
 
 从仓库根目录执行以下命令，需要 Docker Engine/Desktop 和 Docker Compose v2。先在当前 shell 注入自己的 API bearer token；例如生成新的随机值：
 
@@ -82,4 +82,4 @@ API 的停止宽限期为 210 秒，以容纳有界任务取消和底层工作�
 
 停止服务并保留资产使用 `docker compose down`。`docker compose down -v` 会删除模型、知识索引、历史摘要和 trace 卷，只适合明确要清空该环境时使用。备份或迁移 Qdrant 文件前先停止 API，避免复制正在写入的本地数据库；同时保留模型、配置和索引清单以便核对版本。
 
-交付验收仍需在有 Docker 的目标环境完成镜像构建、准备命令、健康检查、CSV 分析、SSE 断线重放、重启后的 trace/记忆行为以及停止流程。当前静态检查验证配置的资源和挂载关系，不能替代这些运行验证。
+交付验收仍需在有 Docker 的目标环境按上述命令准备镜像与资产，完成健康检查、CSV 分析、SSE 断线重放、重启后的 trace/记忆行为以及停止流程。已通过的云端镜像构建与配置静态检查不能替代这些运行验证；仅修改 Markdown 的提交不会再次触发 CI。

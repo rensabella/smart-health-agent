@@ -79,6 +79,8 @@ python -m evaluation.run_eval --backend live --max-live-requests 128 \
 
 ## 工程检查
 
-`tests/test_evaluation.py` 验证分母、N/A、来源绑定、标签不进入模型上下文、操作失败不能冒充安全，以及跨病例 live 请求预算。前端另有纯 HTTP/SSE 客户端测试和 Streamlit AppTest；Docker 配置有静态不变量检查。GitHub Actions 提供后续环境的测试和容器构建入口；只有在实际运行完成后，才能把其结果作为该平台的验证证据。
+`tests/test_evaluation.py` 验证分母、N/A、来源绑定、标签不进入模型上下文、操作失败不能冒充安全，以及跨病例 live 请求预算。前端另有纯 HTTP/SSE 客户端测试和 Streamlit AppTest；Docker 配置有静态不变量检查。
+
+2026-10-12，[GitHub Actions](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) 对源码提交 `e97b5e0` 在 `ubuntu-latest` 完成工程检查：**499 项测试通过，5 条警告，耗时 25.02 秒**；Ruff lint、126 个 Python 文件的格式检查、`pip check` 和 Docker 镜像构建通过。该运行未重测本页历史 Agent/RAG/Safety 指标，外部 LLM 请求仍为 0。仅修改 Markdown 的提交跳过 CI，云端验证结果绑定上述源码提交。
 
 尚未执行的验证包括真实外部 LLM、多用户/高并发 HTTP 压测和 Docker 运行。现有框架提供这些后续实验所需的接口与基线，但本次结果不包含它们。

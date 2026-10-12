@@ -10,7 +10,7 @@
 
 **当前已实现至 Step 9：Agent/RAG/Safety/System Evaluation、Streamlit、Docker Compose 和 CI 配置。** 五个角色通过九个类型化 Skills 执行分析、检索、逐条主张写作和独立角色审核；报告必须绑定当前分析、证据、草稿版本和策略哈希，通过发布检查后才输出正文。知识检索使用固定版本的本地 multilingual-e5-small ONNX 与 Qdrant，原有 Tool API 保持兼容。详见 [RAG 与报告文档](docs/rag_and_reports.md) 和 [Step 9 验证记录](docs/step9_verification.md)。
 
-已有 [Memory](docs/memory_layer.md)、[Router](docs/agent_router.md)、[ReAct Loop](docs/agent_loop.md) 与 [Harness](docs/harness_engineering.md) 提供有界执行、来源校验、审计及发布门禁。当前是面向生产工程设计的本地单进程实现。本次评测使用真实 LightGBM/E5/Qdrant 和明确标记的脚本角色决策，保留一条语义审核失败；没有执行外部 LLM 调用、Docker 构建运行或多用户压测，不能据此声称已满足生产或临床质量要求。
+已有 [Memory](docs/memory_layer.md)、[Router](docs/agent_router.md)、[ReAct Loop](docs/agent_loop.md) 与 [Harness](docs/harness_engineering.md) 提供有界执行、来源校验、审计及发布门禁。当前是面向生产工程设计的本地单进程实现。本次评测使用真实 LightGBM/E5/Qdrant 和明确标记的脚本角色决策，保留一条语义审核失败。云端 CI 已通过 Python 检查与 Docker 镜像构建；外部 LLM 调用、容器运行和多用户压测仍未验证，不能据此声称已满足生产或临床质量要求。[云端验证记录](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504)
 
 ## Start here
 
@@ -22,7 +22,7 @@
 | 本地运行 | Installation → Training → API example → Streamlit；基础工具不需要外部 LLM |
 | 已知边界与待补充 | [Evaluation 定义](docs/evaluation.md)、[求职补充清单](docs/portfolio_checklist.md) |
 
-2026-10-12 本机复验：**499 项测试通过**，Ruff 和依赖检查通过。训练与 RAG/Agent 的已保存结果来自 2026-09-09，未因本次发布准备而重新测量。模型二进制、真实健康数据、凭据、本地数据库和第三方参考工程不随本仓库发布。
+2026-10-12 本机复验：**499 项测试通过**，Ruff 和依赖检查通过。同日 [GitHub Actions](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) 对源码提交 `e97b5e0` 完成 **499 项测试、Ruff、依赖检查和 Docker 镜像构建**。训练与 RAG/Agent 的已保存结果来自 2026-09-09，未因本次发布准备而重新测量。模型二进制、真实健康数据、凭据、本地数据库和第三方参考工程不随本仓库发布。
 
 ## Architecture
 
@@ -318,7 +318,7 @@ python -m evaluation.run_eval --fail-on-regression
 
 [Docker 部署文档](docs/deployment.md) 给出构建、合成数据/训练/E5 索引准备、API/Streamlit 启动及停止流程。镜像使用非 root 用户；Compose 配置只读根文件系统、独立数据卷、资源上限、健康检查和本机端口绑定。模型必须在镜像对应的依赖环境中训练；API 仍只运行一个 worker，当前没有 Redis 或独立 Qdrant 服务。
 
-本机没有 Docker，镜像构建和容器运行尚未验证。[GitHub Actions 配置](.github/workflows/checks.yml) 提供 Python 测试、lint 和镜像构建任务；本目录是 Git 仓库根目录。远端发布及云端 CI 的实际状态见 [求职补充清单](docs/portfolio_checklist.md)。镜像构建通过也不等于容器运行验证。
+2026-10-12 的 [GitHub Actions 运行](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) 已在 `ubuntu-latest` 对源码提交 `e97b5e0` 完成 Python 检查与 Docker 镜像构建。本机没有 Docker；容器内资产准备、API/Streamlit 启动、SSE 和重启行为仍待运行验证。[工作流配置](.github/workflows/checks.yml) 对仅修改 Markdown 的提交跳过 CI，因此上述结果对应明确的源码提交。发布状态与后续事项见 [求职补充清单](docs/portfolio_checklist.md)。
 
 ## 可观测性与运行边界
 
@@ -340,6 +340,8 @@ python -m pip check
 ```
 
 当前本机 **499 项测试通过**，Ruff lint/格式与 `pip check` 通过。测试 fixture 实际训练 RF 与 LightGBM，并使用真实本地 Qdrant；快速检索测试注入明确标记的测试向量器，无外部 LLM 或模型下载依赖。覆盖数据/Registry、ReAct、Router、SSE、journal、provider 协议、Memory、Harness、RAG 来源绑定、报告修订与发布门禁，以及 Evaluation 指标、前端 HTTP/SSE、Streamlit AppTest 和 Docker 静态约束。真实 E5 另通过运行示例与评测验证。7 条上游弃用提示来自 Starlette/AnyIO 以及 Streamlit 的 NumPy timedelta 调用，未导致测试失败；未隐藏这些提示。
+
+云端同日对源码提交 `e97b5e0` 的复验结果为 **499 passed、5 warnings、25.02 秒**；Ruff lint、126 个 Python 文件的格式检查和 `pip check` 通过。该结果与本机计时、警告数分别记录，详见 [GitHub Actions 日志](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504)。
 
 Step 9 的前端浏览器检查实际验证了页面、上传及简单任务；完整报告展示另由 AppTest 验证，报告 HTTP/SSE 由真实 Uvicorn 验证。最终浏览器重连点击未完成，具体范围见 [Step 9 验证记录](docs/step9_verification.md)。
 
@@ -366,7 +368,7 @@ Harness 默认读取项目 `configs/`，通过 `HEALTH_HARNESS_CONFIG_DIR` 指�
 | Step 6（已完成） | 本地 Short-term Memory、Qdrant 摘要、显式偏好、分组趋势、TTL 与删除；Redis 分布式接入留到部署阶段 |
 | Step 7（已完成） | 冻结 YAML 策略、预算/权限、来源与数值检查、确定性发布校验和策略审计 |
 | Step 8（已完成） | 固定 E5/Qdrant 检索、五角色报告闭环、可定位证据、Writer/Safety 权限与版本绑定、有界修订、审核后 SSE |
-| Step 9（代码与本地验证已完成） | Agent/RAG/Safety/System Evaluation、Streamlit、Docker Compose、CI；真实 LLM 与容器验证仍待目标环境执行 |
+| Step 9（代码、本地检查与云端 CI 已完成） | Agent/RAG/Safety/System Evaluation、Streamlit、Docker Compose、镜像构建；真实 LLM 与容器运行验证仍待目标环境执行 |
 | 后续质量与部署 | 独立复核标签、真实 LLM 盲测、扩大检索难负例、HTTP 负载测试、多用户认证及共享任务/记忆基础设施 |
 
 已按本轮授权连续完成至 Step 9。后续模型可通过 `BasePredictor` 与新输入协议接入 PaAno 或深度学习模型；当前不训练医疗大模型、VLM 或强化学习策略。

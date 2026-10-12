@@ -163,6 +163,8 @@ python -m pip check
 
 On **2026-10-12**, the local rerun passed **499 tests in 21.80 seconds**; Ruff lint, formatting for 126 Python files, and dependency checks passed. Fast tests use labeled scripted decisions and test embeddings, alongside real baseline training fixtures and local Qdrant. Historical real-E5 and HTTP/SSE verification is documented separately in [Step 8](docs/step8_verification.md) and [Step 9](docs/step9_verification.md).
 
+On the same date, [GitHub Actions](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) verified source commit `e97b5e0` on `ubuntu-latest`: **499 tests passed, with 5 warnings, in 25.02 seconds**. Ruff lint, formatting for 126 Python files, dependency checks, and the Docker image build passed. Markdown-only commits skip this workflow; these results apply to the cited source commit.
+
 ## Repository guide
 
 | Path | Contents |
@@ -179,7 +181,7 @@ On **2026-10-12**, the local rerun passed **499 tests in 21.80 seconds**; Ruff l
 
 ## Deployment boundaries and next work
 
-The [deployment guide](docs/deployment.md) describes explicit data/model/index preparation and API/UI startup. Docker configuration uses a non-root user, separate volumes, resource limits, and a read-only root filesystem. Container build/runtime validation remains pending; configuration and static checks do not establish a working deployment.
+The [deployment guide](docs/deployment.md) describes explicit data/model/index preparation and API/UI startup. Docker configuration uses a non-root user, separate volumes, resource limits, and a read-only root filesystem. The [cloud Docker image build passed](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) for source commit `e97b5e0`; container asset preparation, API/UI startup, SSE, and restart behavior still require runtime validation. The local development environment has no Docker executable.
 
 Use one API worker: artifact storage, sessions, and job execution are local to a process, and local Qdrant directories have process-level ownership. The current API token represents one principal, not a multi-user authentication system. Long-term memory stores summaries and explicit preferences rather than raw uploads; audit events omit raw CSV, draft text, and hidden model reasoning.
 
