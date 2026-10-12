@@ -1,0 +1,23 @@
+{
+  "mode": "scripted_decisions_real_http_real_lightgbm",
+  "external_llm_calls": 0,
+  "status_after_disconnect": "running",
+  "status": "completed",
+  "first_event_id": 1,
+  "last_event_id": 42,
+  "replay_contiguous": true,
+  "idempotency_verified": true,
+  "png_downloaded": true,
+  "decisions": 9,
+  "tool_calls": 6,
+  "delegations": 1,
+  "workflow_type": "complex",
+  "route_traced": true,
+  "memory_status": "stored",
+  "memory_loaded_traced": true,
+  "memory_search_hits": 1,
+  "harness_version": "1.0",
+  "harness_hash": "bab6cae47c34370eef5a1b254f67260eef33d7c471d97420df2d10eb31c8988c",
+  "publication_policy": "tool_facts_only_v1",
+  "publication_evidence_verified": true
+}

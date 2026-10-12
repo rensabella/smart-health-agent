@@ -1,0 +1,472 @@
+{
+  "mode": "scripted_decisions_real_lightgbm_real_local_qdrant",
+  "fixture": "Two new analyses use the same synthetic CSV; these scores are not a clinical trend.",
+  "runs": [
+    {
+      "run_id": "d11a3bc4b34648f79b1932af3d8c300f",
+      "status": "completed",
+      "memory_status": "stored",
+      "tool_calls": 5,
+      "external_llm_requests": 0
+    },
+    {
+      "run_id": "5d7bf1ec00734f19a2f0dabbe9bc6ac5",
+      "status": "completed",
+      "memory_status": "stored",
+      "tool_calls": 5,
+      "external_llm_requests": 0
+    }
+  ],
+  "session": {
+    "session_id": "66871e287c464860bd460701ff7aad41",
+    "input_version": "84752ab4dfea44f1b2c782004c8f3e24",
+    "upload_refs": [],
+    "current_result_run_id": "5d7bf1ec00734f19a2f0dabbe9bc6ac5",
+    "prediction": {
+      "model_name": "LightGBM",
+      "model_version": "1.0",
+      "model_fingerprint": "bf9715bdbb41dbb764887ffe4589a12b98188e3c36ec8c575bf63ec610ffa033",
+      "input_profile": "synthetic_physiology_v1",
+      "feature_schema_version": "1.0",
+      "task_scope": "synthetic_anomaly_only",
+      "window_seconds": 30,
+      "aggregation": "max",
+      "score_semantics": "synthetic_anomaly_model_score",
+      "prediction": "anomaly",
+      "risk_score": 0.9983188764750849,
+      "risk_level": "high",
+      "window_count": 10
+    },
+    "execution": {
+      "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+      "status": "completed",
+      "last_event_id": 10,
+      "decision_count": 1,
+      "tool_calls": 0
+    },
+    "turns": [
+      {
+        "run_id": "d11a3bc4b34648f79b1932af3d8c300f",
+        "input_version": "3362426471d247279253d8110f8f65c0",
+        "user_intent": "data_analysis",
+        "assistant_status": "completed",
+        "completed_at": 1788844497.898023,
+        "analysis": {
+          "model_name": "LightGBM",
+          "model_version": "1.0",
+          "model_fingerprint": "bf9715bdbb41dbb764887ffe4589a12b98188e3c36ec8c575bf63ec610ffa033",
+          "input_profile": "synthetic_physiology_v1",
+          "feature_schema_version": "1.0",
+          "task_scope": "synthetic_anomaly_only",
+          "window_seconds": 30,
+          "aggregation": "max",
+          "score_semantics": "synthetic_anomaly_model_score",
+          "prediction": "anomaly",
+          "risk_score": 0.9983188764750849,
+          "risk_level": "high",
+          "window_count": 10
+        }
+      },
+      {
+        "run_id": "5d7bf1ec00734f19a2f0dabbe9bc6ac5",
+        "input_version": "84752ab4dfea44f1b2c782004c8f3e24",
+        "user_intent": "data_analysis",
+        "assistant_status": "completed",
+        "completed_at": 1788844497.9528902,
+        "analysis": {
+          "model_name": "LightGBM",
+          "model_version": "1.0",
+          "model_fingerprint": "bf9715bdbb41dbb764887ffe4589a12b98188e3c36ec8c575bf63ec610ffa033",
+          "input_profile": "synthetic_physiology_v1",
+          "feature_schema_version": "1.0",
+          "task_scope": "synthetic_anomaly_only",
+          "window_seconds": 30,
+          "aggregation": "max",
+          "score_semantics": "synthetic_anomaly_model_score",
+          "prediction": "anomaly",
+          "risk_score": 0.9983188764750849,
+          "risk_level": "high",
+          "window_count": 10
+        }
+      },
+      {
+        "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+        "input_version": "84752ab4dfea44f1b2c782004c8f3e24",
+        "user_intent": "score_definition",
+        "assistant_status": "completed",
+        "completed_at": 1788844497.958282,
+        "analysis": null
+      }
+    ],
+    "expires_at": 1788848097.958292
+  },
+  "definition_memory_context": {
+    "recent_turns": [
+      {
+        "run_id": "d11a3bc4b34648f79b1932af3d8c300f",
+        "input_version": "3362426471d247279253d8110f8f65c0",
+        "user_intent": "data_analysis",
+        "assistant_status": "completed",
+        "completed_at": 1788844497.898023,
+        "analysis": {
+          "model_name": "LightGBM",
+          "model_version": "1.0",
+          "model_fingerprint": "bf9715bdbb41dbb764887ffe4589a12b98188e3c36ec8c575bf63ec610ffa033",
+          "input_profile": "synthetic_physiology_v1",
+          "feature_schema_version": "1.0",
+          "task_scope": "synthetic_anomaly_only",
+          "window_seconds": 30,
+          "aggregation": "max",
+          "score_semantics": "synthetic_anomaly_model_score",
+          "prediction": "anomaly",
+          "risk_score": 0.9983188764750849,
+          "risk_level": "high",
+          "window_count": 10
+        }
+      },
+      {
+        "run_id": "5d7bf1ec00734f19a2f0dabbe9bc6ac5",
+        "input_version": "84752ab4dfea44f1b2c782004c8f3e24",
+        "user_intent": "data_analysis",
+        "assistant_status": "completed",
+        "completed_at": 1788844497.9528902,
+        "analysis": {
+          "model_name": "LightGBM",
+          "model_version": "1.0",
+          "model_fingerprint": "bf9715bdbb41dbb764887ffe4589a12b98188e3c36ec8c575bf63ec610ffa033",
+          "input_profile": "synthetic_physiology_v1",
+          "feature_schema_version": "1.0",
+          "task_scope": "synthetic_anomaly_only",
+          "window_seconds": 30,
+          "aggregation": "max",
+          "score_semantics": "synthetic_anomaly_model_score",
+          "prediction": "anomaly",
+          "risk_score": 0.9983188764750849,
+          "risk_level": "high",
+          "window_count": 10
+        }
+      }
+    ],
+    "preferences": {
+      "language": "en",
+      "detail": "brief"
+    },
+    "historical_summaries": [
+      {
+        "entry": {
+          "schema_version": "1.0",
+          "kind": "analysis",
+          "source_run_id": "5d7bf1ec00734f19a2f0dabbe9bc6ac5",
+          "created_at": 1788844497.9529269,
+          "expires_at": 1791436497.9529269,
+          "analysis": {
+            "model_name": "LightGBM",
+            "model_version": "1.0",
+            "model_fingerprint": "bf9715bdbb41dbb764887ffe4589a12b98188e3c36ec8c575bf63ec610ffa033",
+            "input_profile": "synthetic_physiology_v1",
+            "feature_schema_version": "1.0",
+            "task_scope": "synthetic_anomaly_only",
+            "window_seconds": 30,
+            "aggregation": "max",
+            "score_semantics": "synthetic_anomaly_model_score",
+            "prediction": "anomaly",
+            "risk_score": 0.9983188764750849,
+            "risk_level": "high",
+            "window_count": 10
+          },
+          "preferences": null
+        },
+        "score": 0.3555662382009728,
+        "score_type": "cosine_lexical_hash"
+      },
+      {
+        "entry": {
+          "schema_version": "1.0",
+          "kind": "analysis",
+          "source_run_id": "d11a3bc4b34648f79b1932af3d8c300f",
+          "created_at": 1788844497.898092,
+          "expires_at": 1791436497.898092,
+          "analysis": {
+            "model_name": "LightGBM",
+            "model_version": "1.0",
+            "model_fingerprint": "bf9715bdbb41dbb764887ffe4589a12b98188e3c36ec8c575bf63ec610ffa033",
+            "input_profile": "synthetic_physiology_v1",
+            "feature_schema_version": "1.0",
+            "task_scope": "synthetic_anomaly_only",
+            "window_seconds": 30,
+            "aggregation": "max",
+            "score_semantics": "synthetic_anomaly_model_score",
+            "prediction": "anomaly",
+            "risk_score": 0.9983188764750849,
+            "risk_level": "high",
+            "window_count": 10
+          },
+          "preferences": null
+        },
+        "score": 0.3555662382009728,
+        "score_type": "cosine_lexical_hash"
+      }
+    ],
+    "historical_only": true
+  },
+  "trends": {
+    "historical_only": true,
+    "groups": [
+      {
+        "group_id": "78018d6b4438e26e52f4b67da267ac8db4ae54e059971343016aad7cec235d7c",
+        "protocol": {
+          "model_name": "LightGBM",
+          "model_version": "1.0",
+          "model_fingerprint": "bf9715bdbb41dbb764887ffe4589a12b98188e3c36ec8c575bf63ec610ffa033",
+          "input_profile": "synthetic_physiology_v1",
+          "feature_schema_version": "1.0",
+          "task_scope": "synthetic_anomaly_only",
+          "window_seconds": 30,
+          "aggregation": "max",
+          "score_semantics": "synthetic_anomaly_model_score"
+        },
+        "points": [
+          {
+            "source_run_id": "d11a3bc4b34648f79b1932af3d8c300f",
+            "analyzed_at": 1788844497.898092,
+            "risk_score": 0.9983188764750849,
+            "risk_level": "high",
+            "window_count": 10
+          },
+          {
+            "source_run_id": "5d7bf1ec00734f19a2f0dabbe9bc6ac5",
+            "analyzed_at": 1788844497.9529269,
+            "risk_score": 0.9983188764750849,
+            "risk_level": "high",
+            "window_count": 10
+          }
+        ]
+      }
+    ]
+  },
+  "long_term_entries": [
+    {
+      "schema_version": "1.0",
+      "kind": "analysis",
+      "source_run_id": "d11a3bc4b34648f79b1932af3d8c300f",
+      "created_at": 1788844497.898092,
+      "expires_at": 1791436497.898092,
+      "analysis": {
+        "model_name": "LightGBM",
+        "model_version": "1.0",
+        "model_fingerprint": "bf9715bdbb41dbb764887ffe4589a12b98188e3c36ec8c575bf63ec610ffa033",
+        "input_profile": "synthetic_physiology_v1",
+        "feature_schema_version": "1.0",
+        "task_scope": "synthetic_anomaly_only",
+        "window_seconds": 30,
+        "aggregation": "max",
+        "score_semantics": "synthetic_anomaly_model_score",
+        "prediction": "anomaly",
+        "risk_score": 0.9983188764750849,
+        "risk_level": "high",
+        "window_count": 10
+      },
+      "preferences": null
+    },
+    {
+      "schema_version": "1.0",
+      "kind": "analysis",
+      "source_run_id": "5d7bf1ec00734f19a2f0dabbe9bc6ac5",
+      "created_at": 1788844497.9529269,
+      "expires_at": 1791436497.9529269,
+      "analysis": {
+        "model_name": "LightGBM",
+        "model_version": "1.0",
+        "model_fingerprint": "bf9715bdbb41dbb764887ffe4589a12b98188e3c36ec8c575bf63ec610ffa033",
+        "input_profile": "synthetic_physiology_v1",
+        "feature_schema_version": "1.0",
+        "task_scope": "synthetic_anomaly_only",
+        "window_seconds": 30,
+        "aggregation": "max",
+        "score_semantics": "synthetic_anomaly_model_score",
+        "prediction": "anomaly",
+        "risk_score": 0.9983188764750849,
+        "risk_level": "high",
+        "window_count": 10
+      },
+      "preferences": null
+    }
+  ],
+  "restart_restored_entries": 2,
+  "short_term_cleared_on_restart": true,
+  "cross_owner_empty": true,
+  "delete_verified": true,
+  "definition_trace": [
+    {
+      "schema_version": "1.0",
+      "event_id": 1,
+      "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+      "timestamp": "2026-09-08T05:14:57.955624+00:00",
+      "event": "run.queued",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "backend_mode": "scripted"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 2,
+      "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+      "timestamp": "2026-09-08T05:14:57.955675+00:00",
+      "event": "route.selected",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "workflow_type": "simple",
+        "reason_code": "score_definition",
+        "objective": "score_definition",
+        "entry_agent": "data_analysis",
+        "required_capabilities": [
+          "model_card"
+        ],
+        "needs_input": null,
+        "router_version": "1.0",
+        "workflow_upgrades": 0
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 3,
+      "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+      "timestamp": "2026-09-08T05:14:57.955798+00:00",
+      "event": "run.running",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "status": "running",
+        "error_code": null,
+        "decision_count": 0,
+        "llm_requests": 0,
+        "tool_calls": 0,
+        "delegation_count": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 4,
+      "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+      "timestamp": "2026-09-08T05:14:57.957666+00:00",
+      "event": "memory.loaded",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "memory_recent_turns": 2,
+        "memory_history_hits": 2,
+        "preferences_available": true
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 5,
+      "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+      "timestamp": "2026-09-08T05:14:57.957726+00:00",
+      "event": "agent.started",
+      "agent": "data_analysis",
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {}
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 6,
+      "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+      "timestamp": "2026-09-08T05:14:57.957773+00:00",
+      "event": "agent.thinking",
+      "agent": "data_analysis",
+      "step_id": "ed2e64ff32874622a373bca8b947a264",
+      "parent_step_id": null,
+      "data": {
+        "decision_count": 1,
+        "llm_requests": 0,
+        "attempt": 1
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 7,
+      "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+      "timestamp": "2026-09-08T05:14:57.958018+00:00",
+      "event": "agent.decision",
+      "agent": "data_analysis",
+      "step_id": "ed2e64ff32874622a373bca8b947a264",
+      "parent_step_id": null,
+      "data": {
+        "action": "finish",
+        "decision_count": 1,
+        "llm_requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 8,
+      "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+      "timestamp": "2026-09-08T05:14:57.958163+00:00",
+      "event": "run.verifying",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "status": "verifying",
+        "error_code": null,
+        "decision_count": 1,
+        "llm_requests": 0,
+        "tool_calls": 0,
+        "delegation_count": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 9,
+      "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+      "timestamp": "2026-09-08T05:14:57.958208+00:00",
+      "event": "publication.checked",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "policy": "tool_facts_only_v1",
+        "result_kind": "score_definition"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 10,
+      "run_id": "d5c35905f9344e67b6a174a3b8d116da",
+      "timestamp": "2026-09-08T05:14:57.958241+00:00",
+      "event": "run.completed",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "status": "completed",
+        "error_code": null,
+        "decision_count": 1,
+        "llm_requests": 0,
+        "tool_calls": 0,
+        "delegation_count": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false
+      }
+    }
+  ]
+}

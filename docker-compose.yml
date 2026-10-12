@@ -1,0 +1,149 @@
+name: smarthealth
+
+x-runtime: &runtime
+  image: smart-health-agent:local
+  build:
+    context: .
+    dockerfile: Dockerfile
+  user: "10001:10001"
+  init: true
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  tmpfs:
+    - /tmp:rw,nosuid,nodev,size=128m,mode=1777
+  pids_limit: 256
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  api:
+    <<: *runtime
+    restart: unless-stopped
+    command: [python, -m, uvicorn, "app.main:app", --host, "0.0.0.0", --port, "8000", --workers, "1", --limit-concurrency, "16", --no-access-log, --log-config, configs/logging.json]
+    ports:
+      - "127.0.0.1:${HEALTH_API_PORT:-8000}:8000"
+    environment:
+      HEALTH_API_TOKEN: "${HEALTH_API_TOKEN:?Set HEALTH_API_TOKEN to your own private bearer token}"
+      HEALTH_AGENT_BACKEND: "${HEALTH_AGENT_BACKEND:-disabled}"
+      HEALTH_LLM_BASE_URL: "${HEALTH_LLM_BASE_URL:-https://api.openai.com/v1}"
+      HEALTH_LLM_MODEL: "${HEALTH_LLM_MODEL:-}"
+      HEALTH_LLM_API_KEY: "${HEALTH_LLM_API_KEY:-}"
+      HEALTH_MODEL_DIR: /var/lib/smarthealth/models/lightgbm_v1.0
+      HEALTH_HARNESS_CONFIG_DIR: /opt/smarthealth/configs/report
+      HEALTH_RAG_MODE: local
+      HEALTH_RAG_MODEL_DIR: /var/lib/smarthealth/embeddings/multilingual-e5-small
+      HEALTH_RAG_INDEX_DIR: /var/lib/smarthealth/knowledge/v1
+      HEALTH_RAG_MIN_SCORE: "${HEALTH_RAG_MIN_SCORE:-0.78}"
+      HEALTH_MEMORY_MODE: local
+      HEALTH_MEMORY_DIR: /var/lib/smarthealth/memory/qdrant
+      HEALTH_AGENT_TRACE_DIR: /var/lib/smarthealth/traces/agent_runs
+    volumes:
+      - model_bundles:/var/lib/smarthealth/models:ro
+      - e5_cache:/var/lib/smarthealth/embeddings:ro
+      # Local Qdrant opens locks and the application hardens file modes at startup.
+      # Its validated knowledge contents are immutable; the mount must still be RW.
+      - knowledge_index:/var/lib/smarthealth/knowledge
+      - long_term_memory:/var/lib/smarthealth/memory
+      - agent_traces:/var/lib/smarthealth/traces
+    cpus: "2.0"
+    mem_limit: 4g
+    stop_grace_period: 210s
+
+  frontend:
+    <<: *runtime
+    restart: unless-stopped
+    command:
+      - python
+      - -m
+      - streamlit
+      - run
+      - frontend/streamlit_app.py
+      - --server.address=0.0.0.0
+      - --server.port=8501
+      - --server.headless=true
+      - --server.fileWatcherType=none
+      - --server.maxUploadSize=5
+      - --browser.gatherUsageStats=false
+    environment:
+      HEALTH_API_BASE_URL: http://api:8000
+    ports:
+      - "127.0.0.1:${HEALTH_UI_PORT:-8501}:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=3).read()"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    cpus: "1.0"
+    mem_limit: 1g
+
+  prepare-data:
+    <<: *runtime
+    profiles: [prepare]
+    restart: "no"
+    command: [python, generate_demo_data.py, --output-dir, /var/lib/smarthealth/datasets, --seed, "42"]
+    volumes:
+      - demo_data:/var/lib/smarthealth/datasets
+    healthcheck:
+      disable: true
+    cpus: "2.0"
+    mem_limit: 2g
+
+  train-models:
+    <<: *runtime
+    profiles: [prepare]
+    restart: "no"
+    command:
+      - python
+      - train.py
+      - --data
+      - /var/lib/smarthealth/datasets/generated/training.csv
+      - --output-dir
+      - /var/lib/smarthealth/models
+      - --model
+      - both
+    volumes:
+      - demo_data:/var/lib/smarthealth/datasets:ro
+      - model_bundles:/var/lib/smarthealth/models
+    healthcheck:
+      disable: true
+    cpus: "2.0"
+    mem_limit: 4g
+
+  prepare-rag:
+    <<: *runtime
+    profiles: [prepare]
+    restart: "no"
+    command:
+      - python
+      - -m
+      - scripts.build_knowledge_index
+      - --corpus
+      - knowledge/corpus.json
+      - --model-dir
+      - /var/lib/smarthealth/embeddings/multilingual-e5-small
+      - --output
+      - /var/lib/smarthealth/knowledge/v1
+      - --download-model
+    volumes:
+      - e5_cache:/var/lib/smarthealth/embeddings
+      - knowledge_index:/var/lib/smarthealth/knowledge
+    healthcheck:
+      disable: true
+    cpus: "2.0"
+    mem_limit: 4g
+
+volumes:
+  demo_data:
+  model_bundles:
+  e5_cache:
+  knowledge_index:
+  long_term_memory:
+  agent_traces:

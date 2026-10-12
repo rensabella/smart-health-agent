@@ -1,0 +1,736 @@
+[
+  {
+    "name": "anomaly_prediction",
+    "description": "Score synthetic physiological anomaly windows using a cached baseline model; scores are not medical probabilities.",
+    "version": "1.0",
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "feature_set_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Feature Set Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "feature_set_ref"
+      ],
+      "title": "AnomalyPredictionInput",
+      "type": "object"
+    },
+    "output_schema": {
+      "$defs": {
+        "ImportantFeature": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string"
+            },
+            "importance": {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "title": "Importance",
+              "type": "number"
+            }
+          },
+          "required": [
+            "name",
+            "importance"
+          ],
+          "title": "ImportantFeature",
+          "type": "object"
+        },
+        "JsonValue": {},
+        "ModelInfo": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string"
+            },
+            "version": {
+              "title": "Version",
+              "type": "string"
+            },
+            "task_scope": {
+              "default": "synthetic_physiology_v1",
+              "title": "Task Scope",
+              "type": "string"
+            },
+            "metadata": {
+              "additionalProperties": {
+                "$ref": "#/$defs/JsonValue"
+              },
+              "title": "Metadata",
+              "type": "object"
+            }
+          },
+          "required": [
+            "name",
+            "version"
+          ],
+          "title": "ModelInfo",
+          "type": "object"
+        },
+        "WindowPrediction": {
+          "additionalProperties": false,
+          "properties": {
+            "window_index": {
+              "minimum": 0,
+              "title": "Window Index",
+              "type": "integer"
+            },
+            "risk_score": {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "title": "Risk Score",
+              "type": "number"
+            },
+            "prediction": {
+              "enum": [
+                "anomaly",
+                "normal"
+              ],
+              "title": "Prediction",
+              "type": "string"
+            }
+          },
+          "required": [
+            "window_index",
+            "risk_score",
+            "prediction"
+          ],
+          "title": "WindowPrediction",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "prediction": {
+          "enum": [
+            "anomaly",
+            "normal"
+          ],
+          "title": "Prediction",
+          "type": "string"
+        },
+        "risk_score": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Risk Score",
+          "type": "number"
+        },
+        "important_features": {
+          "items": {
+            "$ref": "#/$defs/ImportantFeature"
+          },
+          "title": "Important Features",
+          "type": "array"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelInfo"
+        },
+        "aggregation": {
+          "const": "max",
+          "default": "max",
+          "title": "Aggregation",
+          "type": "string"
+        },
+        "window_count": {
+          "minimum": 1,
+          "title": "Window Count",
+          "type": "integer"
+        },
+        "anomalous_ratio": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Anomalous Ratio",
+          "type": "number"
+        },
+        "highest_risk_window": {
+          "minimum": 0,
+          "title": "Highest Risk Window",
+          "type": "integer"
+        },
+        "window_predictions": {
+          "items": {
+            "$ref": "#/$defs/WindowPrediction"
+          },
+          "title": "Window Predictions",
+          "type": "array"
+        },
+        "risk_level": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "title": "Risk Level",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "prediction_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Prediction Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "prediction",
+        "risk_score",
+        "important_features",
+        "model",
+        "window_count",
+        "anomalous_ratio",
+        "highest_risk_window",
+        "window_predictions",
+        "risk_level",
+        "prediction_ref"
+      ],
+      "title": "AnomalyPredictionOutput",
+      "type": "object"
+    },
+    "timeout_seconds": 30.0
+  },
+  {
+    "name": "csv_analysis",
+    "description": "Validate the five-signal synthetic physiology CSV and report data quality.",
+    "version": "1.0",
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "upload_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Upload Ref",
+          "type": "string"
+        },
+        "data_profile": {
+          "const": "synthetic_physiology_v1",
+          "default": "synthetic_physiology_v1",
+          "title": "Data Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "upload_ref"
+      ],
+      "title": "CSVAnalysisInput",
+      "type": "object"
+    },
+    "output_schema": {
+      "$defs": {
+        "JsonValue": {}
+      },
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "dataset_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Dataset Ref",
+          "type": "string"
+        },
+        "columns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Columns",
+          "type": "array"
+        },
+        "row_count": {
+          "title": "Row Count",
+          "type": "integer"
+        },
+        "quality_report": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Quality Report",
+          "type": "object"
+        }
+      },
+      "required": [
+        "dataset_ref",
+        "columns",
+        "row_count",
+        "quality_report"
+      ],
+      "title": "CSVAnalysisOutput",
+      "type": "object"
+    },
+    "timeout_seconds": 30.0
+  },
+  {
+    "name": "feature_explanation",
+    "description": "Return global importance and highest-risk-window evidence with explicit attribution limits.",
+    "version": "1.0",
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "prediction_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Prediction Ref",
+          "type": "string"
+        },
+        "top_k": {
+          "default": 5,
+          "maximum": 20,
+          "minimum": 1,
+          "title": "Top K",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "prediction_ref"
+      ],
+      "title": "FeatureExplanationInput",
+      "type": "object"
+    },
+    "output_schema": {
+      "$defs": {
+        "ImportantFeature": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string"
+            },
+            "importance": {
+              "maximum": 1.0,
+              "minimum": 0.0,
+              "title": "Importance",
+              "type": "number"
+            }
+          },
+          "required": [
+            "name",
+            "importance"
+          ],
+          "title": "ImportantFeature",
+          "type": "object"
+        },
+        "LocalEvidence": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "title": "Name",
+              "type": "string"
+            },
+            "observed_value": {
+              "title": "Observed Value",
+              "type": "number"
+            },
+            "reference_mean": {
+              "title": "Reference Mean",
+              "type": "number"
+            },
+            "reference_std": {
+              "title": "Reference Std",
+              "type": "number"
+            },
+            "deviation_std": {
+              "title": "Deviation Std",
+              "type": "number"
+            },
+            "contribution": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Contribution"
+            },
+            "direction": {
+              "enum": [
+                "raises_score",
+                "lowers_score",
+                "no_change",
+                "reference_deviation_only"
+              ],
+              "title": "Direction",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "observed_value",
+            "reference_mean",
+            "reference_std",
+            "deviation_std",
+            "contribution",
+            "direction"
+          ],
+          "title": "LocalEvidence",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "global_importance": {
+          "items": {
+            "$ref": "#/$defs/ImportantFeature"
+          },
+          "title": "Global Importance",
+          "type": "array"
+        },
+        "global_importance_method": {
+          "enum": [
+            "gain",
+            "mean_decrease_impurity"
+          ],
+          "title": "Global Importance Method",
+          "type": "string"
+        },
+        "local_evidence": {
+          "items": {
+            "$ref": "#/$defs/LocalEvidence"
+          },
+          "title": "Local Evidence",
+          "type": "array"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "highest_risk_window": {
+          "minimum": 0,
+          "title": "Highest Risk Window",
+          "type": "integer"
+        },
+        "scope": {
+          "const": "highest_risk_window",
+          "default": "highest_risk_window",
+          "title": "Scope",
+          "type": "string"
+        },
+        "contribution_units": {
+          "default": "not_available",
+          "enum": [
+            "raw_margin",
+            "not_available"
+          ],
+          "title": "Contribution Units",
+          "type": "string"
+        },
+        "base_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Value"
+        },
+        "raw_margin": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Raw Margin"
+        },
+        "schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "analysis_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Analysis Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "global_importance",
+        "global_importance_method",
+        "local_evidence",
+        "method",
+        "limitations",
+        "highest_risk_window",
+        "analysis_ref"
+      ],
+      "title": "FeatureExplanationOutput",
+      "type": "object"
+    },
+    "timeout_seconds": 30.0
+  },
+  {
+    "name": "feature_extraction",
+    "description": "Extract versioned window statistics from validated physiological signals.",
+    "version": "1.0",
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "window_set_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Window Set Ref",
+          "type": "string"
+        },
+        "feature_profile": {
+          "const": "physiology_statistics_v1",
+          "default": "physiology_statistics_v1",
+          "title": "Feature Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "window_set_ref"
+      ],
+      "title": "FeatureExtractionInput",
+      "type": "object"
+    },
+    "output_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "feature_set_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Feature Set Ref",
+          "type": "string"
+        },
+        "feature_schema_version": {
+          "title": "Feature Schema Version",
+          "type": "string"
+        },
+        "feature_names": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Feature Names",
+          "type": "array"
+        },
+        "window_count": {
+          "title": "Window Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "feature_set_ref",
+        "feature_schema_version",
+        "feature_names",
+        "window_count"
+      ],
+      "title": "FeatureExtractionOutput",
+      "type": "object"
+    },
+    "timeout_seconds": 30.0
+  },
+  {
+    "name": "signal_processing",
+    "description": "Clean short signal gaps and create non-overlapping 30-second windows at 1 Hz.",
+    "version": "1.0",
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "dataset_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Dataset Ref",
+          "type": "string"
+        },
+        "processing_profile": {
+          "const": "1hz_30s_v1",
+          "default": "1hz_30s_v1",
+          "title": "Processing Profile",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dataset_ref"
+      ],
+      "title": "SignalProcessingInput",
+      "type": "object"
+    },
+    "output_schema": {
+      "$defs": {
+        "JsonValue": {}
+      },
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "window_set_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Window Set Ref",
+          "type": "string"
+        },
+        "window_count": {
+          "title": "Window Count",
+          "type": "integer"
+        },
+        "cleaning_report": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Cleaning Report",
+          "type": "object"
+        },
+        "warnings": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Warnings",
+          "type": "array"
+        }
+      },
+      "required": [
+        "window_set_ref",
+        "window_count",
+        "cleaning_report",
+        "warnings"
+      ],
+      "title": "SignalProcessingOutput",
+      "type": "object"
+    },
+    "timeout_seconds": 30.0
+  },
+  {
+    "name": "visualization",
+    "description": "Render signal trends, window risk scores, and feature importance as protected PNG artifacts.",
+    "version": "1.0",
+    "input_schema": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Analysis Ref",
+          "type": "string"
+        },
+        "plot_types": {
+          "default": [
+            "signals",
+            "risk",
+            "importance"
+          ],
+          "items": {
+            "enum": [
+              "signals",
+              "risk",
+              "importance"
+            ],
+            "type": "string"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "title": "Plot Types",
+          "type": "array"
+        }
+      },
+      "required": [
+        "analysis_ref"
+      ],
+      "title": "VisualizationInput",
+      "type": "object"
+    },
+    "output_schema": {
+      "$defs": {
+        "PlotArtifact": {
+          "additionalProperties": false,
+          "properties": {
+            "artifact_ref": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Artifact Ref",
+              "type": "string"
+            },
+            "kind": {
+              "enum": [
+                "signals",
+                "risk",
+                "importance"
+              ],
+              "title": "Kind",
+              "type": "string"
+            },
+            "mime_type": {
+              "const": "image/png",
+              "title": "Mime Type",
+              "type": "string"
+            },
+            "url": {
+              "title": "Url",
+              "type": "string"
+            }
+          },
+          "required": [
+            "artifact_ref",
+            "kind",
+            "mime_type",
+            "url"
+          ],
+          "title": "PlotArtifact",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "1.0",
+          "default": "1.0",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/PlotArtifact"
+          },
+          "title": "Artifacts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "artifacts"
+      ],
+      "title": "VisualizationOutput",
+      "type": "object"
+    },
+    "timeout_seconds": 45.0
+  }
+]

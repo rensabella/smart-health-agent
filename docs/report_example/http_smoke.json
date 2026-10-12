@@ -1,0 +1,28 @@
+{
+  "mode": "scripted_roles_real_http_e5_qdrant_lightgbm",
+  "external_llm_calls": 0,
+  "status_after_disconnect": "running",
+  "status": "completed",
+  "roles": [
+    "data_analysis",
+    "planner",
+    "rag",
+    "report_writer",
+    "safety_verification"
+  ],
+  "decisions": 18,
+  "tool_calls": 9,
+  "delegations": 4,
+  "last_event_id": 77,
+  "report_chunk_count": 1,
+  "report_hash": "590d8551c3eded43b0ed3dfc996dfa80576780dd0e2aa8007b402c9a8773ea0b",
+  "publication_precedes_body": true,
+  "replay_contiguous": true,
+  "report_replay_identical": true,
+  "trace_excludes_body": true,
+  "idempotency_verified": true,
+  "png_download_count": 1,
+  "memory_status": "stored",
+  "review_mode": "scripted_test",
+  "harness_hash": "334e0953b3b804f576b85797ac774bb09db566b0abd3747e1c724d965f6d9a47"
+}

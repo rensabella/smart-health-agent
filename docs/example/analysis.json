@@ -1,0 +1,360 @@
+{
+  "note": "Synthetic example; temporary references expire when this process exits.",
+  "run_id": "9a9fcd28d5764b29addf2edfbdbf19da",
+  "tool_calls": 6,
+  "results": {
+    "csv_analysis": {
+      "schema_version": "1.0",
+      "dataset_ref": "art_63975c3ecfc645a8a85dd8459a0c787b",
+      "columns": [
+        "timestamp",
+        "subject_id",
+        "session_id",
+        "heart_rate",
+        "EDA",
+        "EEG_feature",
+        "activity",
+        "sleep_quality"
+      ],
+      "row_count": 300,
+      "quality_report": {
+        "input_profile": "synthetic_physiology_v1",
+        "row_count": 300,
+        "columns": [
+          "timestamp",
+          "subject_id",
+          "session_id",
+          "heart_rate",
+          "EDA",
+          "EEG_feature",
+          "activity",
+          "sleep_quality"
+        ],
+        "sample_rate_hz": 1,
+        "timestamp_present": true,
+        "missing_values": {
+          "heart_rate": 1,
+          "EDA": 0,
+          "EEG_feature": 0,
+          "activity": 1,
+          "sleep_quality": 0
+        },
+        "missing_fraction": 0.0013333333333333333,
+        "warnings": []
+      }
+    },
+    "signal_processing": {
+      "schema_version": "1.0",
+      "window_set_ref": "art_f20be6b956a04c358cabfac2b769b230",
+      "window_count": 10,
+      "cleaning_report": {
+        "input_profile": "synthetic_physiology_v1",
+        "row_count": 300,
+        "columns": [
+          "timestamp",
+          "subject_id",
+          "session_id",
+          "heart_rate",
+          "EDA",
+          "EEG_feature",
+          "activity",
+          "sleep_quality"
+        ],
+        "sample_rate_hz": 1,
+        "timestamp_present": true,
+        "missing_values": {
+          "heart_rate": 1,
+          "EDA": 0,
+          "EEG_feature": 0,
+          "activity": 1,
+          "sleep_quality": 0
+        },
+        "missing_fraction": 0.0013333333333333333,
+        "warnings": [
+          "Short missing spans were filled within their own windows."
+        ],
+        "window_count": 10,
+        "window_rows": 30,
+        "processed_rows": 300,
+        "dropped_tail_rows": 0,
+        "imputed_values": 2,
+        "processing_version": "1.0"
+      },
+      "warnings": [
+        "Short missing spans were filled within their own windows."
+      ]
+    },
+    "feature_extraction": {
+      "schema_version": "1.0",
+      "feature_set_ref": "art_7fe9f6ad201442048f62d55d593e16a2",
+      "feature_schema_version": "1.0",
+      "feature_names": [
+        "heart_rate_mean",
+        "heart_rate_std",
+        "heart_rate_min",
+        "heart_rate_max",
+        "heart_rate_p25",
+        "heart_rate_p75",
+        "heart_rate_slope",
+        "heart_rate_mean_abs_change",
+        "EDA_mean",
+        "EDA_std",
+        "EDA_min",
+        "EDA_max",
+        "EDA_p25",
+        "EDA_p75",
+        "EDA_slope",
+        "EDA_mean_abs_change",
+        "EEG_feature_mean",
+        "EEG_feature_std",
+        "EEG_feature_min",
+        "EEG_feature_max",
+        "EEG_feature_p25",
+        "EEG_feature_p75",
+        "EEG_feature_slope",
+        "EEG_feature_mean_abs_change",
+        "activity_mean",
+        "activity_std",
+        "activity_min",
+        "activity_max",
+        "activity_p25",
+        "activity_p75",
+        "activity_slope",
+        "activity_mean_abs_change",
+        "sleep_quality_mean",
+        "heart_rate_activity_correlation",
+        "heart_rate_EDA_correlation"
+      ],
+      "window_count": 10
+    },
+    "anomaly_prediction": {
+      "prediction": "anomaly",
+      "risk_score": 0.9983188764750849,
+      "important_features": [
+        {
+          "name": "EEG_feature_mean",
+          "importance": 0.7555926588697731
+        },
+        {
+          "name": "sleep_quality_mean",
+          "importance": 0.08345442442058167
+        },
+        {
+          "name": "EDA_mean",
+          "importance": 0.0374642611166322
+        },
+        {
+          "name": "EDA_min",
+          "importance": 0.025280173969225064
+        },
+        {
+          "name": "EEG_feature_p75",
+          "importance": 0.024297721960727835
+        }
+      ],
+      "model": {
+        "name": "LightGBM",
+        "version": "1.0",
+        "task_scope": "synthetic_anomaly_only",
+        "metadata": {
+          "input_schema_version": "1.0",
+          "feature_schema_version": "1.0",
+          "input_profile": "synthetic_physiology_v1",
+          "score_semantics": "synthetic_anomaly_model_score",
+          "aggregation": "max",
+          "threshold": 0.35000000000000003,
+          "threshold_source": "maximum_validation_f1",
+          "risk_thresholds": {
+            "medium": 0.35000000000000003,
+            "high": 0.8
+          },
+          "processing_config": {
+            "version": "1.0",
+            "sample_rate_hz": 1,
+            "window_rows": 30,
+            "stride_rows": 30,
+            "max_gap_rows": 3,
+            "max_window_missing_fraction": 0.15,
+            "max_channel_missing_fraction": 0.2,
+            "tail_policy": "discard_and_report",
+            "imputation": "within_window_linear_interpolation_then_edge_fill"
+          },
+          "limitations": [
+            "Synthetic data only; no clinical validation.",
+            "Maximum window score is not a session probability.",
+            "No calibration on real physiology; metrics reflect the synthetic generator."
+          ]
+        }
+      },
+      "aggregation": "max",
+      "window_count": 10,
+      "anomalous_ratio": 0.2,
+      "highest_risk_window": 2,
+      "window_predictions": [
+        {
+          "window_index": 0,
+          "risk_score": 0.0008578159622794888,
+          "prediction": "normal"
+        },
+        {
+          "window_index": 1,
+          "risk_score": 0.0007137681694982743,
+          "prediction": "normal"
+        },
+        {
+          "window_index": 2,
+          "risk_score": 0.9983188764750849,
+          "prediction": "anomaly"
+        },
+        {
+          "window_index": 3,
+          "risk_score": 0.0020609150532214025,
+          "prediction": "normal"
+        },
+        {
+          "window_index": 4,
+          "risk_score": 0.9983038768075286,
+          "prediction": "anomaly"
+        },
+        {
+          "window_index": 5,
+          "risk_score": 0.09951244897065485,
+          "prediction": "normal"
+        },
+        {
+          "window_index": 6,
+          "risk_score": 0.0007137681694982743,
+          "prediction": "normal"
+        },
+        {
+          "window_index": 7,
+          "risk_score": 0.0007137681694982743,
+          "prediction": "normal"
+        },
+        {
+          "window_index": 8,
+          "risk_score": 0.006461331544579835,
+          "prediction": "normal"
+        },
+        {
+          "window_index": 9,
+          "risk_score": 0.0007103776195086633,
+          "prediction": "normal"
+        }
+      ],
+      "risk_level": "high",
+      "schema_version": "1.0",
+      "prediction_ref": "art_37bb58eeb718481eb1bad45f590e9dde"
+    },
+    "feature_explanation": {
+      "global_importance": [
+        {
+          "name": "EEG_feature_mean",
+          "importance": 0.7555926588697731
+        },
+        {
+          "name": "sleep_quality_mean",
+          "importance": 0.08345442442058167
+        },
+        {
+          "name": "EDA_mean",
+          "importance": 0.0374642611166322
+        },
+        {
+          "name": "EDA_min",
+          "importance": 0.025280173969225064
+        },
+        {
+          "name": "EEG_feature_p75",
+          "importance": 0.024297721960727835
+        }
+      ],
+      "global_importance_method": "gain",
+      "local_evidence": [
+        {
+          "name": "EEG_feature_mean",
+          "observed_value": 0.6347685526666667,
+          "reference_mean": 0.45691508519207313,
+          "reference_std": 0.04207671467254095,
+          "deviation_std": 4.226885793216641,
+          "contribution": 4.460976682350226,
+          "direction": "raises_score"
+        },
+        {
+          "name": "EEG_feature_p75",
+          "observed_value": 0.7434769075000001,
+          "reference_mean": 0.5536368327042683,
+          "reference_std": 0.04811518712354327,
+          "deviation_std": 3.945533336663279,
+          "contribution": 1.3852298253976758,
+          "direction": "raises_score"
+        },
+        {
+          "name": "EDA_min",
+          "observed_value": 2.37319124,
+          "reference_mean": 0.8257504620731707,
+          "reference_std": 0.42565318231872634,
+          "deviation_std": 3.635449803281668,
+          "contribution": 0.86310912428893,
+          "direction": "raises_score"
+        },
+        {
+          "name": "EDA_mean",
+          "observed_value": 3.1773026690000004,
+          "reference_mean": 1.5397936514221544,
+          "reference_std": 0.4030246904556227,
+          "deviation_std": 4.063048881016765,
+          "contribution": 0.8169760895566529,
+          "direction": "raises_score"
+        },
+        {
+          "name": "sleep_quality_mean",
+          "observed_value": 0.8801726899999996,
+          "reference_mean": 0.626521812987805,
+          "reference_std": 0.21397449312389377,
+          "deviation_std": 1.185425764113519,
+          "contribution": 0.7228237869743196,
+          "direction": "raises_score"
+        }
+      ],
+      "method": "lightgbm_native_contribution",
+      "limitations": [
+        "Trained on synthetic anomaly events; outputs are not clinical diagnoses or disease probabilities.",
+        "Session score is the maximum window score and increases exposure to isolated extreme windows.",
+        "Feature associations do not establish causal explanations of an individual's physiology.",
+        "Reference deviations use normal training windows with a standard-deviation floor of 1e-6.",
+        "Local contributions are signed raw-margin units, not probability changes."
+      ],
+      "highest_risk_window": 2,
+      "scope": "highest_risk_window",
+      "contribution_units": "raw_margin",
+      "base_value": -3.0350158303907033,
+      "raw_margin": 6.38661040606133,
+      "schema_version": "1.0",
+      "analysis_ref": "art_b471f9d77f4943c0b3c9e17d1ae7a3e3"
+    },
+    "visualization": {
+      "schema_version": "1.0",
+      "artifacts": [
+        {
+          "artifact_ref": "art_2e5b7bd0e08a42ae88762c58454548bc",
+          "kind": "signals",
+          "mime_type": "image/png",
+          "url": "/artifacts/art_2e5b7bd0e08a42ae88762c58454548bc"
+        },
+        {
+          "artifact_ref": "art_690b74316b4141b28ec61b296a81f607",
+          "kind": "risk",
+          "mime_type": "image/png",
+          "url": "/artifacts/art_690b74316b4141b28ec61b296a81f607"
+        },
+        {
+          "artifact_ref": "art_ea8207c354fe4ddfa5f881d87f74c2bc",
+          "kind": "importance",
+          "mime_type": "image/png",
+          "url": "/artifacts/art_ea8207c354fe4ddfa5f881d87f74c2bc"
+        }
+      ]
+    }
+  }
+}

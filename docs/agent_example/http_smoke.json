@@ -1,0 +1,14 @@
+{
+  "mode": "scripted_decisions_real_http_real_lightgbm",
+  "external_llm_calls": 0,
+  "status_after_disconnect": "running",
+  "status": "completed",
+  "first_event_id": 1,
+  "last_event_id": 39,
+  "replay_contiguous": true,
+  "idempotency_verified": true,
+  "png_downloaded": true,
+  "decisions": 9,
+  "tool_calls": 6,
+  "delegations": 1
+}

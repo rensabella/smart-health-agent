@@ -1,0 +1,396 @@
+{
+  "schema_version": "1.0",
+  "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+  "request_id": "report-demo",
+  "session_id": "report_demo",
+  "input_version": "v1",
+  "parent_run_id": null,
+  "status": "completed",
+  "backend_mode": "scripted",
+  "decision_model": null,
+  "objective": "health_report",
+  "entry_agent": "planner",
+  "created_at": "2026-09-08T16:39:18.145374+00:00",
+  "updated_at": "2026-09-08T16:39:30.196441+00:00",
+  "decision_count": 18,
+  "llm_requests": 0,
+  "tool_calls": 9,
+  "delegation_count": 4,
+  "input_tokens": 0,
+  "output_tokens": 0,
+  "token_usage_available": false,
+  "last_event_id": 77,
+  "final_result": {
+    "kind": "health_report",
+    "analysis": {
+      "schema_version": "1.0",
+      "request_id": "report-demo",
+      "session_id": "report_demo",
+      "input_version": "v1",
+      "analysis_ref": "art_50ff060817384d51b9f4a9063144b69b",
+      "summary": "分析了 10 个 30 秒窗口；最高合成异常模型分数为 0.998，对应窗口 2（从 0 编号）。该分数不表示临床患病概率或医学诊断；局部贡献描述模型行为，不证明异常原因。",
+      "risk_level": "high",
+      "prediction": {
+        "prediction": "anomaly",
+        "risk_score": 0.9983188764750849,
+        "important_features": [
+          {
+            "name": "EEG_feature_mean",
+            "importance": 0.7555926588697731
+          },
+          {
+            "name": "sleep_quality_mean",
+            "importance": 0.08345442442058167
+          },
+          {
+            "name": "EDA_mean",
+            "importance": 0.0374642611166322
+          },
+          {
+            "name": "EDA_min",
+            "importance": 0.025280173969225064
+          },
+          {
+            "name": "EEG_feature_p75",
+            "importance": 0.024297721960727835
+          }
+        ],
+        "model": {
+          "name": "LightGBM",
+          "version": "1.0",
+          "task_scope": "synthetic_anomaly_only",
+          "metadata": {
+            "input_schema_version": "1.0",
+            "feature_schema_version": "1.0",
+            "input_profile": "synthetic_physiology_v1",
+            "score_semantics": "synthetic_anomaly_model_score",
+            "aggregation": "max",
+            "threshold": 0.35000000000000003,
+            "threshold_source": "maximum_validation_f1",
+            "risk_thresholds": {
+              "medium": 0.35000000000000003,
+              "high": 0.8
+            },
+            "processing_config": {
+              "version": "1.0",
+              "sample_rate_hz": 1,
+              "window_rows": 30,
+              "stride_rows": 30,
+              "max_gap_rows": 3,
+              "max_window_missing_fraction": 0.15,
+              "max_channel_missing_fraction": 0.2,
+              "tail_policy": "discard_and_report",
+              "imputation": "within_window_linear_interpolation_then_edge_fill"
+            },
+            "limitations": [
+              "Synthetic data only; no clinical validation.",
+              "Maximum window score is not a session probability.",
+              "No calibration on real physiology; metrics reflect the synthetic generator."
+            ]
+          }
+        },
+        "aggregation": "max",
+        "window_count": 10,
+        "anomalous_ratio": 0.2,
+        "highest_risk_window": 2,
+        "window_predictions": [
+          {
+            "window_index": 0,
+            "risk_score": 0.0008578159622794888,
+            "prediction": "normal"
+          },
+          {
+            "window_index": 1,
+            "risk_score": 0.0007137681694982743,
+            "prediction": "normal"
+          },
+          {
+            "window_index": 2,
+            "risk_score": 0.9983188764750849,
+            "prediction": "anomaly"
+          },
+          {
+            "window_index": 3,
+            "risk_score": 0.0020609150532214025,
+            "prediction": "normal"
+          },
+          {
+            "window_index": 4,
+            "risk_score": 0.9983038768075286,
+            "prediction": "anomaly"
+          },
+          {
+            "window_index": 5,
+            "risk_score": 0.09951244897065485,
+            "prediction": "normal"
+          },
+          {
+            "window_index": 6,
+            "risk_score": 0.0007137681694982743,
+            "prediction": "normal"
+          },
+          {
+            "window_index": 7,
+            "risk_score": 0.0007137681694982743,
+            "prediction": "normal"
+          },
+          {
+            "window_index": 8,
+            "risk_score": 0.006461331544579835,
+            "prediction": "normal"
+          },
+          {
+            "window_index": 9,
+            "risk_score": 0.0007103776195086633,
+            "prediction": "normal"
+          }
+        ],
+        "risk_level": "high"
+      },
+      "explanation": {
+        "global_importance": [
+          {
+            "name": "EEG_feature_mean",
+            "importance": 0.7555926588697731
+          },
+          {
+            "name": "sleep_quality_mean",
+            "importance": 0.08345442442058167
+          },
+          {
+            "name": "EDA_mean",
+            "importance": 0.0374642611166322
+          },
+          {
+            "name": "EDA_min",
+            "importance": 0.025280173969225064
+          },
+          {
+            "name": "EEG_feature_p75",
+            "importance": 0.024297721960727835
+          }
+        ],
+        "global_importance_method": "gain",
+        "local_evidence": [
+          {
+            "name": "EEG_feature_mean",
+            "observed_value": 0.6347685526666667,
+            "reference_mean": 0.45691508519207313,
+            "reference_std": 0.04207671467254095,
+            "deviation_std": 4.226885793216641,
+            "contribution": 4.460976682350226,
+            "direction": "raises_score"
+          },
+          {
+            "name": "EEG_feature_p75",
+            "observed_value": 0.7434769075000001,
+            "reference_mean": 0.5536368327042683,
+            "reference_std": 0.04811518712354327,
+            "deviation_std": 3.945533336663279,
+            "contribution": 1.3852298253976758,
+            "direction": "raises_score"
+          },
+          {
+            "name": "EDA_min",
+            "observed_value": 2.37319124,
+            "reference_mean": 0.8257504620731707,
+            "reference_std": 0.42565318231872634,
+            "deviation_std": 3.635449803281668,
+            "contribution": 0.86310912428893,
+            "direction": "raises_score"
+          },
+          {
+            "name": "EDA_mean",
+            "observed_value": 3.1773026690000004,
+            "reference_mean": 1.5397936514221544,
+            "reference_std": 0.4030246904556227,
+            "deviation_std": 4.063048881016765,
+            "contribution": 0.8169760895566529,
+            "direction": "raises_score"
+          },
+          {
+            "name": "sleep_quality_mean",
+            "observed_value": 0.8801726899999996,
+            "reference_mean": 0.626521812987805,
+            "reference_std": 0.21397449312389377,
+            "deviation_std": 1.185425764113519,
+            "contribution": 0.7228237869743196,
+            "direction": "raises_score"
+          }
+        ],
+        "method": "lightgbm_native_contribution",
+        "limitations": [
+          "Trained on synthetic anomaly events; outputs are not clinical diagnoses or disease probabilities.",
+          "Session score is the maximum window score and increases exposure to isolated extreme windows.",
+          "Feature associations do not establish causal explanations of an individual's physiology.",
+          "Reference deviations use normal training windows with a standard-deviation floor of 1e-6.",
+          "Local contributions are signed raw-margin units, not probability changes."
+        ],
+        "highest_risk_window": 2,
+        "scope": "highest_risk_window",
+        "contribution_units": "raw_margin",
+        "base_value": -3.0350158303907033,
+        "raw_margin": 6.38661040606133
+      },
+      "visualization": [
+        {
+          "artifact_ref": "art_f880bfac88974691bba35ba619f4763b",
+          "kind": "risk",
+          "mime_type": "image/png",
+          "url": "/artifacts/art_f880bfac88974691bba35ba619f4763b?session_id=report_demo&input_version=v1"
+        }
+      ],
+      "quality_report": {
+        "input_profile": "synthetic_physiology_v1",
+        "row_count": 300,
+        "columns": [
+          "timestamp",
+          "subject_id",
+          "session_id",
+          "heart_rate",
+          "EDA",
+          "EEG_feature",
+          "activity",
+          "sleep_quality"
+        ],
+        "sample_rate_hz": 1,
+        "timestamp_present": true,
+        "missing_values": {
+          "heart_rate": 1,
+          "EDA": 0,
+          "EEG_feature": 0,
+          "activity": 1,
+          "sleep_quality": 0
+        },
+        "missing_fraction": 0.0013333333333333333,
+        "warnings": [
+          "Short missing spans were filled within their own windows."
+        ],
+        "window_count": 10,
+        "window_rows": 30,
+        "processed_rows": 300,
+        "dropped_tail_rows": 0,
+        "imputed_values": 2,
+        "processing_version": "1.0"
+      },
+      "warnings": [
+        "Short missing spans were filled within their own windows."
+      ]
+    },
+    "report": {
+      "schema_version": "1.0",
+      "analysis_ref": "art_50ff060817384d51b9f4a9063144b69b",
+      "evidence_ref": "art_edb461e138a749798e1edf0eed2c8583",
+      "draft_ref": "art_21253aa82d124963806bf2fd25267c50",
+      "review_ref": "art_5b8c1d1effad486e92285ff21b9f9fa4",
+      "title": "合成生理信号分析与知识解释",
+      "summary": "分析了 10 个 30 秒窗口；最高合成异常模型分数为 0.998，对应窗口 2（从 0 编号）。该分数不表示临床患病概率或医学诊断；局部贡献描述模型行为，不证明异常原因。",
+      "analysis": {
+        "prediction": "anomaly",
+        "risk_score": 0.9983188764750849,
+        "risk_level": "high",
+        "window_count": 10,
+        "highest_risk_window": 2,
+        "model_name": "LightGBM",
+        "model_version": "1.0"
+      },
+      "claims": [
+        {
+          "claim_id": "signal_context",
+          "text": "身体活动和兴奋等情境可能伴随皮电变化；皮电不能单独确定个人的压力状态或异常原因。",
+          "evidence_ids": [
+            "ev_2dda276c13ea7d7875cc4d4e620357c56e410db65d67e829d815745933657066"
+          ],
+          "sources": [
+            {
+              "evidence_id": "ev_2dda276c13ea7d7875cc4d4e620357c56e410db65d67e829d815745933657066",
+              "source": {
+                "id": "empatica_eda_context",
+                "title": "What is electrodermal activity?",
+                "url": "https://support.empatica.com/hc/en-us/articles/115000198283-What-is-electrodermal-activity",
+                "source_type": "sensor_documentation"
+              },
+              "locator": "What affects EDA?; 页面开头 EDA 定义段落 | chars 0:205",
+              "content_hash": "b8398acd4efd9f33de35b21f06e2a0e93ab35a5d19e94cef11b3ab8eeaacafc6",
+              "knowledge_version": "1.0"
+            }
+          ]
+        }
+      ],
+      "uncertainty": "模型仅用合成数据训练，未经临床验证；分数和特征贡献不能证明病因或患病概率。检索资料提供一般知识背景，不证明当前个体异常的原因。",
+      "recommendations": [
+        "请先核对输入协议、数据完整性和采集质量，再复测分析；合成模型高分不能作为诊疗依据。"
+      ],
+      "scope": "synthetic_analysis_with_educational_context",
+      "safety": {
+        "safe": true,
+        "warnings": [],
+        "revision_needed": false,
+        "draft_version": 1,
+        "draft_hash": "9f3748f92411cd42d90ff5b9fdee5e497a347a1245ff6d06bad9ca5a7dfafadb",
+        "evidence_hash": "1db155712ea7e15615533ef0cc084d57bdea7c356feea574c640355d921ad5ab",
+        "analysis_fingerprint": "9528ad5456de79277aa51f20c681cc5553ae3f49c6f412e535dcf9fba2468efe",
+        "policy_hash": "334e0953b3b804f576b85797ac774bb09db566b0abd3747e1c724d965f6d9a47",
+        "review_hash": "e9a501c5a6f0315a8fc99d7f16e256ce0f0d050adfd4091a15d05fc3194653d3",
+        "reviewer_role": "safety_verification",
+        "verification_mode": "role_claim_review_with_deterministic_guards",
+        "clinical_validation": "not_performed"
+      },
+      "body": "合成生理信号分析与知识解释\n\n分析了 10 个 30 秒窗口；最高合成异常模型分数为 0.998，对应窗口 2（从 0 编号）。该分数不表示临床患病概率或医学诊断；局部贡献描述模型行为，不证明异常原因。\n\n1. 身体活动和兴奋等情境可能伴随皮电变化；皮电不能单独确定个人的压力状态或异常原因。\n来源：What is electrodermal activity? (https://support.empatica.com/hc/en-us/articles/115000198283-What-is-electrodermal-activity)\n\n模型仅用合成数据训练，未经临床验证；分数和特征贡献不能证明病因或患病概率。检索资料提供一般知识背景，不证明当前个体异常的原因。\n\n请先核对输入协议、数据完整性和采集质量，再复测分析；合成模型高分不能作为诊疗依据。"
+    },
+    "review_mode": "scripted_test",
+    "publication": {
+      "policy": "evidence_report_v1",
+      "harness_version": "2.0",
+      "harness_hash": "334e0953b3b804f576b85797ac774bb09db566b0abd3747e1c724d965f6d9a47",
+      "evidence": [
+        {
+          "type": "analysis_artifact",
+          "ref": "art_50ff060817384d51b9f4a9063144b69b",
+          "input_version": "v1"
+        },
+        {
+          "type": "model_card",
+          "name": "LightGBM",
+          "version": "1.0"
+        }
+      ],
+      "uncertainty": "模型仅用合成数据训练，未经临床验证；分数和特征贡献不能证明病因或患病概率。",
+      "recommendations": [
+        "请先核对输入协议、数据完整性和采集质量，再复测分析；合成模型高分不能作为诊疗依据。"
+      ],
+      "medical_review": "scripted_test",
+      "draft_ref": "art_21253aa82d124963806bf2fd25267c50",
+      "review_ref": "art_5b8c1d1effad486e92285ff21b9f9fa4"
+    }
+  },
+  "result_available": true,
+  "error_code": null,
+  "message": null,
+  "events_url": "/agent/runs/d37fc692b6c548c6a1e12e1c42d37981/events?session_id=report_demo",
+  "route": {
+    "workflow_type": "complex",
+    "reason_code": "health_report",
+    "objective": "health_report",
+    "entry_agent": "planner",
+    "required_capabilities": [
+      "csv_analysis",
+      "signal_processing",
+      "feature_extraction",
+      "anomaly_prediction",
+      "feature_explanation",
+      "visualization",
+      "rag_retrieval",
+      "report_generation",
+      "safety_verification"
+    ],
+    "needs_input": null,
+    "router_version": "1.0"
+  },
+  "initial_workflow_type": "complex",
+  "workflow_upgrades": 0,
+  "source_run_id": null,
+  "memory_status": "stored",
+  "harness_version": "2.0",
+  "harness_hash": "334e0953b3b804f576b85797ac774bb09db566b0abd3747e1c724d965f6d9a47"
+}

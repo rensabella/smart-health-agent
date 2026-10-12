@@ -1,0 +1,887 @@
+{
+  "definition": {
+    "preview": {
+      "workflow_type": "simple",
+      "reason_code": "score_definition",
+      "objective": "score_definition",
+      "entry_agent": "data_analysis",
+      "required_capabilities": [
+        "model_card"
+      ],
+      "needs_input": null,
+      "router_version": "1.0"
+    },
+    "run": {
+      "schema_version": "1.0",
+      "run_id": "cee274d553c44525b9b910bd805e4f06",
+      "request_id": "router-demo-definition",
+      "session_id": "68f3e33f8efe4e86abeac70027e146c9",
+      "input_version": "4740e946e1a94a95b2d8799c049b2b24",
+      "parent_run_id": null,
+      "status": "completed",
+      "backend_mode": "scripted",
+      "decision_model": null,
+      "objective": "score_definition",
+      "entry_agent": "data_analysis",
+      "created_at": "2026-09-07T21:58:21.176841+00:00",
+      "updated_at": "2026-09-07T21:58:21.178146+00:00",
+      "decision_count": 1,
+      "llm_requests": 0,
+      "tool_calls": 0,
+      "delegation_count": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "last_event_id": 9,
+      "final_result": {
+        "kind": "score_definition",
+        "summary": "risk_score 是当前模型对合成异常模式的分数。每 30 秒窗口产生一个分数，会话取最高窗口分数；它不是临床患病概率。",
+        "source": {
+          "type": "model_card",
+          "name": "LightGBM",
+          "version": "1.0",
+          "score_semantics": "synthetic_anomaly_model_score",
+          "aggregation": "max"
+        }
+      },
+      "result_available": true,
+      "error_code": null,
+      "message": null,
+      "events_url": "/agent/runs/cee274d553c44525b9b910bd805e4f06/events?session_id=68f3e33f8efe4e86abeac70027e146c9",
+      "route": {
+        "workflow_type": "simple",
+        "reason_code": "score_definition",
+        "objective": "score_definition",
+        "entry_agent": "data_analysis",
+        "required_capabilities": [
+          "model_card"
+        ],
+        "needs_input": null,
+        "router_version": "1.0"
+      },
+      "initial_workflow_type": "simple",
+      "workflow_upgrades": 0,
+      "source_run_id": null
+    }
+  },
+  "analysis": {
+    "preview": {
+      "workflow_type": "complex",
+      "reason_code": "data_analysis",
+      "objective": "data_analysis",
+      "entry_agent": "planner",
+      "required_capabilities": [
+        "csv_analysis",
+        "signal_processing",
+        "feature_extraction",
+        "anomaly_prediction",
+        "feature_explanation",
+        "visualization"
+      ],
+      "needs_input": null,
+      "router_version": "1.0"
+    },
+    "run": {
+      "schema_version": "1.0",
+      "run_id": "2d98b03b852e4cdb852894fb53272ffc",
+      "request_id": "router-demo-analysis",
+      "session_id": "68f3e33f8efe4e86abeac70027e146c9",
+      "input_version": "4740e946e1a94a95b2d8799c049b2b24",
+      "parent_run_id": null,
+      "status": "completed",
+      "backend_mode": "scripted",
+      "decision_model": null,
+      "objective": "data_analysis",
+      "entry_agent": "planner",
+      "created_at": "2026-09-07T21:58:21.178608+00:00",
+      "updated_at": "2026-09-07T21:58:21.562739+00:00",
+      "decision_count": 9,
+      "llm_requests": 0,
+      "tool_calls": 6,
+      "delegation_count": 1,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "last_event_id": 40,
+      "final_result": {
+        "kind": "data_analysis",
+        "analysis": {
+          "schema_version": "1.0",
+          "request_id": "router-demo-analysis",
+          "session_id": "68f3e33f8efe4e86abeac70027e146c9",
+          "input_version": "4740e946e1a94a95b2d8799c049b2b24",
+          "analysis_ref": "art_a046653820fe40fa95bcb0a95e280c9d",
+          "summary": "分析了 10 个 30 秒窗口；最高合成异常模型分数为 0.998，对应窗口 2（从 0 编号）。该分数不表示临床患病概率或医学诊断；局部贡献描述模型行为，不证明异常原因。",
+          "risk_level": "high",
+          "prediction": {
+            "prediction": "anomaly",
+            "risk_score": 0.9983188764750849,
+            "important_features": [
+              {
+                "name": "EEG_feature_mean",
+                "importance": 0.7555926588697731
+              },
+              {
+                "name": "sleep_quality_mean",
+                "importance": 0.08345442442058167
+              },
+              {
+                "name": "EDA_mean",
+                "importance": 0.0374642611166322
+              },
+              {
+                "name": "EDA_min",
+                "importance": 0.025280173969225064
+              },
+              {
+                "name": "EEG_feature_p75",
+                "importance": 0.024297721960727835
+              }
+            ],
+            "model": {
+              "name": "LightGBM",
+              "version": "1.0",
+              "task_scope": "synthetic_anomaly_only",
+              "metadata": {
+                "input_schema_version": "1.0",
+                "feature_schema_version": "1.0",
+                "input_profile": "synthetic_physiology_v1",
+                "score_semantics": "synthetic_anomaly_model_score",
+                "aggregation": "max",
+                "threshold": 0.35000000000000003,
+                "threshold_source": "maximum_validation_f1",
+                "risk_thresholds": {
+                  "medium": 0.35000000000000003,
+                  "high": 0.8
+                },
+                "processing_config": {
+                  "version": "1.0",
+                  "sample_rate_hz": 1,
+                  "window_rows": 30,
+                  "stride_rows": 30,
+                  "max_gap_rows": 3,
+                  "max_window_missing_fraction": 0.15,
+                  "max_channel_missing_fraction": 0.2,
+                  "tail_policy": "discard_and_report",
+                  "imputation": "within_window_linear_interpolation_then_edge_fill"
+                },
+                "limitations": [
+                  "Synthetic data only; no clinical validation.",
+                  "Maximum window score is not a session probability.",
+                  "No calibration on real physiology; metrics reflect the synthetic generator."
+                ]
+              }
+            },
+            "aggregation": "max",
+            "window_count": 10,
+            "anomalous_ratio": 0.2,
+            "highest_risk_window": 2,
+            "window_predictions": [
+              {
+                "window_index": 0,
+                "risk_score": 0.0008578159622794888,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 1,
+                "risk_score": 0.0007137681694982743,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 2,
+                "risk_score": 0.9983188764750849,
+                "prediction": "anomaly"
+              },
+              {
+                "window_index": 3,
+                "risk_score": 0.0020609150532214025,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 4,
+                "risk_score": 0.9983038768075286,
+                "prediction": "anomaly"
+              },
+              {
+                "window_index": 5,
+                "risk_score": 0.09951244897065485,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 6,
+                "risk_score": 0.0007137681694982743,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 7,
+                "risk_score": 0.0007137681694982743,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 8,
+                "risk_score": 0.006461331544579835,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 9,
+                "risk_score": 0.0007103776195086633,
+                "prediction": "normal"
+              }
+            ],
+            "risk_level": "high"
+          },
+          "explanation": {
+            "global_importance": [
+              {
+                "name": "EEG_feature_mean",
+                "importance": 0.7555926588697731
+              },
+              {
+                "name": "sleep_quality_mean",
+                "importance": 0.08345442442058167
+              },
+              {
+                "name": "EDA_mean",
+                "importance": 0.0374642611166322
+              },
+              {
+                "name": "EDA_min",
+                "importance": 0.025280173969225064
+              },
+              {
+                "name": "EEG_feature_p75",
+                "importance": 0.024297721960727835
+              }
+            ],
+            "global_importance_method": "gain",
+            "local_evidence": [
+              {
+                "name": "EEG_feature_mean",
+                "observed_value": 0.6347685526666667,
+                "reference_mean": 0.45691508519207313,
+                "reference_std": 0.04207671467254095,
+                "deviation_std": 4.226885793216641,
+                "contribution": 4.460976682350226,
+                "direction": "raises_score"
+              },
+              {
+                "name": "EEG_feature_p75",
+                "observed_value": 0.7434769075000001,
+                "reference_mean": 0.5536368327042683,
+                "reference_std": 0.04811518712354327,
+                "deviation_std": 3.945533336663279,
+                "contribution": 1.3852298253976758,
+                "direction": "raises_score"
+              },
+              {
+                "name": "EDA_min",
+                "observed_value": 2.37319124,
+                "reference_mean": 0.8257504620731707,
+                "reference_std": 0.42565318231872634,
+                "deviation_std": 3.635449803281668,
+                "contribution": 0.86310912428893,
+                "direction": "raises_score"
+              },
+              {
+                "name": "EDA_mean",
+                "observed_value": 3.1773026690000004,
+                "reference_mean": 1.5397936514221544,
+                "reference_std": 0.4030246904556227,
+                "deviation_std": 4.063048881016765,
+                "contribution": 0.8169760895566529,
+                "direction": "raises_score"
+              },
+              {
+                "name": "sleep_quality_mean",
+                "observed_value": 0.8801726899999996,
+                "reference_mean": 0.626521812987805,
+                "reference_std": 0.21397449312389377,
+                "deviation_std": 1.185425764113519,
+                "contribution": 0.7228237869743196,
+                "direction": "raises_score"
+              }
+            ],
+            "method": "lightgbm_native_contribution",
+            "limitations": [
+              "Trained on synthetic anomaly events; outputs are not clinical diagnoses or disease probabilities.",
+              "Session score is the maximum window score and increases exposure to isolated extreme windows.",
+              "Feature associations do not establish causal explanations of an individual's physiology.",
+              "Reference deviations use normal training windows with a standard-deviation floor of 1e-6.",
+              "Local contributions are signed raw-margin units, not probability changes."
+            ],
+            "highest_risk_window": 2,
+            "scope": "highest_risk_window",
+            "contribution_units": "raw_margin",
+            "base_value": -3.0350158303907033,
+            "raw_margin": 6.38661040606133
+          },
+          "visualization": [
+            {
+              "artifact_ref": "art_c0a733542a4940fb977944c948365474",
+              "kind": "risk",
+              "mime_type": "image/png",
+              "url": "/artifacts/art_c0a733542a4940fb977944c948365474?session_id=68f3e33f8efe4e86abeac70027e146c9&input_version=4740e946e1a94a95b2d8799c049b2b24"
+            }
+          ],
+          "quality_report": {
+            "input_profile": "synthetic_physiology_v1",
+            "row_count": 300,
+            "columns": [
+              "timestamp",
+              "subject_id",
+              "session_id",
+              "heart_rate",
+              "EDA",
+              "EEG_feature",
+              "activity",
+              "sleep_quality"
+            ],
+            "sample_rate_hz": 1,
+            "timestamp_present": true,
+            "missing_values": {
+              "heart_rate": 1,
+              "EDA": 0,
+              "EEG_feature": 0,
+              "activity": 1,
+              "sleep_quality": 0
+            },
+            "missing_fraction": 0.0013333333333333333,
+            "warnings": [
+              "Short missing spans were filled within their own windows."
+            ],
+            "window_count": 10,
+            "window_rows": 30,
+            "processed_rows": 300,
+            "dropped_tail_rows": 0,
+            "imputed_values": 2,
+            "processing_version": "1.0"
+          },
+          "warnings": [
+            "Short missing spans were filled within their own windows."
+          ]
+        }
+      },
+      "result_available": true,
+      "error_code": null,
+      "message": null,
+      "events_url": "/agent/runs/2d98b03b852e4cdb852894fb53272ffc/events?session_id=68f3e33f8efe4e86abeac70027e146c9",
+      "route": {
+        "workflow_type": "complex",
+        "reason_code": "data_analysis",
+        "objective": "data_analysis",
+        "entry_agent": "planner",
+        "required_capabilities": [
+          "csv_analysis",
+          "signal_processing",
+          "feature_extraction",
+          "anomaly_prediction",
+          "feature_explanation",
+          "visualization"
+        ],
+        "needs_input": null,
+        "router_version": "1.0"
+      },
+      "initial_workflow_type": "complex",
+      "workflow_upgrades": 0,
+      "source_run_id": null
+    }
+  },
+  "reuse": {
+    "preview": {
+      "workflow_type": "simple",
+      "reason_code": "existing_result",
+      "objective": "data_analysis",
+      "entry_agent": "data_analysis",
+      "required_capabilities": [
+        "verified_result_read",
+        "visualization"
+      ],
+      "needs_input": null,
+      "router_version": "1.0"
+    },
+    "run": {
+      "schema_version": "1.0",
+      "run_id": "ae98bd4487404411a81233b660acaa83",
+      "request_id": "router-demo-reuse",
+      "session_id": "68f3e33f8efe4e86abeac70027e146c9",
+      "input_version": "4740e946e1a94a95b2d8799c049b2b24",
+      "parent_run_id": null,
+      "status": "completed",
+      "backend_mode": "scripted",
+      "decision_model": null,
+      "objective": "data_analysis",
+      "entry_agent": "data_analysis",
+      "created_at": "2026-09-07T21:58:21.564719+00:00",
+      "updated_at": "2026-09-07T21:58:21.565886+00:00",
+      "decision_count": 1,
+      "llm_requests": 0,
+      "tool_calls": 0,
+      "delegation_count": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "last_event_id": 9,
+      "final_result": {
+        "kind": "data_analysis",
+        "analysis": {
+          "schema_version": "1.0",
+          "request_id": "router-demo-analysis",
+          "session_id": "68f3e33f8efe4e86abeac70027e146c9",
+          "input_version": "4740e946e1a94a95b2d8799c049b2b24",
+          "analysis_ref": "art_a046653820fe40fa95bcb0a95e280c9d",
+          "summary": "分析了 10 个 30 秒窗口；最高合成异常模型分数为 0.998，对应窗口 2（从 0 编号）。该分数不表示临床患病概率或医学诊断；局部贡献描述模型行为，不证明异常原因。",
+          "risk_level": "high",
+          "prediction": {
+            "prediction": "anomaly",
+            "risk_score": 0.9983188764750849,
+            "important_features": [
+              {
+                "name": "EEG_feature_mean",
+                "importance": 0.7555926588697731
+              },
+              {
+                "name": "sleep_quality_mean",
+                "importance": 0.08345442442058167
+              },
+              {
+                "name": "EDA_mean",
+                "importance": 0.0374642611166322
+              },
+              {
+                "name": "EDA_min",
+                "importance": 0.025280173969225064
+              },
+              {
+                "name": "EEG_feature_p75",
+                "importance": 0.024297721960727835
+              }
+            ],
+            "model": {
+              "name": "LightGBM",
+              "version": "1.0",
+              "task_scope": "synthetic_anomaly_only",
+              "metadata": {
+                "input_schema_version": "1.0",
+                "feature_schema_version": "1.0",
+                "input_profile": "synthetic_physiology_v1",
+                "score_semantics": "synthetic_anomaly_model_score",
+                "aggregation": "max",
+                "threshold": 0.35000000000000003,
+                "threshold_source": "maximum_validation_f1",
+                "risk_thresholds": {
+                  "medium": 0.35000000000000003,
+                  "high": 0.8
+                },
+                "processing_config": {
+                  "version": "1.0",
+                  "sample_rate_hz": 1,
+                  "window_rows": 30,
+                  "stride_rows": 30,
+                  "max_gap_rows": 3,
+                  "max_window_missing_fraction": 0.15,
+                  "max_channel_missing_fraction": 0.2,
+                  "tail_policy": "discard_and_report",
+                  "imputation": "within_window_linear_interpolation_then_edge_fill"
+                },
+                "limitations": [
+                  "Synthetic data only; no clinical validation.",
+                  "Maximum window score is not a session probability.",
+                  "No calibration on real physiology; metrics reflect the synthetic generator."
+                ]
+              }
+            },
+            "aggregation": "max",
+            "window_count": 10,
+            "anomalous_ratio": 0.2,
+            "highest_risk_window": 2,
+            "window_predictions": [
+              {
+                "window_index": 0,
+                "risk_score": 0.0008578159622794888,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 1,
+                "risk_score": 0.0007137681694982743,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 2,
+                "risk_score": 0.9983188764750849,
+                "prediction": "anomaly"
+              },
+              {
+                "window_index": 3,
+                "risk_score": 0.0020609150532214025,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 4,
+                "risk_score": 0.9983038768075286,
+                "prediction": "anomaly"
+              },
+              {
+                "window_index": 5,
+                "risk_score": 0.09951244897065485,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 6,
+                "risk_score": 0.0007137681694982743,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 7,
+                "risk_score": 0.0007137681694982743,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 8,
+                "risk_score": 0.006461331544579835,
+                "prediction": "normal"
+              },
+              {
+                "window_index": 9,
+                "risk_score": 0.0007103776195086633,
+                "prediction": "normal"
+              }
+            ],
+            "risk_level": "high"
+          },
+          "explanation": {
+            "global_importance": [
+              {
+                "name": "EEG_feature_mean",
+                "importance": 0.7555926588697731
+              },
+              {
+                "name": "sleep_quality_mean",
+                "importance": 0.08345442442058167
+              },
+              {
+                "name": "EDA_mean",
+                "importance": 0.0374642611166322
+              },
+              {
+                "name": "EDA_min",
+                "importance": 0.025280173969225064
+              },
+              {
+                "name": "EEG_feature_p75",
+                "importance": 0.024297721960727835
+              }
+            ],
+            "global_importance_method": "gain",
+            "local_evidence": [
+              {
+                "name": "EEG_feature_mean",
+                "observed_value": 0.6347685526666667,
+                "reference_mean": 0.45691508519207313,
+                "reference_std": 0.04207671467254095,
+                "deviation_std": 4.226885793216641,
+                "contribution": 4.460976682350226,
+                "direction": "raises_score"
+              },
+              {
+                "name": "EEG_feature_p75",
+                "observed_value": 0.7434769075000001,
+                "reference_mean": 0.5536368327042683,
+                "reference_std": 0.04811518712354327,
+                "deviation_std": 3.945533336663279,
+                "contribution": 1.3852298253976758,
+                "direction": "raises_score"
+              },
+              {
+                "name": "EDA_min",
+                "observed_value": 2.37319124,
+                "reference_mean": 0.8257504620731707,
+                "reference_std": 0.42565318231872634,
+                "deviation_std": 3.635449803281668,
+                "contribution": 0.86310912428893,
+                "direction": "raises_score"
+              },
+              {
+                "name": "EDA_mean",
+                "observed_value": 3.1773026690000004,
+                "reference_mean": 1.5397936514221544,
+                "reference_std": 0.4030246904556227,
+                "deviation_std": 4.063048881016765,
+                "contribution": 0.8169760895566529,
+                "direction": "raises_score"
+              },
+              {
+                "name": "sleep_quality_mean",
+                "observed_value": 0.8801726899999996,
+                "reference_mean": 0.626521812987805,
+                "reference_std": 0.21397449312389377,
+                "deviation_std": 1.185425764113519,
+                "contribution": 0.7228237869743196,
+                "direction": "raises_score"
+              }
+            ],
+            "method": "lightgbm_native_contribution",
+            "limitations": [
+              "Trained on synthetic anomaly events; outputs are not clinical diagnoses or disease probabilities.",
+              "Session score is the maximum window score and increases exposure to isolated extreme windows.",
+              "Feature associations do not establish causal explanations of an individual's physiology.",
+              "Reference deviations use normal training windows with a standard-deviation floor of 1e-6.",
+              "Local contributions are signed raw-margin units, not probability changes."
+            ],
+            "highest_risk_window": 2,
+            "scope": "highest_risk_window",
+            "contribution_units": "raw_margin",
+            "base_value": -3.0350158303907033,
+            "raw_margin": 6.38661040606133
+          },
+          "visualization": [
+            {
+              "artifact_ref": "art_c0a733542a4940fb977944c948365474",
+              "kind": "risk",
+              "mime_type": "image/png",
+              "url": "/artifacts/art_c0a733542a4940fb977944c948365474?session_id=68f3e33f8efe4e86abeac70027e146c9&input_version=4740e946e1a94a95b2d8799c049b2b24"
+            }
+          ],
+          "quality_report": {
+            "input_profile": "synthetic_physiology_v1",
+            "row_count": 300,
+            "columns": [
+              "timestamp",
+              "subject_id",
+              "session_id",
+              "heart_rate",
+              "EDA",
+              "EEG_feature",
+              "activity",
+              "sleep_quality"
+            ],
+            "sample_rate_hz": 1,
+            "timestamp_present": true,
+            "missing_values": {
+              "heart_rate": 1,
+              "EDA": 0,
+              "EEG_feature": 0,
+              "activity": 1,
+              "sleep_quality": 0
+            },
+            "missing_fraction": 0.0013333333333333333,
+            "warnings": [
+              "Short missing spans were filled within their own windows."
+            ],
+            "window_count": 10,
+            "window_rows": 30,
+            "processed_rows": 300,
+            "dropped_tail_rows": 0,
+            "imputed_values": 2,
+            "processing_version": "1.0"
+          },
+          "warnings": [
+            "Short missing spans were filled within their own windows."
+          ]
+        },
+        "source_run_id": "2d98b03b852e4cdb852894fb53272ffc"
+      },
+      "result_available": true,
+      "error_code": null,
+      "message": null,
+      "events_url": "/agent/runs/ae98bd4487404411a81233b660acaa83/events?session_id=68f3e33f8efe4e86abeac70027e146c9",
+      "route": {
+        "workflow_type": "simple",
+        "reason_code": "existing_result",
+        "objective": "data_analysis",
+        "entry_agent": "data_analysis",
+        "required_capabilities": [
+          "verified_result_read",
+          "visualization"
+        ],
+        "needs_input": null,
+        "router_version": "1.0"
+      },
+      "initial_workflow_type": "simple",
+      "workflow_upgrades": 0,
+      "source_run_id": "2d98b03b852e4cdb852894fb53272ffc"
+    }
+  },
+  "health_reasoning": {
+    "preview": {
+      "workflow_type": "complex",
+      "reason_code": "health_reasoning",
+      "objective": "health_report",
+      "entry_agent": "planner",
+      "required_capabilities": [
+        "csv_analysis",
+        "signal_processing",
+        "feature_extraction",
+        "anomaly_prediction",
+        "feature_explanation",
+        "rag_retrieval",
+        "report_generation",
+        "safety_verification"
+      ],
+      "needs_input": null,
+      "router_version": "1.0"
+    },
+    "run": {
+      "schema_version": "1.0",
+      "run_id": "69370aefa443496eb368da1601cd496d",
+      "request_id": "router-demo-health_reasoning",
+      "session_id": "68f3e33f8efe4e86abeac70027e146c9",
+      "input_version": "4740e946e1a94a95b2d8799c049b2b24",
+      "parent_run_id": null,
+      "status": "blocked",
+      "backend_mode": "scripted",
+      "decision_model": null,
+      "objective": "health_report",
+      "entry_agent": "planner",
+      "created_at": "2026-09-07T21:58:21.566277+00:00",
+      "updated_at": "2026-09-07T21:58:21.566524+00:00",
+      "decision_count": 0,
+      "llm_requests": 0,
+      "tool_calls": 0,
+      "delegation_count": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "last_event_id": 4,
+      "final_result": null,
+      "result_available": false,
+      "error_code": "safety_unavailable",
+      "message": "该任务需要 RAG、报告写作与安全审核能力；这些模块尚未实现，当前不发布个人健康解释或报告。",
+      "events_url": "/agent/runs/69370aefa443496eb368da1601cd496d/events?session_id=68f3e33f8efe4e86abeac70027e146c9",
+      "route": {
+        "workflow_type": "complex",
+        "reason_code": "health_reasoning",
+        "objective": "health_report",
+        "entry_agent": "planner",
+        "required_capabilities": [
+          "csv_analysis",
+          "signal_processing",
+          "feature_extraction",
+          "anomaly_prediction",
+          "feature_explanation",
+          "rag_retrieval",
+          "report_generation",
+          "safety_verification"
+        ],
+        "needs_input": null,
+        "router_version": "1.0"
+      },
+      "initial_workflow_type": "complex",
+      "workflow_upgrades": 0,
+      "source_run_id": null
+    }
+  },
+  "missing_upload": {
+    "preview": {
+      "workflow_type": "complex",
+      "reason_code": "missing_upload",
+      "objective": "data_analysis",
+      "entry_agent": "planner",
+      "required_capabilities": [
+        "csv_analysis",
+        "signal_processing",
+        "feature_extraction",
+        "anomaly_prediction",
+        "feature_explanation"
+      ],
+      "needs_input": "missing_upload",
+      "router_version": "1.0"
+    },
+    "run": {
+      "schema_version": "1.0",
+      "run_id": "f1d9eb7b696844bf8409fb1ce8498f43",
+      "request_id": "router-demo-missing_upload",
+      "session_id": "68f3e33f8efe4e86abeac70027e146c9",
+      "input_version": "4740e946e1a94a95b2d8799c049b2b24",
+      "parent_run_id": null,
+      "status": "awaiting_input",
+      "backend_mode": "scripted",
+      "decision_model": null,
+      "objective": "data_analysis",
+      "entry_agent": "planner",
+      "created_at": "2026-09-07T21:58:21.566691+00:00",
+      "updated_at": "2026-09-07T21:58:21.566918+00:00",
+      "decision_count": 0,
+      "llm_requests": 0,
+      "tool_calls": 0,
+      "delegation_count": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "last_event_id": 4,
+      "final_result": null,
+      "result_available": false,
+      "error_code": "missing_upload",
+      "message": "请上传符合数据协议的 CSV，再使用 parent_run_id 创建新任务。",
+      "events_url": "/agent/runs/f1d9eb7b696844bf8409fb1ce8498f43/events?session_id=68f3e33f8efe4e86abeac70027e146c9",
+      "route": {
+        "workflow_type": "complex",
+        "reason_code": "missing_upload",
+        "objective": "data_analysis",
+        "entry_agent": "planner",
+        "required_capabilities": [
+          "csv_analysis",
+          "signal_processing",
+          "feature_extraction",
+          "anomaly_prediction",
+          "feature_explanation"
+        ],
+        "needs_input": "missing_upload",
+        "router_version": "1.0"
+      },
+      "initial_workflow_type": "complex",
+      "workflow_upgrades": 0,
+      "source_run_id": null
+    }
+  },
+  "ambiguous": {
+    "preview": {
+      "workflow_type": "complex",
+      "reason_code": "clarify_task",
+      "objective": "data_analysis",
+      "entry_agent": "planner",
+      "required_capabilities": [],
+      "needs_input": "clarify_task",
+      "router_version": "1.0"
+    },
+    "run": {
+      "schema_version": "1.0",
+      "run_id": "67afb997030a423d806d4a43396a108d",
+      "request_id": "router-demo-ambiguous",
+      "session_id": "68f3e33f8efe4e86abeac70027e146c9",
+      "input_version": "4740e946e1a94a95b2d8799c049b2b24",
+      "parent_run_id": null,
+      "status": "awaiting_input",
+      "backend_mode": "scripted",
+      "decision_model": null,
+      "objective": "data_analysis",
+      "entry_agent": "planner",
+      "created_at": "2026-09-07T21:58:21.567072+00:00",
+      "updated_at": "2026-09-07T21:58:21.567280+00:00",
+      "decision_count": 0,
+      "llm_requests": 0,
+      "tool_calls": 0,
+      "delegation_count": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "last_event_id": 4,
+      "final_result": null,
+      "result_available": false,
+      "error_code": "clarify_task",
+      "message": "请补充需要分析的数据或明确的数据分析目标，再创建新任务。",
+      "events_url": "/agent/runs/67afb997030a423d806d4a43396a108d/events?session_id=68f3e33f8efe4e86abeac70027e146c9",
+      "route": {
+        "workflow_type": "complex",
+        "reason_code": "clarify_task",
+        "objective": "data_analysis",
+        "entry_agent": "planner",
+        "required_capabilities": [],
+        "needs_input": "clarify_task",
+        "router_version": "1.0"
+      },
+      "initial_workflow_type": "complex",
+      "workflow_upgrades": 0,
+      "source_run_id": null
+    }
+  }
+}

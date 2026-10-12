@@ -1,0 +1,67 @@
+{
+  "status": "success",
+  "hits": [
+    {
+      "evidence_id": "ev_2dda276c13ea7d7875cc4d4e620357c56e410db65d67e829d815745933657066",
+      "source": {
+        "id": "empatica_eda_context",
+        "title": "What is electrodermal activity?",
+        "url": "https://support.empatica.com/hc/en-us/articles/115000198283-What-is-electrodermal-activity",
+        "source_type": "sensor_documentation"
+      },
+      "content": "来源事实：EDA（electrodermal activity，皮肤电活动）涉及皮肤电学特性的变化，也称 skin conductance。身体活动、兴奋和压力都可能伴随 EDA 升高；皮肤水合状态及传感器放置位置还会影响测量。\n项目适用边界：EDA_mean 或 EDA_std 的变化不能单独证明心理压力，更不能确定医学病因。合成模型的特征重要性用于解释预测行为；设备背景知识只提供可能需要核对的采集因素。",
+      "locator": "What affects EDA?; 页面开头 EDA 定义段落 | chars 0:205",
+      "content_hash": "b8398acd4efd9f33de35b21f06e2a0e93ab35a5d19e94cef11b3ab8eeaacafc6",
+      "knowledge_version": "1.0",
+      "score": 0.8965385585403892,
+      "score_type": "cosine"
+    },
+    {
+      "evidence_id": "ev_89f4f5d6f52d37f1e814bdb58b509eb579a08241eae4f60260dc08ae65a229a3",
+      "source": {
+        "id": "smets_wearable_context_2018",
+        "title": "Large-scale wearable data reveal digital phenotypes for daily-life stress detection",
+        "url": "https://www.nature.com/articles/s41746-018-0074-9",
+        "source_type": "research_paper"
+      },
+      "content": "来源事实：Smets 等人的观察性研究记录了 1002 名参与者连续五天的生理及情境信息。研究指出 activity 与生理变化、信号质量相关；分析自报压力时排除了高活动片段，并讨论 stress 与 arousal 的区分限制。\n项目适用边界：这项研究支持在 HR、EDA 等信号解释中保留活动与质量背景，但不能证明某位用户的异常原因，也不能把该论文结果当成本项目合成模型的准确率或临床验证。",
+      "locator": "Abstract; Results 活动与信号质量分析; Discussion | chars 0:197",
+      "content_hash": "292248cbe173a0ef3f7c42e09cf6edc92e935b00b3b438bf7b4f1116fad414ec",
+      "knowledge_version": "1.0",
+      "score": 0.8660331800910097,
+      "score_type": "cosine"
+    },
+    {
+      "evidence_id": "ev_fa9c6ddf6639b66b5f387e40706ef2cd42a3ac71ce5391f4d00d1bbd4e3db862",
+      "source": {
+        "id": "ninds_eeg_measurement",
+        "title": "Neurological Diagnostic Tests and Procedures",
+        "url": "https://www.ninds.nih.gov/health-information/disorders/neurological-diagnostic-tests-and-procedures",
+        "source_type": "signal_reference"
+      },
+      "content": "来源事实：EEG（electroencephalography，脑电记录）通过头皮电极记录脑部电活动，信号送往记录设备以呈现脑电波形。记录过程还可能包含睁闭眼或改变呼吸等操作条件。\n项目适用边界：CSV 中的 EEG_feature 是生成器创建的非负合成代理量，没有原始多通道 EEG 波形、电极布置或真实采样元数据。该特征偏离训练参考值，只能解释模型输入，不能作为脑电检查结论或疾病证据。",
+      "locator": "Electroencephalography：定义及头皮电极记录步骤 | chars 0:196",
+      "content_hash": "a24abf118f74d799479392fd548bfff8b928cb35dafec315dc2530c49d3863fe",
+      "knowledge_version": "1.0",
+      "score": 0.8612018027143222,
+      "score_type": "cosine"
+    },
+    {
+      "evidence_id": "ev_20c7e8c3d2467036b436543bbfb0ac04d28da467effdae1a25a7fa49a418a027",
+      "source": {
+        "id": "aha_heart_rate_activity",
+        "title": "All About Heart Rate",
+        "url": "https://www.heart.org/en/health-topics/high-blood-pressure/the-facts-about-high-blood-pressure/all-about-heart-rate-pulse",
+        "source_type": "signal_reference"
+      },
+      "content": "来源事实：heart_rate（HR，心率）表示每分钟心跳次数。运动 activity 增强时心率通常升高，停止运动后也不会立即恢复到静息水平；体位、温度及情绪等背景因素同样会影响读数。\n项目适用边界：这些一般因素不能确定本次 heart_rate_mean 或 risk_score 升高的原因。当前输出描述合成异常模型的行为，需要分别保留活动背景、数据质量和模型贡献的信息。",
+      "locator": "Heart rate, blood pressure and exercise; How other factors affect heart rate | chars 0:189",
+      "content_hash": "1d3f0438b801bd3a3df01601615f376355ab7c4b6d925a97a81619f8e19cb33f",
+      "knowledge_version": "1.0",
+      "score": 0.8410483144242479,
+      "score_type": "cosine"
+    }
+  ],
+  "knowledge_version": "1.0",
+  "embedding_id": "intfloat/multilingual-e5-small@fd1525a9fd15316a2d503bf26ab031a61d056e98:onnx_mean_l2_384_v1"
+}

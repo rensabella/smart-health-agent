@@ -1,0 +1,1261 @@
+[
+  {
+    "schema_version": "1.0",
+    "event_id": 1,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.145652+00:00",
+    "event": "run.queued",
+    "agent": null,
+    "step_id": null,
+    "parent_step_id": null,
+    "data": {
+      "backend_mode": "scripted"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 2,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.145842+00:00",
+    "event": "route.selected",
+    "agent": null,
+    "step_id": null,
+    "parent_step_id": null,
+    "data": {
+      "workflow_type": "complex",
+      "reason_code": "health_report",
+      "objective": "health_report",
+      "entry_agent": "planner",
+      "required_capabilities": [
+        "csv_analysis",
+        "signal_processing",
+        "feature_extraction",
+        "anomaly_prediction",
+        "feature_explanation",
+        "visualization",
+        "rag_retrieval",
+        "report_generation",
+        "safety_verification"
+      ],
+      "needs_input": null,
+      "router_version": "1.0",
+      "workflow_upgrades": 0
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 3,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.145916+00:00",
+    "event": "harness.loaded",
+    "agent": null,
+    "step_id": null,
+    "parent_step_id": null,
+    "data": {
+      "harness_version": "2.0",
+      "harness_hash": "334e0953b3b804f576b85797ac774bb09db566b0abd3747e1c724d965f6d9a47"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 4,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.146629+00:00",
+    "event": "run.running",
+    "agent": null,
+    "step_id": null,
+    "parent_step_id": null,
+    "data": {
+      "status": "running",
+      "error_code": null,
+      "decision_count": 0,
+      "llm_requests": 0,
+      "tool_calls": 0,
+      "delegation_count": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 5,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.159737+00:00",
+    "event": "memory.loaded",
+    "agent": null,
+    "step_id": null,
+    "parent_step_id": null,
+    "data": {
+      "memory_recent_turns": 0,
+      "memory_history_hits": 0,
+      "preferences_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 6,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.159872+00:00",
+    "event": "agent.started",
+    "agent": "planner",
+    "step_id": null,
+    "parent_step_id": null,
+    "data": {}
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 7,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.159938+00:00",
+    "event": "agent.thinking",
+    "agent": "planner",
+    "step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 1,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 8,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.160326+00:00",
+    "event": "agent.decision",
+    "agent": "planner",
+    "step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "parent_step_id": null,
+    "data": {
+      "action": "delegate",
+      "decision_count": 1,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 9,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.160384+00:00",
+    "event": "agent.started",
+    "agent": "data_analysis",
+    "step_id": null,
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {}
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 10,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.160430+00:00",
+    "event": "agent.thinking",
+    "agent": "data_analysis",
+    "step_id": "cc518862ed914cdf90479940c59eeea5",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 2,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 11,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.163723+00:00",
+    "event": "agent.decision",
+    "agent": "data_analysis",
+    "step_id": "cc518862ed914cdf90479940c59eeea5",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "action": "call_skill",
+      "decision_count": 2,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "skill": "csv_analysis"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 12,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.163799+00:00",
+    "event": "skill.dispatched",
+    "agent": "data_analysis",
+    "step_id": "cc518862ed914cdf90479940c59eeea5",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "csv_analysis",
+      "input_ref": "art_265226ce4adb4cc6a29112f8524d7842"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 13,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.190589+00:00",
+    "event": "skill.completed",
+    "agent": "data_analysis",
+    "step_id": "cc518862ed914cdf90479940c59eeea5",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "csv_analysis",
+      "call_id": "0205b56146e041a9afde2157784d55eb",
+      "version": "1.0",
+      "latency_ms": 26.670959312468767,
+      "tool_calls": 1,
+      "error_code": null,
+      "output_refs": [
+        "art_ea90e22ba05d4232ad5a1e938870c315"
+      ]
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 14,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.190686+00:00",
+    "event": "agent.thinking",
+    "agent": "data_analysis",
+    "step_id": "a73c0108a2f84f95a225e7a6126dcb9d",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 3,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 15,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.194285+00:00",
+    "event": "agent.decision",
+    "agent": "data_analysis",
+    "step_id": "a73c0108a2f84f95a225e7a6126dcb9d",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "action": "call_skill",
+      "decision_count": 3,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "skill": "signal_processing"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 16,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.194369+00:00",
+    "event": "skill.dispatched",
+    "agent": "data_analysis",
+    "step_id": "a73c0108a2f84f95a225e7a6126dcb9d",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "signal_processing",
+      "input_ref": "art_ea90e22ba05d4232ad5a1e938870c315"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 17,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.211059+00:00",
+    "event": "skill.completed",
+    "agent": "data_analysis",
+    "step_id": "a73c0108a2f84f95a225e7a6126dcb9d",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "signal_processing",
+      "call_id": "a8682c6e579b4205beb1266acbb8697b",
+      "version": "1.0",
+      "latency_ms": 16.57887501642108,
+      "tool_calls": 2,
+      "error_code": null,
+      "output_refs": [
+        "art_45a51c386a0b4db99e0b9bba70cd6d49"
+      ]
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 18,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.211153+00:00",
+    "event": "agent.thinking",
+    "agent": "data_analysis",
+    "step_id": "400cbcf0824a41d2b819f9df42850ee0",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 4,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 19,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.214398+00:00",
+    "event": "agent.decision",
+    "agent": "data_analysis",
+    "step_id": "400cbcf0824a41d2b819f9df42850ee0",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "action": "call_skill",
+      "decision_count": 4,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "skill": "feature_extraction"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 20,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.214462+00:00",
+    "event": "skill.dispatched",
+    "agent": "data_analysis",
+    "step_id": "400cbcf0824a41d2b819f9df42850ee0",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "feature_extraction",
+      "input_ref": "art_45a51c386a0b4db99e0b9bba70cd6d49"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 21,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.224828+00:00",
+    "event": "skill.completed",
+    "agent": "data_analysis",
+    "step_id": "400cbcf0824a41d2b819f9df42850ee0",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "feature_extraction",
+      "call_id": "45155895c53d47c982ab0a694945a795",
+      "version": "1.0",
+      "latency_ms": 10.2530000731349,
+      "tool_calls": 3,
+      "error_code": null,
+      "output_refs": [
+        "art_64f47653861c46b285d8356b46920c2a"
+      ]
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 22,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.224941+00:00",
+    "event": "agent.thinking",
+    "agent": "data_analysis",
+    "step_id": "cdf2979a0a8945b2981e22037fab7374",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 5,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 23,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.228383+00:00",
+    "event": "agent.decision",
+    "agent": "data_analysis",
+    "step_id": "cdf2979a0a8945b2981e22037fab7374",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "action": "call_skill",
+      "decision_count": 5,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "skill": "anomaly_prediction"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 24,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.228459+00:00",
+    "event": "skill.dispatched",
+    "agent": "data_analysis",
+    "step_id": "cdf2979a0a8945b2981e22037fab7374",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "anomaly_prediction",
+      "input_ref": "art_64f47653861c46b285d8356b46920c2a"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 25,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.234957+00:00",
+    "event": "skill.completed",
+    "agent": "data_analysis",
+    "step_id": "cdf2979a0a8945b2981e22037fab7374",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "anomaly_prediction",
+      "call_id": "81cd042b9915454da473b4adf4d0cb19",
+      "version": "1.0",
+      "latency_ms": 6.411583162844181,
+      "tool_calls": 4,
+      "error_code": null,
+      "output_refs": [
+        "art_781b2f32ce3d4ceca1bd4fa1f7de4981"
+      ]
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 26,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.235047+00:00",
+    "event": "agent.thinking",
+    "agent": "data_analysis",
+    "step_id": "82d42d8f0faa49af9936cea5e9d12f40",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 6,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 27,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.238293+00:00",
+    "event": "agent.decision",
+    "agent": "data_analysis",
+    "step_id": "82d42d8f0faa49af9936cea5e9d12f40",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "action": "call_skill",
+      "decision_count": 6,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "skill": "feature_explanation"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 28,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.238355+00:00",
+    "event": "skill.dispatched",
+    "agent": "data_analysis",
+    "step_id": "82d42d8f0faa49af9936cea5e9d12f40",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "feature_explanation",
+      "input_ref": "art_781b2f32ce3d4ceca1bd4fa1f7de4981"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 29,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.241327+00:00",
+    "event": "skill.completed",
+    "agent": "data_analysis",
+    "step_id": "82d42d8f0faa49af9936cea5e9d12f40",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "feature_explanation",
+      "call_id": "01aa1bee8e5248b5b9bdade8bbcb8987",
+      "version": "1.0",
+      "latency_ms": 2.874125260859728,
+      "tool_calls": 5,
+      "error_code": null,
+      "output_refs": [
+        "art_50ff060817384d51b9f4a9063144b69b"
+      ]
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 30,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.241423+00:00",
+    "event": "agent.thinking",
+    "agent": "data_analysis",
+    "step_id": "cad2ebc01bd74c109f4cb1496284d48a",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 7,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 31,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.245057+00:00",
+    "event": "agent.decision",
+    "agent": "data_analysis",
+    "step_id": "cad2ebc01bd74c109f4cb1496284d48a",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "action": "call_skill",
+      "decision_count": 7,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "skill": "visualization"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 32,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:18.245128+00:00",
+    "event": "skill.dispatched",
+    "agent": "data_analysis",
+    "step_id": "cad2ebc01bd74c109f4cb1496284d48a",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "visualization",
+      "input_ref": "art_50ff060817384d51b9f4a9063144b69b"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 33,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.070516+00:00",
+    "event": "skill.completed",
+    "agent": "data_analysis",
+    "step_id": "cad2ebc01bd74c109f4cb1496284d48a",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "skill": "visualization",
+      "call_id": "2465e93213e44e05b66865ab3d7fcb04",
+      "version": "1.0",
+      "latency_ms": 11825.454291887581,
+      "tool_calls": 6,
+      "error_code": null,
+      "output_refs": []
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 34,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.070690+00:00",
+    "event": "agent.thinking",
+    "agent": "data_analysis",
+    "step_id": "c6cd8e9df11d4c22921e197fc9cbb724",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 8,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 35,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.075162+00:00",
+    "event": "agent.decision",
+    "agent": "data_analysis",
+    "step_id": "c6cd8e9df11d4c22921e197fc9cbb724",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "action": "finish",
+      "decision_count": 8,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 36,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.075994+00:00",
+    "event": "agent.completed",
+    "agent": "data_analysis",
+    "step_id": "c6cd8e9df11d4c22921e197fc9cbb724",
+    "parent_step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "data": {
+      "result_ref": "art_50ff060817384d51b9f4a9063144b69b"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 37,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.076052+00:00",
+    "event": "agent.delegation_completed",
+    "agent": "planner",
+    "step_id": "ac6a24fbd71044cb81f0232e2c48381f",
+    "parent_step_id": null,
+    "data": {
+      "agent": "data_analysis",
+      "delegation_count": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 38,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.076113+00:00",
+    "event": "agent.thinking",
+    "agent": "planner",
+    "step_id": "3dcd907c8f39441a918df2bd68f6cade",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 9,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 39,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.076437+00:00",
+    "event": "agent.decision",
+    "agent": "planner",
+    "step_id": "3dcd907c8f39441a918df2bd68f6cade",
+    "parent_step_id": null,
+    "data": {
+      "action": "delegate",
+      "decision_count": 9,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 40,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.076919+00:00",
+    "event": "agent.started",
+    "agent": "rag",
+    "step_id": null,
+    "parent_step_id": "3dcd907c8f39441a918df2bd68f6cade",
+    "data": {}
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 41,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.076966+00:00",
+    "event": "agent.thinking",
+    "agent": "rag",
+    "step_id": "97ced3e3908347f1a9e68c2ad261c4e3",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 10,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 42,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.078133+00:00",
+    "event": "agent.decision",
+    "agent": "rag",
+    "step_id": "97ced3e3908347f1a9e68c2ad261c4e3",
+    "parent_step_id": "3dcd907c8f39441a918df2bd68f6cade",
+    "data": {
+      "action": "call_skill",
+      "decision_count": 10,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "skill": "rag_retrieval"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 43,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.078742+00:00",
+    "event": "skill.dispatched",
+    "agent": "rag",
+    "step_id": "97ced3e3908347f1a9e68c2ad261c4e3",
+    "parent_step_id": "3dcd907c8f39441a918df2bd68f6cade",
+    "data": {
+      "skill": "rag_retrieval",
+      "input_ref": "art_50ff060817384d51b9f4a9063144b69b"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 44,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.142132+00:00",
+    "event": "skill.completed",
+    "agent": "rag",
+    "step_id": "97ced3e3908347f1a9e68c2ad261c4e3",
+    "parent_step_id": "3dcd907c8f39441a918df2bd68f6cade",
+    "data": {
+      "skill": "rag_retrieval",
+      "call_id": "cf9c943c9cce47ba82067f02755da814",
+      "version": "1.0",
+      "latency_ms": 63.14104190096259,
+      "tool_calls": 7,
+      "error_code": null,
+      "output_refs": [
+        "art_edb461e138a749798e1edf0eed2c8583"
+      ]
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 45,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.142478+00:00",
+    "event": "agent.thinking",
+    "agent": "rag",
+    "step_id": "1c2a5a622c3841b7b6d862c639f22a11",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 11,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 46,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.151656+00:00",
+    "event": "agent.decision",
+    "agent": "rag",
+    "step_id": "1c2a5a622c3841b7b6d862c639f22a11",
+    "parent_step_id": "3dcd907c8f39441a918df2bd68f6cade",
+    "data": {
+      "action": "finish",
+      "decision_count": 11,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 47,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.151804+00:00",
+    "event": "agent.completed",
+    "agent": "rag",
+    "step_id": "1c2a5a622c3841b7b6d862c639f22a11",
+    "parent_step_id": "3dcd907c8f39441a918df2bd68f6cade",
+    "data": {
+      "result_ref": "art_edb461e138a749798e1edf0eed2c8583"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 48,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.151855+00:00",
+    "event": "agent.delegation_completed",
+    "agent": "planner",
+    "step_id": "3dcd907c8f39441a918df2bd68f6cade",
+    "parent_step_id": null,
+    "data": {
+      "agent": "rag",
+      "delegation_count": 2
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 49,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.151921+00:00",
+    "event": "agent.thinking",
+    "agent": "planner",
+    "step_id": "22e15493136040488348f9072d62946e",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 12,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 50,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.153886+00:00",
+    "event": "agent.decision",
+    "agent": "planner",
+    "step_id": "22e15493136040488348f9072d62946e",
+    "parent_step_id": null,
+    "data": {
+      "action": "delegate",
+      "decision_count": 12,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 51,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.155705+00:00",
+    "event": "agent.started",
+    "agent": "report_writer",
+    "step_id": null,
+    "parent_step_id": "22e15493136040488348f9072d62946e",
+    "data": {}
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 52,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.157010+00:00",
+    "event": "agent.thinking",
+    "agent": "report_writer",
+    "step_id": "22156767e9e945259d71f0351c9d3974",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 13,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 53,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.164614+00:00",
+    "event": "agent.decision",
+    "agent": "report_writer",
+    "step_id": "22156767e9e945259d71f0351c9d3974",
+    "parent_step_id": "22e15493136040488348f9072d62946e",
+    "data": {
+      "action": "call_skill",
+      "decision_count": 13,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "skill": "report_generation"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 54,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.165325+00:00",
+    "event": "skill.dispatched",
+    "agent": "report_writer",
+    "step_id": "22156767e9e945259d71f0351c9d3974",
+    "parent_step_id": "22e15493136040488348f9072d62946e",
+    "data": {
+      "skill": "report_generation",
+      "input_ref": "art_edb461e138a749798e1edf0eed2c8583"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 55,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.169978+00:00",
+    "event": "skill.completed",
+    "agent": "report_writer",
+    "step_id": "22156767e9e945259d71f0351c9d3974",
+    "parent_step_id": "22e15493136040488348f9072d62946e",
+    "data": {
+      "skill": "report_generation",
+      "call_id": "c10a00a44c0b4240962eed1ebbabbecb",
+      "version": "1.0",
+      "latency_ms": 4.52425004914403,
+      "tool_calls": 8,
+      "error_code": null,
+      "output_refs": [
+        "art_21253aa82d124963806bf2fd25267c50"
+      ]
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 56,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.170057+00:00",
+    "event": "agent.thinking",
+    "agent": "report_writer",
+    "step_id": "f4f338f736054b69963f7f5b82b2e0cc",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 14,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 57,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.172002+00:00",
+    "event": "agent.decision",
+    "agent": "report_writer",
+    "step_id": "f4f338f736054b69963f7f5b82b2e0cc",
+    "parent_step_id": "22e15493136040488348f9072d62946e",
+    "data": {
+      "action": "finish",
+      "decision_count": 14,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 58,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.172069+00:00",
+    "event": "agent.completed",
+    "agent": "report_writer",
+    "step_id": "f4f338f736054b69963f7f5b82b2e0cc",
+    "parent_step_id": "22e15493136040488348f9072d62946e",
+    "data": {
+      "result_ref": "art_21253aa82d124963806bf2fd25267c50"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 59,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.172111+00:00",
+    "event": "agent.delegation_completed",
+    "agent": "planner",
+    "step_id": "22e15493136040488348f9072d62946e",
+    "parent_step_id": null,
+    "data": {
+      "agent": "report_writer",
+      "delegation_count": 3
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 60,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.172155+00:00",
+    "event": "agent.thinking",
+    "agent": "planner",
+    "step_id": "c82ae1c0a733499fa840e3c008993453",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 15,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 61,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.172472+00:00",
+    "event": "agent.decision",
+    "agent": "planner",
+    "step_id": "c82ae1c0a733499fa840e3c008993453",
+    "parent_step_id": null,
+    "data": {
+      "action": "delegate",
+      "decision_count": 15,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 62,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.173031+00:00",
+    "event": "agent.started",
+    "agent": "safety_verification",
+    "step_id": null,
+    "parent_step_id": "c82ae1c0a733499fa840e3c008993453",
+    "data": {}
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 63,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.173098+00:00",
+    "event": "agent.thinking",
+    "agent": "safety_verification",
+    "step_id": "a008bb0cc8bb4e22aefd8b2285e7ed10",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 16,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 64,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.178255+00:00",
+    "event": "agent.decision",
+    "agent": "safety_verification",
+    "step_id": "a008bb0cc8bb4e22aefd8b2285e7ed10",
+    "parent_step_id": "c82ae1c0a733499fa840e3c008993453",
+    "data": {
+      "action": "call_skill",
+      "decision_count": 16,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false,
+      "skill": "safety_verification"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 65,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.178878+00:00",
+    "event": "skill.dispatched",
+    "agent": "safety_verification",
+    "step_id": "a008bb0cc8bb4e22aefd8b2285e7ed10",
+    "parent_step_id": "c82ae1c0a733499fa840e3c008993453",
+    "data": {
+      "skill": "safety_verification",
+      "input_ref": "art_21253aa82d124963806bf2fd25267c50"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 66,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.183572+00:00",
+    "event": "safety.reviewed",
+    "agent": "safety_verification",
+    "step_id": null,
+    "parent_step_id": null,
+    "data": {
+      "safe": true,
+      "revision_needed": false,
+      "draft_hash": "9f3748f92411cd42d90ff5b9fdee5e497a347a1245ff6d06bad9ca5a7dfafadb",
+      "review_ref": "art_5b8c1d1effad486e92285ff21b9f9fa4"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 67,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.183670+00:00",
+    "event": "skill.completed",
+    "agent": "safety_verification",
+    "step_id": "a008bb0cc8bb4e22aefd8b2285e7ed10",
+    "parent_step_id": "c82ae1c0a733499fa840e3c008993453",
+    "data": {
+      "skill": "safety_verification",
+      "call_id": "4b6a8b35f7d5481aab54203418480a04",
+      "version": "1.0",
+      "latency_ms": 4.597166553139687,
+      "tool_calls": 9,
+      "error_code": null,
+      "output_refs": [
+        "art_5b8c1d1effad486e92285ff21b9f9fa4"
+      ]
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 68,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.183774+00:00",
+    "event": "agent.thinking",
+    "agent": "safety_verification",
+    "step_id": "9c13aa3176c04110bda3c2c7d80f2f68",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 17,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 69,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.186986+00:00",
+    "event": "agent.decision",
+    "agent": "safety_verification",
+    "step_id": "9c13aa3176c04110bda3c2c7d80f2f68",
+    "parent_step_id": "c82ae1c0a733499fa840e3c008993453",
+    "data": {
+      "action": "finish",
+      "decision_count": 17,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 70,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.187063+00:00",
+    "event": "agent.completed",
+    "agent": "safety_verification",
+    "step_id": "9c13aa3176c04110bda3c2c7d80f2f68",
+    "parent_step_id": "c82ae1c0a733499fa840e3c008993453",
+    "data": {
+      "result_ref": "art_5b8c1d1effad486e92285ff21b9f9fa4"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 71,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.187102+00:00",
+    "event": "agent.delegation_completed",
+    "agent": "planner",
+    "step_id": "c82ae1c0a733499fa840e3c008993453",
+    "parent_step_id": null,
+    "data": {
+      "agent": "safety_verification",
+      "delegation_count": 4
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 72,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.187151+00:00",
+    "event": "agent.thinking",
+    "agent": "planner",
+    "step_id": "a228522078fe4a349a28a659ff005cc6",
+    "parent_step_id": null,
+    "data": {
+      "decision_count": 18,
+      "llm_requests": 0,
+      "attempt": 1
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 73,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.187503+00:00",
+    "event": "agent.decision",
+    "agent": "planner",
+    "step_id": "a228522078fe4a349a28a659ff005cc6",
+    "parent_step_id": null,
+    "data": {
+      "action": "finish",
+      "decision_count": 18,
+      "llm_requests": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 74,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.190537+00:00",
+    "event": "run.verifying",
+    "agent": null,
+    "step_id": null,
+    "parent_step_id": null,
+    "data": {
+      "status": "verifying",
+      "error_code": null,
+      "decision_count": 18,
+      "llm_requests": 0,
+      "tool_calls": 9,
+      "delegation_count": 4,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 75,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.193855+00:00",
+    "event": "publication.checked",
+    "agent": null,
+    "step_id": null,
+    "parent_step_id": null,
+    "data": {
+      "policy": "evidence_report_v1",
+      "result_kind": "health_report",
+      "harness_hash": "334e0953b3b804f576b85797ac774bb09db566b0abd3747e1c724d965f6d9a47"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 76,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.193968+00:00",
+    "event": "report.chunk",
+    "agent": null,
+    "step_id": null,
+    "parent_step_id": null,
+    "data": {
+      "chunk_index": 0,
+      "report_hash": "590d8551c3eded43b0ed3dfc996dfa80576780dd0e2aa8007b402c9a8773ea0b"
+    }
+  },
+  {
+    "schema_version": "1.0",
+    "event_id": 77,
+    "run_id": "d37fc692b6c548c6a1e12e1c42d37981",
+    "timestamp": "2026-09-08T16:39:30.194008+00:00",
+    "event": "run.completed",
+    "agent": null,
+    "step_id": null,
+    "parent_step_id": null,
+    "data": {
+      "status": "completed",
+      "error_code": null,
+      "decision_count": 18,
+      "llm_requests": 0,
+      "tool_calls": 9,
+      "delegation_count": 4,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "token_usage_available": false
+    }
+  }
+]
