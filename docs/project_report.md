@@ -479,6 +479,5 @@ Docker 使用 Python 3.12 slim、非 root 用户与 OpenMP 运行库；Compose �
 | Evaluation | [病例](../evaluation/test_cases.json)、[Runner](../evaluation/runner.py)、[指标](../evaluation/metrics.py)、[实际 JSON](../evaluation/evaluation_report.json) |
 | 前端 | [Streamlit](../frontend/streamlit_app.py)、[HTTP/SSE 客户端](../frontend/client.py) |
 | 部署与验证 | [Dockerfile](../Dockerfile)、[Compose](../docker-compose.yml)、[CI](../.github/workflows/checks.yml)、[最终验证记录](step9_verification.md) |
-| 求职材料 | [简历描述与面试表达](resume_project.md) |
 
 本报告依据当前代码、配置及保存的运行结果编写。阶段文档保留当时的历史状态；当前能力以 README、本报告、报告配置及最新验证记录为准。没有在撰写本报告时重新训练模型、调用外部 LLM 或追加效果实验。

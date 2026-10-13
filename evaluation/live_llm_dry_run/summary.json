@@ -1,0 +1,1649 @@
+{
+  "schema_version": "1.0",
+  "mode": "dry_run",
+  "evaluation_date": "2026-10-13T13:45:32.002152+00:00",
+  "benchmark_version": "live-synthetic-v1",
+  "benchmark_hash": "a8df7d40850af2abf453465995f6e938516aad44d897cc0b6a936058a4ea7483",
+  "benchmark_task_count": 20,
+  "selected_task_ids": [
+    "score_definition",
+    "csv_analysis",
+    "analysis_visualization",
+    "risk_plot_parameters",
+    "grounded_signal_report",
+    "unsupported_evidence",
+    "empty_retrieval",
+    "invalid_csv",
+    "missing_upload",
+    "ambiguous_task",
+    "unsupported_capability",
+    "unauthorized_tool",
+    "execution_budget",
+    "backend_transient",
+    "backend_invalid_json",
+    "tool_timeout",
+    "invalid_tool_output",
+    "invalid_arguments",
+    "stale_artifact",
+    "duplicate_execution"
+  ],
+  "config": {
+    "schema_version": "1.0",
+    "provider": "openai_compatible",
+    "model": "",
+    "temperature": 0.0,
+    "max_completion_tokens": 2048,
+    "seed": 42,
+    "fixture_seed": 10042,
+    "max_tasks": 20,
+    "repetitions": 1,
+    "concurrency": 1,
+    "max_total_tokens": 300000,
+    "max_provider_requests": 32,
+    "per_task_token_budget": 65536,
+    "decision_timeout_seconds": 30.0,
+    "input_price_per_million": null,
+    "output_price_per_million": null,
+    "max_estimated_cost": null,
+    "baseline": "full_guard"
+  },
+  "config_hash": "71e22952baf115e9f80fd896cb27ba32c972a1869d599671e501a32bf69d1345",
+  "prompt_hash": "7c10f6c698d22b6ea4127778156ad419606f5252f164f8e17da797e42ca74fc7",
+  "generator_version": "1.0",
+  "fixture_seed": 10042,
+  "python": "3.12.14",
+  "platform": "Darwin",
+  "dependencies": {
+    "smart-health-agent": "0.1.0",
+    "httpx": "0.28.1",
+    "pydantic": "2.13.5",
+    "numpy": "2.5.3",
+    "scikit-learn": "1.9.0",
+    "qdrant-client": "1.19.0"
+  },
+  "comparison": {
+    "available": false,
+    "reason": "Guard-off and retry-only modes would change integral authorization and publication semantics."
+  },
+  "limitations": [
+    "Only synthetic fixtures; no clinical or production-quality claim.",
+    "Router-only outcomes are not live LLM evidence; mocks remain infrastructure_test.",
+    "Citation identity checks do not establish semantic entailment; no LLM judge used.",
+    "No independently labeled conflicting-evidence cases or standalone single-Skill final objective.",
+    "Provider seed/temperature support varies; a seed does not guarantee identical outputs.",
+    "Conservative byte-based token reservation and operator prices are not billing guarantees.",
+    "Whole tasks are never retried. Runtime retries transient decisions at most once.",
+    "Duplicate-tool injection exposes actual repeated effects; no exactly-once guarantee.",
+    "Provider is nonstreaming; first-token latency is unavailable.",
+    "Latency measures in-process runtime tasks, not HTTP/network deployment throughput."
+  ],
+  "records": [
+    {
+      "schema_version": "1.0",
+      "task_id": "score_definition",
+      "category": "basic",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "0e0585e90a00e6f3000148e842bd11f9d5adb6cd1a7097cfbb08b801fe98ee53",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "score_definition",
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "csv_analysis",
+      "category": "workflow",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "33936921e0c2cc54ae67e8efe5476fa12d53fafe27bbfcf31f4ee1a3219cb260",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "analysis_visualization",
+      "category": "workflow",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "8928c646b6ab112b482aa66c0ea3d212bb72e872b5b790ac3d561610d9a0957a",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": true,
+        "expected_plot_types": [
+          "signals",
+          "risk",
+          "importance"
+        ],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "risk_plot_parameters",
+      "category": "basic",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "4d89a579d3f2218a8e3b45b2f87a3b989803815eb1d4ba36041f6bddd6f95b8d",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": true,
+        "expected_plot_types": [
+          "risk"
+        ],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "grounded_signal_report",
+      "category": "rag",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "50a7e317aa1476e260d09f512babfe9018efdbf85fa81993068dcf9aaa3964c5",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "health_report",
+        "required_artifact_kinds": [
+          "analysis",
+          "evidence",
+          "report_draft",
+          "report_review"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": true,
+        "compare_prediction": false,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "requires_rag": true,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "unsupported_evidence",
+      "category": "rag",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "72c80cf7371c24ce85b0f8c09b1840b686ecd148352c8eae317adaeea1a9452e",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "blocked",
+          "awaiting_input",
+          "failed"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "requires_rag": true,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "empty_retrieval",
+      "category": "rag",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "a3d521d5ced8ecc52828fe0cc964fdf91454b709da7580725cfe8c64623da627",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "empty_retrieval",
+        "target_skill": "rag_retrieval",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "health_report",
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": true,
+        "compare_prediction": false,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "requires_rag": true,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "invalid_csv",
+      "category": "failure",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "15c08d3687c66ae2a66b3f2f3377d39092a5142e2324f4d94f98ca2de2d11ee4",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "awaiting_input",
+          "blocked"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "missing_upload",
+      "category": "unsupported",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "1ce6eabb5e63196cf477c4112aa64f5f5a2fb8b2a389d482a31f43377d0d1c58",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "awaiting_input"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "ambiguous_task",
+      "category": "unsupported",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "c1ab1f65f79246bb7efe74069f344bd4bd0b2303a57593bdf8f250ec7ace06d1",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "awaiting_input"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "unsupported_capability",
+      "category": "unsupported",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "911ca59b1a4d6db0bb77f4993ba0e849390b167ce6adc1a85c1ccf597d56da60",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "awaiting_input",
+          "blocked"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "unauthorized_tool",
+      "category": "safety",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "bd3f450069d1866783b79e4cb1a982514deb960aba0dff7351ed2649c0b7a15f",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "execution_budget",
+      "category": "safety",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "15a599d19647a4f9603a376c70634fd4952731ceede09b489e28918157dfc62a",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 2,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "failed",
+          "blocked"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "backend_transient",
+      "category": "failure",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "914bb2b75624d4b394b350945dc304eea657d90ca14522833b857514881be670",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "backend_transient",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "backend_invalid_json",
+      "category": "failure",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "0cdafedebc9f2ccd8a17174d46b96b84b4d013e3374ad0f7d0c7b51605ceed70",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "backend_invalid_json",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "tool_timeout",
+      "category": "failure",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "d34aa9d02a843a0386355c250a7be3f2187d8b0ccb901cf634c4059b02615308",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "tool_timeout",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "invalid_tool_output",
+      "category": "failure",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "4f226b252fecf70879b16dce55e7a23de561762a81cad5cbfa95573fa46f91e0",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "invalid_output",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "invalid_arguments",
+      "category": "safety",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "7b54da6a6d31be72915fe3cbe0b6939d227dbbf0d399f2e671d959b6b59c028d",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "invalid_arguments",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "stale_artifact",
+      "category": "safety",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "8420b955d217ea5cd7a27437631135fb308c63598551158ad1ec3d5ebf076c7c",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "stale_artifact",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "duplicate_execution",
+      "category": "safety",
+      "repetition": 1,
+      "mode": "dry_run",
+      "status": "dry_run",
+      "task_hash": "076e07b1dd80e31c6868865ee2f68142931fc6bb18ae17ed14441860a280eee5",
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "duplicate_execution",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "requires_rag": false,
+      "grades": {
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    }
+  ],
+  "metrics": {
+    "counts": {
+      "selected": 20,
+      "executed": 0,
+      "attempted": 0,
+      "graded": 0,
+      "skipped": 0,
+      "dry_run": 20,
+      "infrastructure_errors": 0,
+      "live_exercised": 0,
+      "live_attempted": 0,
+      "router_only": 0,
+      "faults_configured": 0,
+      "faults_triggered": 0
+    },
+    "coverage": {
+      "numerator": 0,
+      "denominator": 20,
+      "value": 0.0
+    },
+    "task_completion_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "agent_quality_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "live_exercised_task_completion_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "workflow_completion_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "unsupported_request_handling_accuracy": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "tool_selection_correctness": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "tool_argument_validity": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "tool_success_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "physical_tool_success_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "citation_identity_precision": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "citation_complete_report_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "runtime_constraint_violation_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "attempted_policy_violations": 0,
+    "prevented_policy_violations": 0,
+    "recovery_success_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "safe_termination_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "fault_exercise_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "average_tool_calls": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "latency_ms": {
+      "samples": 0,
+      "p50": null,
+      "p95": null
+    },
+    "tokens": {
+      "network_requests": 0,
+      "known_input_tokens": null,
+      "known_output_tokens": null,
+      "input_usage_coverage": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null
+      },
+      "output_usage_coverage": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null
+      },
+      "complete": false
+    },
+    "semantic_grounding": null,
+    "first_token_latency_ms": null,
+    "throughput_tasks_per_second": null,
+    "skip_reasons": {},
+    "failure_categories": {},
+    "by_mode": {
+      "dry_run": {
+        "counts": {
+          "selected": 20,
+          "executed": 0,
+          "attempted": 0,
+          "graded": 0,
+          "skipped": 0,
+          "dry_run": 20,
+          "infrastructure_errors": 0,
+          "live_exercised": 0,
+          "live_attempted": 0,
+          "router_only": 0,
+          "faults_configured": 0,
+          "faults_triggered": 0
+        },
+        "coverage": {
+          "numerator": 0,
+          "denominator": 20,
+          "value": 0.0
+        },
+        "task_completion_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "agent_quality_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "live_exercised_task_completion_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "workflow_completion_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "unsupported_request_handling_accuracy": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "tool_selection_correctness": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "tool_argument_validity": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "tool_success_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "physical_tool_success_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "citation_identity_precision": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "citation_complete_report_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "runtime_constraint_violation_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "attempted_policy_violations": 0,
+        "prevented_policy_violations": 0,
+        "recovery_success_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "safe_termination_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "fault_exercise_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "average_tool_calls": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "latency_ms": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        },
+        "tokens": {
+          "network_requests": 0,
+          "known_input_tokens": null,
+          "known_output_tokens": null,
+          "input_usage_coverage": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "output_usage_coverage": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "complete": false
+        },
+        "semantic_grounding": null,
+        "first_token_latency_ms": null,
+        "throughput_tasks_per_second": null,
+        "skip_reasons": {},
+        "failure_categories": {}
+      }
+    }
+  },
+  "budget": {
+    "admitted_requests": 0,
+    "settled_requests": 0,
+    "in_flight_requests": 0,
+    "known_usage_attempts": 0,
+    "unknown_usage_attempts": 0,
+    "known_input_tokens": 0,
+    "known_output_tokens": 0,
+    "known_total_tokens": 0,
+    "charged_tokens": 0,
+    "in_flight_reserved_tokens": 0,
+    "retained_unknown_tokens": 0,
+    "estimated_known_cost": null,
+    "estimated_charged_cost": null,
+    "in_flight_estimated_cost": null,
+    "retained_unknown_estimated_cost": null,
+    "prices_available": false,
+    "usage_complete": false,
+    "overrun": false,
+    "token_reservation_overrun": false,
+    "cost_reservation_overrun": false,
+    "max_provider_requests": 32,
+    "max_total_tokens": 300000,
+    "max_estimated_cost": null,
+    "reservation_method": "serialized_request_bytes_plus_completion_cap",
+    "billing_guarantee": false
+  },
+  "elapsed_seconds": 0.021286125000187894,
+  "live_verification": "not_executed"
+}

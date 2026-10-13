@@ -29,6 +29,7 @@ smarthealth-generate = "smarthealth.cli.generate_demo_data:main"
 smarthealth-train = "smarthealth.cli.train:main"
 smarthealth-index = "smarthealth.cli.build_knowledge_index:main"
 smarthealth-eval = "smarthealth.evaluation.run_eval:main"
+smarthealth-eval-live = "smarthealth.evaluation.live_llm.runner:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

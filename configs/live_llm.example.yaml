@@ -1,0 +1,21 @@
+# No credentials here. Copy to an ignored local path to customize an experiment.
+schema_version: "1.0"
+provider: openai_compatible
+model: ""  # Uses HEALTH_LLM_MODEL; select a tool-calling compatible model explicitly.
+temperature: 0.0  # null omits this parameter for providers/models that do not support it.
+max_completion_tokens: 2048
+seed: 42  # null omits it; provider seeds do not guarantee determinism.
+fixture_seed: 10042
+max_tasks: 1
+repetitions: 1
+concurrency: 1
+max_total_tokens: 300000
+max_provider_requests: 32
+per_task_token_budget: 65536
+decision_timeout_seconds: 30.0
+# Operator-supplied current prices, in one consistent currency per million tokens.
+# No defaults or inferred provider prices. Both are required to enable a cost cap.
+input_price_per_million: null
+output_price_per_million: null
+max_estimated_cost: null
+baseline: full_guard

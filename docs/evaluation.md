@@ -1,5 +1,10 @@
 # Evaluation：评测整个 Agent 系统
 
+新增的 [Live LLM benchmark](LIVE_LLM_EVALUATION.md) 在保留本页历史评测器的基础上，提供
+20 个任务、共享请求/token/费用预算、隔离故障注入、真实 Runtime 执行、JSONL 与 Markdown。
+默认 dry-run，尚未执行付费模型调用；实现验证见 [验证记录](LIVE_LLM_EVALUATION_VERIFICATION.md)。
+下面的历史指标不作为新 live benchmark 的成绩。
+
 `evaluation/run_eval.py` 执行真实 Runtime、Skill Registry、预测、检索和报告服务，按场景保存结果、受限 trace、配置与数据哈希，并生成 JSON 和 Markdown 报告。当前初始集为 **14 个系统场景、8 个检索查询、8 个单主张安全/支持关系病例**。
 
 [用例文件](../evaluation/test_cases.json) 与 [用例来源说明](evaluation_cases.md) 分离输入、预期结果和标签依据。语料变化导致哈希不匹配时评测拒绝启动，避免沿用过期标签。当前标签由项目维护过程整理，`human_review_status=pending`，尚未经独立人员或临床专家复核。这个小型集合不是性能排行榜或临床验证集。

@@ -278,6 +278,10 @@ class OpenAICompatibleBackend(DecisionBackend):
         model: str,
         timeout_seconds: float = 30,
         transport: httpx.AsyncBaseTransport | None = None,
+        *,
+        temperature: float | None = None,
+        max_completion_tokens: int = MAX_COMPLETION_TOKENS,
+        seed: int | None = None,
     ):
         self._endpoint = _endpoint(base_url)
         if (
@@ -290,11 +294,34 @@ class OpenAICompatibleBackend(DecisionBackend):
             or not isinstance(timeout_seconds, (int, float))
             or not math.isfinite(timeout_seconds)
             or not 0 < timeout_seconds <= 120
+            or (
+                temperature is not None
+                and (
+                    isinstance(temperature, bool)
+                    or not isinstance(temperature, (int, float))
+                    or not math.isfinite(temperature)
+                    or not 0 <= temperature <= 2
+                )
+            )
+            or isinstance(max_completion_tokens, bool)
+            or not isinstance(max_completion_tokens, int)
+            or not 1 <= max_completion_tokens <= MAX_COMPLETION_TOKENS
+            or (
+                seed is not None
+                and (
+                    isinstance(seed, bool)
+                    or not isinstance(seed, int)
+                    or not 0 <= seed <= 2**31 - 1
+                )
+            )
         ):
             raise _error("backend_configuration_error", "The provider configuration is invalid.")
         self._model = model
         self.model_name = model
         self._timeout_seconds = timeout_seconds
+        self._temperature = temperature
+        self._max_completion_tokens = max_completion_tokens
+        self._seed = seed
         self._headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
@@ -309,24 +336,37 @@ class OpenAICompatibleBackend(DecisionBackend):
             transport=transport if transport is not None else httpx.AsyncHTTPTransport(retries=0),
         )
 
-    async def decide(self, request: DecisionRequest) -> DecisionReply:
-        if self._client.is_closed:
-            raise _error("backend_unavailable", "The decision backend is closed.")
+    def build_payload(self, request: DecisionRequest) -> bytes:
+        """Serialize the exact bounded request without networking or credentials.
+
+        Evaluation can reserve its request budget using these bytes. The payload
+        includes task data and must not be logged merely because it has no key.
+        Optional provider generation controls are omitted unless configured;
+        support for temperature and seed is determined by the selected provider.
+        """
+        return self._prepare_request(request)[0]
+
+    def _prepare_request(self, request: DecisionRequest) -> tuple[bytes, frozenset[str]]:
         request = _validated_request(request)
         tools, callable_names = _tools_for(request)
         try:
+            body = {
+                "model": self._model,
+                "messages": build_messages(request),
+                "tools": tools,
+                "tool_choice": "required",
+                "parallel_tool_calls": False,
+                "max_completion_tokens": self._max_completion_tokens,
+                "n": 1,
+                "stream": False,
+                "store": False,
+            }
+            if self._temperature is not None:
+                body["temperature"] = self._temperature
+            if self._seed is not None:
+                body["seed"] = self._seed
             payload = json.dumps(
-                {
-                    "model": self._model,
-                    "messages": build_messages(request),
-                    "tools": tools,
-                    "tool_choice": "required",
-                    "parallel_tool_calls": False,
-                    "max_completion_tokens": MAX_COMPLETION_TOKENS,
-                    "n": 1,
-                    "stream": False,
-                    "store": False,
-                },
+                body,
                 ensure_ascii=False,
                 allow_nan=False,
                 separators=(",", ":"),
@@ -339,6 +379,12 @@ class OpenAICompatibleBackend(DecisionBackend):
             raise _error(
                 "backend_context_too_large", "The decision context exceeds its size limit."
             )
+        return payload, callable_names
+
+    async def decide(self, request: DecisionRequest) -> DecisionReply:
+        if self._client.is_closed:
+            raise _error("backend_unavailable", "The decision backend is closed.")
+        payload, callable_names = self._prepare_request(request)
         try:
             # httpx has per-operation timeouts; this also bounds the entire
             # response, including a provider that keeps sending tiny chunks.

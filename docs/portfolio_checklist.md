@@ -4,11 +4,15 @@
 
 ## 当前可展示
 
+- Live LLM 评测框架：20 个合成任务、共享 token/费用预算、隔离故障注入、执行 trace 与产物校验。
+  默认 dry-run；尚未进行真实模型评测，不应在简历写为“已通过 live benchmark”。
+  实际工程测试与 dry-run 证据见 [验证记录](LIVE_LLM_EVALUATION_VERIFICATION.md)。
+
 - `0.2.0` 工程重构：`src/smarthealth`、Settings、结构化执行追踪、Makefile 和独立 wheel 安装。本地与 [本次云端 CI](https://github.com/rensabella/smart-health-agent/actions/runs/38275517363) 均通过 523 项测试（新增 24 项回归）；源码提交 `3c7175d` 的独立 wheel 真实训练/API/图表验证及 Docker 镜像构建已通过，见 [包重构验证](package_verification.md)。
 
 - 九个类型化 Skills、五种 Agent 角色、ReAct Runtime、Router、Memory、Harness、本地 RAG 和报告发布检查。
 - FastAPI Tool/Agent API、Streamlit、SSE 回放、来源与版本校验、脱敏审计。
-- [完整项目报告](project_report.md)、[简历与面试材料](resume_project.md)、[真实合成报告示例](report_example/run.json)。
+- [完整项目报告](project_report.md)、[真实合成报告示例](report_example/run.json)。
 - 2026-10-12 重新运行：499 项 pytest 通过，7 条已知上游弃用提示；Ruff lint/126 个文件格式检查及 `pip check` 通过。本次未重新运行 9 月保存的训练和 E5 系统评测。
 - 从 Git 暂存区导出完整源码（不含本机 `.venv`、模型和索引缓存），复用相同 Python 依赖进行第二次回归：499 项通过，26.93 秒。发布文件、合成测试资产与配置目录已一并核对，见 [发布验证记录](publication_verification.md)。
 - Docker/Compose、GitHub Actions、贡献及安全说明。2026-10-12 首轮 [云端 CI](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) 已通过：499 项测试、Ruff、依赖检查及 Docker 镜像构建；容器运行仍待验证。

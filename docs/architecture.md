@@ -111,6 +111,15 @@ Scripted/live provenance, denominator definitions, request budgets, corpus hashe
 and the known semantic-review failure are preserved. See [evaluation.md](evaluation.md)
 for current evidence and future benchmark design.
 
+`evaluation/live_llm/` adds an independent opt-in runner using the same production
+Runtime entry points. It owns only experiment configuration, shared request/token/
+estimated-cost admission, isolated one-shot faults, safe trace/artifact collection
+and deterministic grading. The existing provider gains optional generation
+controls without changing its default behavior. See the
+[integration plan](LIVE_LLM_EVALUATION_PLAN.md) and
+[live evaluation guide](LIVE_LLM_EVALUATION.md). No live benchmark results are
+claimed from infrastructure tests or the checked-in dry-run.
+
 ## Migration and compatibility
 
 | Previous source | Canonical package |

@@ -79,6 +79,7 @@ async def test_live_adapter_tool_protocol_and_usage():
         assert request.headers["authorization"] == "Bearer test-secret"
         assert payload["tool_choice"] == "required" and not payload["parallel_tool_calls"]
         assert not payload["store"] and payload["max_completion_tokens"] == 2048
+        assert "temperature" not in payload and "seed" not in payload
         assert {t["function"]["name"] for t in payload["tools"]} == {
             "finish",
             "delegate",
@@ -202,3 +203,87 @@ def test_provider_endpoint_is_admin_validated(url):
     with pytest.raises(SkillError) as error:
         OpenAICompatibleBackend(url, "secret", "model")
     assert error.value.code == "backend_configuration_error" and "SECRET" not in str(error.value)
+
+
+@pytest.mark.parametrize("temperature,seed", [(0, 0), (0.7, 42), (2, 2**31 - 1)])
+async def test_generation_settings_and_pure_payload_match_sent_request(temperature, seed):
+    captured = []
+
+    def handle(request):
+        captured.append(request.content)
+        return httpx.Response(200, json=response())
+
+    backend = OpenAICompatibleBackend(
+        "https://llm.example/v1",
+        "test-secret",
+        "model",
+        transport=httpx.MockTransport(handle),
+        temperature=temperature,
+        max_completion_tokens=256,
+        seed=seed,
+    )
+    try:
+        request = state()
+        before = request.model_dump()
+        payload_bytes = backend.build_payload(request)
+        assert captured == []  # Cost preflight must never call the provider.
+        assert request.model_dump() == before
+        payload = json.loads(payload_bytes)
+        assert payload["temperature"] == temperature
+        assert payload["seed"] == seed
+        assert payload["max_completion_tokens"] == 256
+        assert b"test-secret" not in payload_bytes
+        await backend.decide(request)
+        assert captured == [payload_bytes]
+    finally:
+        await backend.aclose()
+
+
+@pytest.mark.parametrize(
+    "settings",
+    [
+        {"temperature": True},
+        {"temperature": -0.01},
+        {"temperature": 2.01},
+        {"temperature": float("nan")},
+        {"temperature": float("inf")},
+        {"temperature": "SECRET"},
+        {"max_completion_tokens": True},
+        {"max_completion_tokens": 0},
+        {"max_completion_tokens": 2049},
+        {"max_completion_tokens": 1.5},
+        {"max_completion_tokens": "SECRET"},
+        {"seed": True},
+        {"seed": -1},
+        {"seed": 2**31},
+        {"seed": 1.5},
+        {"seed": "SECRET"},
+    ],
+)
+def test_generation_configuration_rejects_invalid_values_without_leaking_them(settings):
+    with pytest.raises(SkillError) as error:
+        OpenAICompatibleBackend("https://llm.example/v1", "test-secret", "model", **settings)
+    assert error.value.code == "backend_configuration_error"
+    assert "SECRET" not in str(error.value) and "test-secret" not in str(error.value)
+
+
+async def test_payload_preflight_enforces_same_context_bound_as_decide():
+    calls = []
+    backend = OpenAICompatibleBackend(
+        "https://llm.example/v1",
+        "test-secret",
+        "model",
+        transport=httpx.MockTransport(lambda request: calls.append(request)),
+    )
+    request = state().model_copy(update={"report_context": {"text": "x" * 131072}})
+    try:
+        with pytest.raises(SkillError) as preflight_error:
+            backend.build_payload(request)
+        with pytest.raises(SkillError) as decision_error:
+            await backend.decide(request)
+        assert (
+            preflight_error.value.code == decision_error.value.code == "backend_context_too_large"
+        )
+        assert calls == []
+    finally:
+        await backend.aclose()

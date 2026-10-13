@@ -33,4 +33,6 @@ dist/
 build/
 .coverage
 htmlcov/
+evaluation/live_runs/
+configs/live_llm.local.yaml
 .DS_Store

@@ -26,6 +26,8 @@ from smarthealth.cli.train import train_models
 from smarthealth.config.resources import resource_path
 from smarthealth.config.settings import Settings
 from smarthealth.evaluation.cases import load_cases
+from smarthealth.evaluation.live_llm.tasks import load_tasks
+from smarthealth.evaluation.live_llm.runner import main as live_eval_main
 from smarthealth.models.model_loader import load_model
 from smarthealth.runtime.harness.config import load_config
 
@@ -36,6 +38,8 @@ settings = Settings.from_env({"HEALTH_HOME": str(Path.cwd()), "HEALTH_MEMORY_MOD
 load_config(settings.harness_config_dir)
 load_config(resource_path("configs", "report"))
 load_cases(resource_path("evaluation", "test_cases.json"), root=resource_path())
+assert len(load_tasks()[0].tasks) == 20
+assert live_eval_main(["--dry-run", "--max-tasks", "20", "--output", "live-eval-dry"]) == 0
 frame = generate_dataset(subjects=16, sessions=2, windows=6, seed=42)
 dataset = Path("training.csv")
 frame.to_csv(dataset, index=False)
@@ -112,6 +116,7 @@ def main():
             "smarthealth-train",
             "smarthealth-index",
             "smarthealth-eval",
+            "smarthealth-eval-live",
         ):
             entry = python.parent / (command + ".exe" if os.name == "nt" else command)
             subprocess.run(

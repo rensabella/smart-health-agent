@@ -7,7 +7,7 @@ evidence-linked reports and reproducible evaluation — packaged as a Python app
 
 [Architecture](docs/architecture.md) · [Deployment](docs/deployment.md) ·
 [Evaluation](docs/evaluation.md) · [Recorded results](evaluation/evaluation_report.md) ·
-[中文项目报告](docs/project_report.md) · [简历与面试材料](docs/resume_project.md)
+[中文项目报告](docs/project_report.md)
 
 ## Motivation
 
@@ -209,6 +209,21 @@ counts and verification limits are recorded in
 commits skip CI; container runtime and live LLM quality remain unverified.
 
 ## Evaluation and limitations
+
+An opt-in [live LLM evaluation framework](docs/LIVE_LLM_EVALUATION.md) exercises
+the existing production Runtime with 20 reviewed synthetic tasks, shared request/
+token/estimated-cost limits, isolated fault injection, deterministic graders and
+JSONL/Markdown reports:
+
+```bash
+smarthealth-eval-live --dry-run --max-tasks 20 --output evaluation/live_runs/first-dry-run
+```
+
+Dry-run is the default and issues no provider calls. Real inference requires an
+explicit `--live` invocation, credentials, prepared local assets and an approved
+spending budget. **Live LLM quality has not yet been measured.** Infrastructure
+tests and router-only outcomes remain separate from provider-exercised results.
+See the [implementation verification](docs/LIVE_LLM_EVALUATION_VERIFICATION.md).
 
 The [recorded evaluation](evaluation/evaluation_report.md) preserves scripted/live
 provenance, denominators, evidence and failures. It uses real ML/E5/Qdrant, with

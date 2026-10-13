@@ -1,6 +1,6 @@
 PYTHON ?= python
 
-.PHONY: install dev data train api ui test lint format check build package-check docker-build docker-up docker-down
+.PHONY: install dev data train api ui test lint format check build package-check docker-build docker-up docker-down eval-dry
 
 install:
 	$(PYTHON) -m pip install -r requirements.txt
@@ -27,6 +27,8 @@ build:
 	$(PYTHON) -m build --wheel
 package-check: build
 	$(PYTHON) scripts/check_wheel.py --wheel dist/smart_health_agent-0.2.0-py3-none-any.whl
+eval-dry:
+	$(PYTHON) -m smarthealth.evaluation.live_llm.runner --dry-run --max-tasks 20
 docker-build:
 	docker compose build
 docker-up:
