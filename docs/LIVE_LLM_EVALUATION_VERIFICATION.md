@@ -31,6 +31,29 @@ actual Skill/runtime error handling, record preservation, report/citation tamper
 artifact lineage, real plot export, budget races/cancellation/unknown usage,
 provider request serialization and error parsing, and metric denominators.
 
+## Cloud verification
+
+The [GitHub Actions run](https://github.com/rensabella/smart-health-agent/actions/runs/38421067133)
+completed successfully on 2026-10-13 for source commit
+`67a5653959f91c4570af80db2550affe4442dfee`:
+
+| Check | Observed result |
+|---|---|
+| Full regression, Python 3.12.15 / Ubuntu | **614 passed, 5 warnings, 36.49 seconds** |
+| Ruff lint and format | Passed; 254 files already formatted |
+| Dependency consistency | No broken requirements |
+| Wheel build and independent installation | Passed, including real training/API/PNG behavior, console entries and the 20-task dry-run |
+| Docker image build | Passed; image tagged `smart-health-agent:ci` on the CI runner |
+
+Both `python` and `container-build` jobs succeeded. The container check builds an
+image; it does not publish that image, launch the deployment or establish runtime
+readiness. CI uses a disabled production provider and mocked provider responses
+only in infrastructure tests. It makes **0 live LLM evaluation requests**.
+
+This record is a documentation-only follow-up. Markdown-only commits are
+excluded by the workflow's path filter; the tested source commit above remains
+the verification reference.
+
 ## Remaining verification
 
 - Live provider protocol compatibility, planning quality, recovery quality, token

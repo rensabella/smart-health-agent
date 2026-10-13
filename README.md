@@ -194,19 +194,22 @@ make package-check         # build + install wheel outside the checkout + real M
 make docker-build          # requires Docker Engine / Desktop
 ```
 
-The existing 499-test suite covers real model fixtures, independent Skills,
-permissions, cancellation, routing, memory isolation, RAG integrity, report
-publication, HTTP/SSE and Streamlit. New regression tests cover settings, resource
-packaging, compatibility and execution spans. The isolated wheel check additionally
-trains a real baseline and exercises `/health`, `/ready`, `/predict` and `/analyze`
-without importing the source checkout. It reuses installed third-party dependencies.
+The 614-test suite covers real model fixtures, independent Skills, permissions,
+cancellation, routing, memory isolation, RAG integrity, report publication,
+HTTP/SSE, Streamlit, settings, package compatibility and execution spans. Evaluation
+regressions additionally cover budgets, fault injection, artifact provenance and
+metric denominators. The isolated wheel check trains a real baseline and exercises
+`/health`, `/ready`, `/predict` and `/analyze` without importing the source checkout,
+then validates the 20-task dry-run. It reuses installed third-party dependencies.
 
-The refactor's [cloud run](https://github.com/rensabella/smart-health-agent/actions/runs/38275517363)
-passed **523 tests**, Ruff, dependency checks, wheel installation/runtime smoke and
-Docker image build at source commit `3c7175d`. Local and cloud evidence, warning
-counts and verification limits are recorded in
-[package verification](docs/package_verification.md). Markdown-only follow-up
-commits skip CI; container runtime and live LLM quality remain unverified.
+The [cloud run](https://github.com/rensabella/smart-health-agent/actions/runs/38421067133)
+passed **614 tests**, Ruff, dependency checks, wheel installation/runtime smoke and
+Docker image build at source commit `67a5653`. Local and cloud evidence, warning
+counts and verification limits are recorded in the
+[evaluation framework verification](docs/LIVE_LLM_EVALUATION_VERIFICATION.md).
+Earlier [package verification](docs/package_verification.md) remains available.
+Markdown-only follow-up commits skip CI; container runtime and live LLM quality
+remain unverified.
 
 ## Evaluation and limitations
 

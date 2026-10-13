@@ -6,9 +6,10 @@
 
 - Live LLM 评测框架：20 个合成任务、共享 token/费用预算、隔离故障注入、执行 trace 与产物校验。
   默认 dry-run；尚未进行真实模型评测，不应在简历写为“已通过 live benchmark”。
+  本地与 [云端 CI](https://github.com/rensabella/smart-health-agent/actions/runs/38421067133) 均通过 614 项测试；独立 wheel 验证及 Docker 镜像构建通过，见 [评测框架验证记录](LIVE_LLM_EVALUATION_VERIFICATION.md)。
   实际工程测试与 dry-run 证据见 [验证记录](LIVE_LLM_EVALUATION_VERIFICATION.md)。
 
-- `0.2.0` 工程重构：`src/smarthealth`、Settings、结构化执行追踪、Makefile 和独立 wheel 安装。本地与 [本次云端 CI](https://github.com/rensabella/smart-health-agent/actions/runs/38275517363) 均通过 523 项测试（新增 24 项回归）；源码提交 `3c7175d` 的独立 wheel 真实训练/API/图表验证及 Docker 镜像构建已通过，见 [包重构验证](package_verification.md)。
+- `0.2.0` 工程重构：`src/smarthealth`、Settings、结构化执行追踪、Makefile 和独立 wheel 安装。本地与 [包重构云端 CI](https://github.com/rensabella/smart-health-agent/actions/runs/38275517363) 均通过 523 项测试（新增 24 项回归）；源码提交 `3c7175d` 的独立 wheel 真实训练/API/图表验证及 Docker 镜像构建已通过，见 [包重构验证](package_verification.md)。
 
 - 九个类型化 Skills、五种 Agent 角色、ReAct Runtime、Router、Memory、Harness、本地 RAG 和报告发布检查。
 - FastAPI Tool/Agent API、Streamlit、SSE 回放、来源与版本校验、脱敏审计。
@@ -47,7 +48,7 @@
 
 ## 当前简历可以强调
 
-优先突出类型化能力层、角色权限、任务生命周期、审核与内容版本绑定、SSE 重连、摘要 Memory 和失败可见的 Evaluation。量化数字可以使用 9 Skills、5 角色、35 维特征、523 项工程测试，以及附带 `scripted` 限定的 14 个系统场景。
+优先突出类型化能力层、角色权限、任务生命周期、审核与内容版本绑定、SSE 重连、摘要 Memory 和失败可见的 Evaluation。量化数字可以使用 9 Skills、5 角色、35 维特征、614 项工程测试，以及附带 `scripted` 限定的 14 个系统场景。
 
 模型 F1/AUC 必须注明合成测试集；本地顺序计时不能写成生产 HTTP QPS；SSE 首报告块不能写成模型首 token。已知语义失败保留在 [评测报告](../evaluation/evaluation_report.md)，不通过删除负例营造安全保证。
 

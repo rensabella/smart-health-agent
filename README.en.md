@@ -5,6 +5,7 @@ The canonical engineering README is now maintained in [README.md](README.md).
 - [Architecture and package migration](docs/architecture.md)
 - [Installation and deployment](docs/deployment.md)
 - [Testing, evaluation and benchmark plan](docs/evaluation.md)
+- [Opt-in live LLM evaluation](docs/LIVE_LLM_EVALUATION.md) and [verified checks](docs/LIVE_LLM_EVALUATION_VERIFICATION.md)
 - [Package verification](docs/package_verification.md)
 - [Recorded system evaluation](evaluation/evaluation_report.md)
 - [Project report](docs/project_report.md)
