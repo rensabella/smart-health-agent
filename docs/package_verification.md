@@ -23,7 +23,8 @@ the old entry points and share canonical module identity.
 | Check | Result and scope |
 |---|---|
 | Existing behavior suite after migration | Original 499 tests passed |
-| Full suite including new regressions | **523 passed, 7 warnings, 13.86 seconds** on Python 3.12/macOS |
+| Local full suite including new regressions | **523 passed, 7 warnings, 13.86 seconds** on Python 3.12/macOS |
+| Cloud full suite | **523 passed, 5 warnings, 32.70 seconds** on Python 3.12.15/Ubuntu; source `3c7175d` |
 | New regression scope | Settings validation/injection, secret exclusion, packaged resources, legacy module identity, span correlation/failure/cancellation, bounded retention and symlink boundaries |
 | Domain preservation | 22 modules structurally unchanged except imports |
 | Wheel build | `smart_health_agent-0.2.0-py3-none-any.whl` built successfully |
@@ -46,8 +47,9 @@ The wheel check found a macOS installation-prefix issue (`/var` resolving to
 operator-supplied index paths retain symlink components so their original strict
 checks still reject them. A regression test covers each side of that boundary.
 
-The seven warnings remain upstream Starlette/AnyIO and Streamlit/NumPy deprecation
-notices. No warning suppression was added. Historical ML/E5/system evaluation
+The local seven warnings remain upstream Starlette/AnyIO and Streamlit/NumPy
+deprecation notices; the cloud environment reported five warnings. No warning
+suppression was added. Historical ML/E5/system evaluation
 results and the known semantic-review failure were not relabeled or remeasured.
 New training was limited to synthetic test and wheel-smoke fixtures.
 
@@ -65,12 +67,25 @@ installed package. CI has been updated to run the wheel check after pytest.
 
 ## Publication and remaining verification
 
-The historical cloud run for `e97b5e0` validates the old layout only. The current
-refactor has passed the local checks above; its own cloud result must be recorded
-after publication. Docker is unavailable on the local host. Updated image-build
-configuration must be checked in CI; container preparation/startup/SSE/restart,
+The refactor is published at source commit
+[`3c7175d`](https://github.com/rensabella/smart-health-agent/commit/3c7175d4186eb1bce621b8dcec4e78607bb32ab1).
+[GitHub Actions run 38275517363](https://github.com/rensabella/smart-health-agent/actions/runs/38275517363)
+completed successfully on 2026-10-13, Asia/Shanghai (2026-10-12 UTC):
+
+- `python`: dependency installation, `pip check`, Ruff lint, formatting of 238
+  Python files, 523 tests, wheel build and independent wheel smoke all passed.
+- `container-build`: the updated `src` layout successfully built a Docker image.
+
+The wheel smoke passed on both the local macOS environment and the Ubuntu runner.
+It includes real synthetic training, API inference, three plots and PNG retrieval;
+it does not run a live LLM or the full historical E5 evaluation. These results
+belong to the source commit above. Subsequent Markdown-only verification updates
+skip CI under the existing workflow rules.
+
+Docker is unavailable on the local host. Container preparation/startup/SSE/restart,
 live LLM quality, multi-user isolation and distributed deployment remain separate
-work. A repository license still needs an owner decision.
+work; image-build success does not establish container runtime behavior. A
+repository license still needs an owner decision.
 
 See [architecture.md](architecture.md), [deployment.md](deployment.md) and
 [evaluation.md](evaluation.md) for the implemented boundaries and benchmark plan.

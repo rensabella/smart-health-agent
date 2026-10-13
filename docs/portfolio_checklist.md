@@ -4,7 +4,7 @@
 
 ## 当前可展示
 
-- `0.2.0` 工程重构：`src/smarthealth`、Settings、结构化执行追踪、Makefile 和独立 wheel 安装。当前本地 523 项测试通过，新增 24 项回归；脱离源码目录的真实训练/API/图表验证通过，见 [包重构验证](package_verification.md)。
+- `0.2.0` 工程重构：`src/smarthealth`、Settings、结构化执行追踪、Makefile 和独立 wheel 安装。本地与 [本次云端 CI](https://github.com/rensabella/smart-health-agent/actions/runs/38275517363) 均通过 523 项测试（新增 24 项回归）；源码提交 `3c7175d` 的独立 wheel 真实训练/API/图表验证及 Docker 镜像构建已通过，见 [包重构验证](package_verification.md)。
 
 - 九个类型化 Skills、五种 Agent 角色、ReAct Runtime、Router、Memory、Harness、本地 RAG 和报告发布检查。
 - FastAPI Tool/Agent API、Streamlit、SSE 回放、来源与版本校验、脱敏审计。

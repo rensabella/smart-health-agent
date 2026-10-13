@@ -72,7 +72,7 @@ settings. Remote Qdrant and Redis are not implemented adapters.
 
 [Dockerfile](../Dockerfile) 使用 Python 3.12 slim、Linux `libgomp1` 和 UID/GID `10001`。同一镜像运行 FastAPI、Streamlit 及一次性准备命令，运行服务均使用非 root 用户。[Compose 配置](../docker-compose.yml) 将 API 固定为一个 Uvicorn worker，默认使用报告 Harness、真实 LightGBM、E5 ONNX 和本地 Qdrant。
 
-旧布局在 2026-10-12 的 [GitHub Actions](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504) 已在 `ubuntu-latest` 对源码提交 `e97b5e0` 成功构建 Docker 镜像。该历史构建不代表本次 `src` 布局镜像已经验证；本次镜像仍须执行更新后的构建任务。本地开发环境没有 Docker 可执行程序；**容器内资产准备、服务启动及运行行为尚未验证**。该 CI 的 `container-build` 任务只构建镜像，Python 测试与 Compose 静态检查也不能作为容器运行验证。
+2026-10-13（Asia/Shanghai），[GitHub Actions](https://github.com/rensabella/smart-health-agent/actions/runs/38275517363) 在 `ubuntu-latest` 对重构源码提交 `3c7175d` 成功构建了新 `src` 布局的 Docker 镜像。同次 Python 任务通过 523 项测试及独立 wheel 运行验证，详见 [包重构验证](package_verification.md)。本地开发环境没有 Docker 可执行程序；**容器内资产准备、服务启动及运行行为尚未验证**。该 CI 的 `container-build` 任务只构建镜像，Python 测试与 Compose 静态检查也不能作为容器运行验证。
 
 从仓库根目录执行以下命令，需要 Docker Engine/Desktop 和 Docker Compose v2。先在当前 shell 注入自己的 API bearer token；例如生成新的随机值：
 

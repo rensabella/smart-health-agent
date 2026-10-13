@@ -99,9 +99,17 @@ exercise the same business implementation.
 source import paths, and runs real synthetic training plus `/health`, `/ready`,
 `/predict` and `/analyze`. It also verifies console entry points and packaged
 corpus/policy integrity. Installed dependencies are reused; this check does not
-claim fresh dependency resolution or cross-platform certification. CI runs this
-check after pytest. A historical passing CI run for `e97b5e0` is not evidence for
-the refactor's current source tree.
+claim fresh dependency resolution or general cross-platform certification. CI
+runs this check after pytest.
+
+On 2026-10-13 (Asia/Shanghai), the refactor's
+[cloud run](https://github.com/rensabella/smart-health-agent/actions/runs/38275517363)
+passed **523 tests, 5 warnings, 32.70 seconds** on Python 3.12.15/Ubuntu at source
+commit `3c7175d`. Ruff, `pip check`, wheel build, independent wheel smoke and Docker
+image build also passed. The local macOS suite passed 523 tests with 7 warnings.
+See [package verification](package_verification.md) for the exact scope. These
+engineering checks do not remeasure the historical Agent/RAG/Safety metrics or
+validate live LLM quality; external LLM requests in this refactor remained zero.
 
 ## Future benchmark design
 

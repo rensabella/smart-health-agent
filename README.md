@@ -201,10 +201,12 @@ packaging, compatibility and execution spans. The isolated wheel check additiona
 trains a real baseline and exercises `/health`, `/ready`, `/predict` and `/analyze`
 without importing the source checkout. It reuses installed third-party dependencies.
 
-The earlier [cloud run](https://github.com/rensabella/smart-health-agent/actions/runs/38269692504)
-passed 499 tests and built the **pre-refactor** image at `e97b5e0`; it is not
-validation of the new source tree. Current refactor checks are recorded in
-[package verification](docs/package_verification.md). CI now includes wheel installation.
+The refactor's [cloud run](https://github.com/rensabella/smart-health-agent/actions/runs/38275517363)
+passed **523 tests**, Ruff, dependency checks, wheel installation/runtime smoke and
+Docker image build at source commit `3c7175d`. Local and cloud evidence, warning
+counts and verification limits are recorded in
+[package verification](docs/package_verification.md). Markdown-only follow-up
+commits skip CI; container runtime and live LLM quality remain unverified.
 
 ## Evaluation and limitations
 
