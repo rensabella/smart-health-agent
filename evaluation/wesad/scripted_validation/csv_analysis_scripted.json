@@ -1,0 +1,1833 @@
+{
+  "schema_version": "1.0",
+  "task_id": "csv_analysis",
+  "category": "workflow",
+  "repetition": 1,
+  "mode": "infrastructure_test",
+  "method": "full_guard",
+  "suite": "wesad",
+  "status": "executed",
+  "task_hash": "2cc7408cf7f57445333b5ea768187bc569ab4335432e825acc179c2962134ba9",
+  "requires_rag": false,
+  "require_citations": false,
+  "snapshot": {
+    "schema_version": "1.0",
+    "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+    "request_id": "eval_csv_analysis_1",
+    "session_id": "csv_analysis_1",
+    "input_version": "wesad_v1",
+    "parent_run_id": null,
+    "status": "completed",
+    "backend_mode": "scripted",
+    "decision_model": null,
+    "objective": "data_analysis",
+    "entry_agent": "planner",
+    "created_at": "2026-11-09T18:30:35.659422+00:00",
+    "updated_at": "2026-11-09T18:30:35.745862+00:00",
+    "decision_count": 8,
+    "llm_requests": 0,
+    "tool_calls": 5,
+    "delegation_count": 1,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "token_usage_available": false,
+    "last_event_id": 39,
+    "final_result": {
+      "kind": "data_analysis",
+      "analysis": {
+        "schema_version": "1.0",
+        "request_id": "eval_csv_analysis_1",
+        "session_id": "csv_analysis_1",
+        "input_version": "wesad_v1",
+        "analysis_ref": "art_20ffa147d1c44536aeee86dab03eca85",
+        "summary": "\u5206\u6790\u4e86 19 \u4e2a 60 \u79d2\u7a97\u53e3\uff1b\u6700\u9ad8\u538b\u529b\u6a21\u578b\u5206\u6570\u4e3a 0.999\uff0c\u5bf9\u5e94\u7a97\u53e3 2\uff08\u4ece 0 \u7f16\u53f7\uff09\u3002\u8be5\u5206\u6570\u4e0d\u8868\u793a\u4e34\u5e8a\u60a3\u75c5\u6982\u7387\u6216\u533b\u5b66\u8bca\u65ad\uff1b\u5c40\u90e8\u8d21\u732e\u63cf\u8ff0\u6a21\u578b\u884c\u4e3a\uff0c\u4e0d\u8bc1\u660e\u538b\u529b\u53cd\u5e94\u7684\u539f\u56e0\u3002",
+        "risk_level": "high",
+        "prediction": {
+          "prediction": "stress",
+          "risk_score": 0.9991934523929149,
+          "important_features": [
+            {
+              "name": "eda_mean_abs_change",
+              "importance": 0.17591559178224056
+            },
+            {
+              "name": "hr_p75",
+              "importance": 0.13571880367699463
+            },
+            {
+              "name": "hr_mean",
+              "importance": 0.05510738145017508
+            },
+            {
+              "name": "eda_p25",
+              "importance": 0.039805204972400615
+            },
+            {
+              "name": "acc_mag_mean_abs_change",
+              "importance": 0.03541325967866117
+            }
+          ],
+          "model": {
+            "name": "LightGBM",
+            "version": "1.0",
+            "task_scope": "wesad_stress_only",
+            "metadata": {
+              "input_schema_version": "1.0",
+              "feature_schema_version": "1.0",
+              "input_profile": "wesad_physiology_v1",
+              "score_semantics": "wesad_stress_model_score",
+              "aggregation": "max",
+              "threshold": 0.7400000000000002,
+              "threshold_source": "maximum_loso_out_of_fold_stress_f1",
+              "risk_thresholds": {
+                "medium": 0.7400000000000002,
+                "high": 0.8
+              },
+              "processing_config": {
+                "version": "1.0",
+                "sample_rate_hz": 1,
+                "window_rows": 60,
+                "stride_rows": 30,
+                "max_gap_rows": 3,
+                "max_window_missing_fraction": 0.15,
+                "max_channel_missing_fraction": 0.2,
+                "tail_policy": "discard_and_report",
+                "imputation": "within_window_linear_interpolation_then_edge_fill"
+              },
+              "limitations": [
+                "Trained on laboratory stress recordings (WESAD); no clinical validation.",
+                "Maximum window score is not a session probability.",
+                "Chest-derived signals only; wrist signals are not modeled in this version."
+              ]
+            }
+          },
+          "aggregation": "max",
+          "window_count": 19,
+          "anomalous_ratio": 1.0,
+          "highest_risk_window": 2,
+          "window_predictions": [
+            {
+              "window_index": 0,
+              "risk_score": 0.9989134371150162,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 1,
+              "risk_score": 0.9989702327139394,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 2,
+              "risk_score": 0.9991934523929149,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 3,
+              "risk_score": 0.9991300366413848,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 4,
+              "risk_score": 0.9985757632326175,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 5,
+              "risk_score": 0.9914309073376985,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 6,
+              "risk_score": 0.9894258629627265,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 7,
+              "risk_score": 0.9965406185806864,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 8,
+              "risk_score": 0.9984635636206798,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 9,
+              "risk_score": 0.9978097950360968,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 10,
+              "risk_score": 0.9778973508519992,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 11,
+              "risk_score": 0.7654088610095534,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 12,
+              "risk_score": 0.9634405119174959,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 13,
+              "risk_score": 0.9863863565531242,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 14,
+              "risk_score": 0.9872154787309066,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 15,
+              "risk_score": 0.985574337583565,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 16,
+              "risk_score": 0.9902037499055292,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 17,
+              "risk_score": 0.9861002519057774,
+              "prediction": "stress"
+            },
+            {
+              "window_index": 18,
+              "risk_score": 0.9884770370058765,
+              "prediction": "stress"
+            }
+          ],
+          "risk_level": "high"
+        },
+        "explanation": {
+          "global_importance": [
+            {
+              "name": "eda_mean_abs_change",
+              "importance": 0.17591559178224056
+            },
+            {
+              "name": "hr_p75",
+              "importance": 0.13571880367699463
+            },
+            {
+              "name": "hr_mean",
+              "importance": 0.05510738145017508
+            },
+            {
+              "name": "eda_p25",
+              "importance": 0.039805204972400615
+            },
+            {
+              "name": "acc_mag_mean_abs_change",
+              "importance": 0.03541325967866117
+            }
+          ],
+          "global_importance_method": "gain",
+          "local_evidence": [
+            {
+              "name": "hr_mean",
+              "observed_value": 115.28036048333334,
+              "reference_mean": 73.18739370919872,
+              "reference_std": 11.364810436517528,
+              "deviation_std": 3.7037984055485045,
+              "contribution": 1.8488113052878958,
+              "direction": "raises_score"
+            },
+            {
+              "name": "acc_mag_mean_abs_change",
+              "observed_value": 0.001458830508474584,
+              "reference_mean": 0.0008287958604954367,
+              "reference_std": 0.0004740262485877754,
+              "deviation_std": 1.3291134190483205,
+              "contribution": 1.0712135004839742,
+              "direction": "raises_score"
+            },
+            {
+              "name": "hr_p75",
+              "observed_value": 119.6956955,
+              "reference_mean": 76.35277058557693,
+              "reference_std": 11.68899310772554,
+              "deviation_std": 3.708011846270717,
+              "contribution": 1.0164511720829437,
+              "direction": "raises_score"
+            },
+            {
+              "name": "scr_count",
+              "observed_value": 41.0,
+              "reference_mean": 75.64807692307693,
+              "reference_std": 9.340214755903128,
+              "deviation_std": -3.7095589157817734,
+              "contribution": 0.9786758556946843,
+              "direction": "raises_score"
+            },
+            {
+              "name": "hr_p25",
+              "observed_value": 103.77443075,
+              "reference_mean": 69.1842370983173,
+              "reference_std": 11.354098403558288,
+              "deviation_std": 3.0464940871784583,
+              "contribution": 0.4043463747661261,
+              "direction": "raises_score"
+            }
+          ],
+          "method": "lightgbm_native_contribution",
+          "limitations": [
+            "Trained on laboratory stress recordings (WESAD); outputs are not clinical diagnoses or disease probabilities.",
+            "Session score is the maximum window score and increases exposure to isolated extreme windows.",
+            "Feature associations do not establish causal explanations of an individual's physiology.",
+            "Reference deviations use baseline-class training windows with a standard-deviation floor of 1e-6.",
+            "Local contributions are signed raw-margin units, not probability changes."
+          ],
+          "highest_risk_window": 2,
+          "scope": "highest_risk_window",
+          "contribution_units": "raw_margin",
+          "base_value": -2.6231964748869636,
+          "raw_margin": 3.3079747482356296
+        },
+        "visualization": [],
+        "quality_report": {
+          "input_profile": "wesad_physiology_v1",
+          "row_count": 600,
+          "columns": [
+            "timestamp",
+            "subject_id",
+            "session_id",
+            "hr",
+            "eda",
+            "emg",
+            "temp",
+            "resp",
+            "acc_mag",
+            "scr"
+          ],
+          "sample_rate_hz": 1,
+          "timestamp_present": true,
+          "missing_values": {
+            "hr": 0,
+            "eda": 0,
+            "emg": 0,
+            "temp": 0,
+            "resp": 0,
+            "acc_mag": 0,
+            "scr": 0
+          },
+          "missing_fraction": 0.0,
+          "warnings": [],
+          "window_count": 19,
+          "window_rows": 60,
+          "processed_rows": 1140,
+          "dropped_tail_rows": 0,
+          "imputed_values": 0,
+          "processing_version": "1.0"
+        },
+        "warnings": []
+      },
+      "publication": {
+        "policy": "tool_facts_only_v1",
+        "harness_version": "1.0",
+        "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e",
+        "evidence": [
+          {
+            "type": "analysis_artifact",
+            "ref": "art_20ffa147d1c44536aeee86dab03eca85",
+            "input_version": "wesad_v1"
+          },
+          {
+            "type": "model_card",
+            "name": "LightGBM",
+            "version": "1.0"
+          }
+        ],
+        "uncertainty": "\u8be5\u6a21\u578b\u662f\u57fa\u4e8e\u5b9e\u9a8c\u5ba4\u6570\u636e\uff08WESAD\uff09\u8bad\u7ec3\u7684\u975e\u4e34\u5e8a\u538b\u529b\u6a21\u5f0f\u5206\u7c7b\u5668\uff0c\u672a\u7ecf\u4e34\u5e8a\u9a8c\u8bc1\uff1b\u5206\u6570\u548c\u7279\u5f81\u8d21\u732e\u4e0d\u80fd\u8bc1\u660e\u75c5\u56e0\u6216\u60a3\u75c5\u6982\u7387\uff0c\u4e5f\u4e0d\u80fd\u7528\u4e8e\u8bca\u7597\u3002",
+        "recommendations": [
+          "\u8bf7\u5148\u6838\u5bf9\u8f93\u5165\u534f\u8bae\u3001\u6570\u636e\u5b8c\u6574\u6027\u548c\u91c7\u96c6\u8d28\u91cf\uff0c\u518d\u590d\u6d4b\u5206\u6790\uff1b\u538b\u529b\u6a21\u578b\u9ad8\u5206\u4e0d\u80fd\u4f5c\u4e3a\u8bca\u7597\u4f9d\u636e\u3002"
+        ],
+        "medical_review": "not_performed"
+      }
+    },
+    "result_available": true,
+    "error_code": null,
+    "message": null,
+    "events_url": "/agent/runs/66f3fc08f4d64f4fb2abee50aa31de42/events?session_id=csv_analysis_1",
+    "route": {
+      "workflow_type": "complex",
+      "reason_code": "data_analysis",
+      "objective": "data_analysis",
+      "entry_agent": "planner",
+      "required_capabilities": [
+        "csv_analysis",
+        "signal_processing",
+        "feature_extraction",
+        "anomaly_prediction",
+        "feature_explanation"
+      ],
+      "needs_input": null,
+      "router_version": "1.0"
+    },
+    "initial_workflow_type": "complex",
+    "workflow_upgrades": 0,
+    "source_run_id": null,
+    "memory_status": "stored",
+    "harness_version": "1.0",
+    "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e",
+    "guard_version": "2.0",
+    "token_budget": null
+  },
+  "events": [
+    {
+      "schema_version": "1.0",
+      "event_id": 1,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.659628+00:00",
+      "event": "run.queued",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "backend_mode": "scripted"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 2,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.659941+00:00",
+      "event": "route.selected",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "workflow_type": "complex",
+        "reason_code": "data_analysis",
+        "objective": "data_analysis",
+        "entry_agent": "planner",
+        "required_capabilities": [
+          "csv_analysis",
+          "signal_processing",
+          "feature_extraction",
+          "anomaly_prediction",
+          "feature_explanation"
+        ],
+        "needs_input": null,
+        "router_version": "1.0",
+        "workflow_upgrades": 0
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 3,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.660004+00:00",
+      "event": "harness.loaded",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "harness_version": "1.0",
+        "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 4,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.660031+00:00",
+      "event": "guard.loaded",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "guard_version": "2.0"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 5,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.660560+00:00",
+      "event": "run.running",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "status": "running",
+        "error_code": null,
+        "error_rule": null,
+        "decision_count": 0,
+        "llm_requests": 0,
+        "tool_calls": 0,
+        "delegation_count": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 6,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.666639+00:00",
+      "event": "memory.loaded",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "memory_recent_turns": 0,
+        "memory_history_hits": 0,
+        "preferences_available": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 7,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.666752+00:00",
+      "event": "agent.started",
+      "agent": "planner",
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {}
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 8,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.666877+00:00",
+      "event": "agent.thinking",
+      "agent": "planner",
+      "step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "parent_step_id": null,
+      "data": {
+        "decision_count": 1,
+        "llm_requests": 0,
+        "attempt": 1
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 9,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.667017+00:00",
+      "event": "agent.decision",
+      "agent": "planner",
+      "step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "parent_step_id": null,
+      "data": {
+        "action": "delegate",
+        "decision_count": 1,
+        "llm_requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 10,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.667102+00:00",
+      "event": "agent.started",
+      "agent": "data_analysis",
+      "step_id": null,
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {}
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 11,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.670365+00:00",
+      "event": "agent.thinking",
+      "agent": "data_analysis",
+      "step_id": "4014d0e671ec4fbeb75fdfc5026c3a50",
+      "parent_step_id": null,
+      "data": {
+        "decision_count": 2,
+        "llm_requests": 0,
+        "attempt": 1
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 12,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.670579+00:00",
+      "event": "agent.decision",
+      "agent": "data_analysis",
+      "step_id": "4014d0e671ec4fbeb75fdfc5026c3a50",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "action": "call_skill",
+        "decision_count": 2,
+        "llm_requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false,
+        "skill": "csv_analysis"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 13,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.670649+00:00",
+      "event": "skill.dispatched",
+      "agent": "data_analysis",
+      "step_id": "4014d0e671ec4fbeb75fdfc5026c3a50",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "skill": "csv_analysis",
+        "input_ref": "art_c441bddafcc84117a3e69a4925f4fc36"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 14,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.678954+00:00",
+      "event": "skill.completed",
+      "agent": "data_analysis",
+      "step_id": "4014d0e671ec4fbeb75fdfc5026c3a50",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "skill": "csv_analysis",
+        "call_id": "6084cfc3b6104801b77dbc5be60177ed",
+        "version": "1.0",
+        "latency_ms": 8.213124994654208,
+        "tool_calls": 1,
+        "error_code": null,
+        "error_rule": null,
+        "output_refs": [
+          "art_185181981a7f439d96be995d7eb84672"
+        ]
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 15,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.681819+00:00",
+      "event": "agent.thinking",
+      "agent": "data_analysis",
+      "step_id": "9293c6e2e4c54f9b9a4e63dfcdba04e7",
+      "parent_step_id": null,
+      "data": {
+        "decision_count": 3,
+        "llm_requests": 0,
+        "attempt": 1
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 16,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.682002+00:00",
+      "event": "agent.decision",
+      "agent": "data_analysis",
+      "step_id": "9293c6e2e4c54f9b9a4e63dfcdba04e7",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "action": "call_skill",
+        "decision_count": 3,
+        "llm_requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false,
+        "skill": "signal_processing"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 17,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.682071+00:00",
+      "event": "skill.dispatched",
+      "agent": "data_analysis",
+      "step_id": "9293c6e2e4c54f9b9a4e63dfcdba04e7",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "skill": "signal_processing",
+        "input_ref": "art_185181981a7f439d96be995d7eb84672"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 18,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.705670+00:00",
+      "event": "skill.completed",
+      "agent": "data_analysis",
+      "step_id": "9293c6e2e4c54f9b9a4e63dfcdba04e7",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "skill": "signal_processing",
+        "call_id": "a8f3c2677f85481f961d93ab26fa4a3e",
+        "version": "1.0",
+        "latency_ms": 23.519375012256205,
+        "tool_calls": 2,
+        "error_code": null,
+        "error_rule": null,
+        "output_refs": [
+          "art_4b19412a902a417a89f646afc784c879"
+        ]
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 19,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.708577+00:00",
+      "event": "agent.thinking",
+      "agent": "data_analysis",
+      "step_id": "38baa895442a415ca48442ef8379cac5",
+      "parent_step_id": null,
+      "data": {
+        "decision_count": 4,
+        "llm_requests": 0,
+        "attempt": 1
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 20,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.708768+00:00",
+      "event": "agent.decision",
+      "agent": "data_analysis",
+      "step_id": "38baa895442a415ca48442ef8379cac5",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "action": "call_skill",
+        "decision_count": 4,
+        "llm_requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false,
+        "skill": "feature_extraction"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 21,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.708833+00:00",
+      "event": "skill.dispatched",
+      "agent": "data_analysis",
+      "step_id": "38baa895442a415ca48442ef8379cac5",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "skill": "feature_extraction",
+        "input_ref": "art_4b19412a902a417a89f646afc784c879"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 22,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.728191+00:00",
+      "event": "skill.completed",
+      "agent": "data_analysis",
+      "step_id": "38baa895442a415ca48442ef8379cac5",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "skill": "feature_extraction",
+        "call_id": "e0bc07a7bee14a8eb8ca0e23d0884277",
+        "version": "1.0",
+        "latency_ms": 19.293666002340615,
+        "tool_calls": 3,
+        "error_code": null,
+        "error_rule": null,
+        "output_refs": [
+          "art_0c651e8f38344f0d902e56dc4f0a5ec0"
+        ]
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 23,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.731122+00:00",
+      "event": "agent.thinking",
+      "agent": "data_analysis",
+      "step_id": "fb983725937a43b0a60edd6545746929",
+      "parent_step_id": null,
+      "data": {
+        "decision_count": 5,
+        "llm_requests": 0,
+        "attempt": 1
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 24,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.731313+00:00",
+      "event": "agent.decision",
+      "agent": "data_analysis",
+      "step_id": "fb983725937a43b0a60edd6545746929",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "action": "call_skill",
+        "decision_count": 5,
+        "llm_requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false,
+        "skill": "anomaly_prediction"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 25,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.731379+00:00",
+      "event": "skill.dispatched",
+      "agent": "data_analysis",
+      "step_id": "fb983725937a43b0a60edd6545746929",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "skill": "anomaly_prediction",
+        "input_ref": "art_0c651e8f38344f0d902e56dc4f0a5ec0"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 26,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.733252+00:00",
+      "event": "skill.completed",
+      "agent": "data_analysis",
+      "step_id": "fb983725937a43b0a60edd6545746929",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "skill": "anomaly_prediction",
+        "call_id": "c4c18940c75d49cf89fbe1922a077798",
+        "version": "1.0",
+        "latency_ms": 1.7955839866772294,
+        "tool_calls": 4,
+        "error_code": null,
+        "error_rule": null,
+        "output_refs": [
+          "art_42d06051fc6a423cac117515ede0ed56"
+        ]
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 27,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.736039+00:00",
+      "event": "agent.thinking",
+      "agent": "data_analysis",
+      "step_id": "8c6bf9c9df2d41e39ff794950fd54675",
+      "parent_step_id": null,
+      "data": {
+        "decision_count": 6,
+        "llm_requests": 0,
+        "attempt": 1
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 28,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.736217+00:00",
+      "event": "agent.decision",
+      "agent": "data_analysis",
+      "step_id": "8c6bf9c9df2d41e39ff794950fd54675",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "action": "call_skill",
+        "decision_count": 6,
+        "llm_requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false,
+        "skill": "feature_explanation"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 29,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.736280+00:00",
+      "event": "skill.dispatched",
+      "agent": "data_analysis",
+      "step_id": "8c6bf9c9df2d41e39ff794950fd54675",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "skill": "feature_explanation",
+        "input_ref": "art_42d06051fc6a423cac117515ede0ed56"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 30,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.738608+00:00",
+      "event": "skill.completed",
+      "agent": "data_analysis",
+      "step_id": "8c6bf9c9df2d41e39ff794950fd54675",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "skill": "feature_explanation",
+        "call_id": "1abf848261854149ae64477de19e7401",
+        "version": "1.0",
+        "latency_ms": 2.242624992504716,
+        "tool_calls": 5,
+        "error_code": null,
+        "error_rule": null,
+        "output_refs": [
+          "art_20ffa147d1c44536aeee86dab03eca85"
+        ]
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 31,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.741721+00:00",
+      "event": "agent.thinking",
+      "agent": "data_analysis",
+      "step_id": "1052097cc7f743afaa7c3f68519b9eab",
+      "parent_step_id": null,
+      "data": {
+        "decision_count": 7,
+        "llm_requests": 0,
+        "attempt": 1
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 32,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.742049+00:00",
+      "event": "agent.decision",
+      "agent": "data_analysis",
+      "step_id": "1052097cc7f743afaa7c3f68519b9eab",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "action": "finish",
+        "decision_count": 7,
+        "llm_requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 33,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.742770+00:00",
+      "event": "agent.completed",
+      "agent": "data_analysis",
+      "step_id": "1052097cc7f743afaa7c3f68519b9eab",
+      "parent_step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "data": {
+        "result_ref": "art_20ffa147d1c44536aeee86dab03eca85"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 34,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.742857+00:00",
+      "event": "agent.delegation_completed",
+      "agent": "planner",
+      "step_id": "989cf23da6944bef856e9b8fb275ed75",
+      "parent_step_id": null,
+      "data": {
+        "agent": "data_analysis",
+        "delegation_count": 1
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 35,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.743020+00:00",
+      "event": "agent.thinking",
+      "agent": "planner",
+      "step_id": "0483533fb44549058180a7e1ebedff46",
+      "parent_step_id": null,
+      "data": {
+        "decision_count": 8,
+        "llm_requests": 0,
+        "attempt": 1
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 36,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.743134+00:00",
+      "event": "agent.decision",
+      "agent": "planner",
+      "step_id": "0483533fb44549058180a7e1ebedff46",
+      "parent_step_id": null,
+      "data": {
+        "action": "finish",
+        "decision_count": 8,
+        "llm_requests": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 37,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.743669+00:00",
+      "event": "run.verifying",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "status": "verifying",
+        "error_code": null,
+        "error_rule": null,
+        "decision_count": 8,
+        "llm_requests": 0,
+        "tool_calls": 5,
+        "delegation_count": 1,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 38,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.744399+00:00",
+      "event": "publication.checked",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "policy": "tool_facts_only_v1",
+        "result_kind": "data_analysis",
+        "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "event_id": 39,
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "timestamp": "2026-11-09T18:30:35.744443+00:00",
+      "event": "run.completed",
+      "agent": null,
+      "step_id": null,
+      "parent_step_id": null,
+      "data": {
+        "status": "completed",
+        "error_code": null,
+        "error_rule": null,
+        "decision_count": 8,
+        "llm_requests": 0,
+        "tool_calls": 5,
+        "delegation_count": 1,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "token_usage_available": false
+      }
+    }
+  ],
+  "registry_events": [
+    {
+      "event": "skill.started",
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "agent_name": "data_analysis",
+      "skill_name": "csv_analysis",
+      "start_time": "2026-11-09T18:30:35.670704+00:00",
+      "end_time": null,
+      "status": "running",
+      "error_message": null,
+      "timestamp": "2026-11-09T18:30:35.670770+00:00",
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "call_id": "6084cfc3b6104801b77dbc5be60177ed",
+      "owner_id": "wesad_live_evaluation",
+      "session_id": "csv_analysis_1",
+      "skill": "csv_analysis",
+      "version": "1.0",
+      "input_version": "wesad_v1",
+      "input_fields": [
+        "data_profile",
+        "upload_ref"
+      ],
+      "output_fields": [],
+      "budget_used": 1,
+      "latency_ms": 0.07279199780896306,
+      "error_code": null,
+      "error_rule": null,
+      "validation_error": null,
+      "harness_version": "1.0",
+      "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+    },
+    {
+      "event": "skill.completed",
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "agent_name": "data_analysis",
+      "skill_name": "csv_analysis",
+      "start_time": "2026-11-09T18:30:35.670704+00:00",
+      "end_time": "2026-11-09T18:30:35.678793+00:00",
+      "status": "completed",
+      "error_message": null,
+      "timestamp": "2026-11-09T18:30:35.678799+00:00",
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "call_id": "6084cfc3b6104801b77dbc5be60177ed",
+      "owner_id": "wesad_live_evaluation",
+      "session_id": "csv_analysis_1",
+      "skill": "csv_analysis",
+      "version": "1.0",
+      "input_version": "wesad_v1",
+      "input_fields": [
+        "data_profile",
+        "upload_ref"
+      ],
+      "output_fields": [
+        "columns",
+        "dataset_ref",
+        "quality_report",
+        "row_count",
+        "schema_version"
+      ],
+      "budget_used": 1,
+      "latency_ms": 8.11137503478676,
+      "error_code": null,
+      "error_rule": null,
+      "validation_error": null,
+      "harness_version": "1.0",
+      "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+    },
+    {
+      "event": "skill.started",
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "agent_name": "data_analysis",
+      "skill_name": "signal_processing",
+      "start_time": "2026-11-09T18:30:35.682121+00:00",
+      "end_time": null,
+      "status": "running",
+      "error_message": null,
+      "timestamp": "2026-11-09T18:30:35.682184+00:00",
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "call_id": "a8f3c2677f85481f961d93ab26fa4a3e",
+      "owner_id": "wesad_live_evaluation",
+      "session_id": "csv_analysis_1",
+      "skill": "signal_processing",
+      "version": "1.0",
+      "input_version": "wesad_v1",
+      "input_fields": [
+        "dataset_ref",
+        "processing_profile"
+      ],
+      "output_fields": [],
+      "budget_used": 2,
+      "latency_ms": 0.0659169745631516,
+      "error_code": null,
+      "error_rule": null,
+      "validation_error": null,
+      "harness_version": "1.0",
+      "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+    },
+    {
+      "event": "skill.completed",
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "agent_name": "data_analysis",
+      "skill_name": "signal_processing",
+      "start_time": "2026-11-09T18:30:35.682121+00:00",
+      "end_time": "2026-11-09T18:30:35.705486+00:00",
+      "status": "completed",
+      "error_message": null,
+      "timestamp": "2026-11-09T18:30:35.705494+00:00",
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "call_id": "a8f3c2677f85481f961d93ab26fa4a3e",
+      "owner_id": "wesad_live_evaluation",
+      "session_id": "csv_analysis_1",
+      "skill": "signal_processing",
+      "version": "1.0",
+      "input_version": "wesad_v1",
+      "input_fields": [
+        "dataset_ref",
+        "processing_profile"
+      ],
+      "output_fields": [
+        "cleaning_report",
+        "schema_version",
+        "warnings",
+        "window_count",
+        "window_set_ref"
+      ],
+      "budget_used": 2,
+      "latency_ms": 23.41133396839723,
+      "error_code": null,
+      "error_rule": null,
+      "validation_error": null,
+      "harness_version": "1.0",
+      "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+    },
+    {
+      "event": "skill.started",
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "agent_name": "data_analysis",
+      "skill_name": "feature_extraction",
+      "start_time": "2026-11-09T18:30:35.708880+00:00",
+      "end_time": null,
+      "status": "running",
+      "error_message": null,
+      "timestamp": "2026-11-09T18:30:35.708940+00:00",
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "call_id": "e0bc07a7bee14a8eb8ca0e23d0884277",
+      "owner_id": "wesad_live_evaluation",
+      "session_id": "csv_analysis_1",
+      "skill": "feature_extraction",
+      "version": "1.0",
+      "input_version": "wesad_v1",
+      "input_fields": [
+        "feature_profile",
+        "window_set_ref"
+      ],
+      "output_fields": [],
+      "budget_used": 3,
+      "latency_ms": 0.06325001595541835,
+      "error_code": null,
+      "error_rule": null,
+      "validation_error": null,
+      "harness_version": "1.0",
+      "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+    },
+    {
+      "event": "skill.completed",
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "agent_name": "data_analysis",
+      "skill_name": "feature_extraction",
+      "start_time": "2026-11-09T18:30:35.708880+00:00",
+      "end_time": "2026-11-09T18:30:35.728025+00:00",
+      "status": "completed",
+      "error_message": null,
+      "timestamp": "2026-11-09T18:30:35.728033+00:00",
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "call_id": "e0bc07a7bee14a8eb8ca0e23d0884277",
+      "owner_id": "wesad_live_evaluation",
+      "session_id": "csv_analysis_1",
+      "skill": "feature_extraction",
+      "version": "1.0",
+      "input_version": "wesad_v1",
+      "input_fields": [
+        "feature_profile",
+        "window_set_ref"
+      ],
+      "output_fields": [
+        "feature_names",
+        "feature_schema_version",
+        "feature_set_ref",
+        "schema_version",
+        "window_count"
+      ],
+      "budget_used": 3,
+      "latency_ms": 19.184625009074807,
+      "error_code": null,
+      "error_rule": null,
+      "validation_error": null,
+      "harness_version": "1.0",
+      "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+    },
+    {
+      "event": "skill.started",
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "agent_name": "data_analysis",
+      "skill_name": "anomaly_prediction",
+      "start_time": "2026-11-09T18:30:35.731425+00:00",
+      "end_time": null,
+      "status": "running",
+      "error_message": null,
+      "timestamp": "2026-11-09T18:30:35.731486+00:00",
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "call_id": "c4c18940c75d49cf89fbe1922a077798",
+      "owner_id": "wesad_live_evaluation",
+      "session_id": "csv_analysis_1",
+      "skill": "anomaly_prediction",
+      "version": "1.0",
+      "input_version": "wesad_v1",
+      "input_fields": [
+        "feature_set_ref"
+      ],
+      "output_fields": [],
+      "budget_used": 4,
+      "latency_ms": 0.06350001785904169,
+      "error_code": null,
+      "error_rule": null,
+      "validation_error": null,
+      "harness_version": "1.0",
+      "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+    },
+    {
+      "event": "skill.completed",
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "agent_name": "data_analysis",
+      "skill_name": "anomaly_prediction",
+      "start_time": "2026-11-09T18:30:35.731425+00:00",
+      "end_time": "2026-11-09T18:30:35.733126+00:00",
+      "status": "completed",
+      "error_message": null,
+      "timestamp": "2026-11-09T18:30:35.733129+00:00",
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "call_id": "c4c18940c75d49cf89fbe1922a077798",
+      "owner_id": "wesad_live_evaluation",
+      "session_id": "csv_analysis_1",
+      "skill": "anomaly_prediction",
+      "version": "1.0",
+      "input_version": "wesad_v1",
+      "input_fields": [
+        "feature_set_ref"
+      ],
+      "output_fields": [
+        "aggregation",
+        "anomalous_ratio",
+        "highest_risk_window",
+        "important_features",
+        "model",
+        "prediction",
+        "prediction_ref",
+        "risk_level",
+        "risk_score",
+        "schema_version",
+        "window_count",
+        "window_predictions"
+      ],
+      "budget_used": 4,
+      "latency_ms": 1.708791998680681,
+      "error_code": null,
+      "error_rule": null,
+      "validation_error": null,
+      "harness_version": "1.0",
+      "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+    },
+    {
+      "event": "skill.started",
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "agent_name": "data_analysis",
+      "skill_name": "feature_explanation",
+      "start_time": "2026-11-09T18:30:35.736326+00:00",
+      "end_time": null,
+      "status": "running",
+      "error_message": null,
+      "timestamp": "2026-11-09T18:30:35.736381+00:00",
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "call_id": "1abf848261854149ae64477de19e7401",
+      "owner_id": "wesad_live_evaluation",
+      "session_id": "csv_analysis_1",
+      "skill": "feature_explanation",
+      "version": "1.0",
+      "input_version": "wesad_v1",
+      "input_fields": [
+        "prediction_ref",
+        "top_k"
+      ],
+      "output_fields": [],
+      "budget_used": 5,
+      "latency_ms": 0.05841598613187671,
+      "error_code": null,
+      "error_rule": null,
+      "validation_error": null,
+      "harness_version": "1.0",
+      "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+    },
+    {
+      "event": "skill.completed",
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "agent_name": "data_analysis",
+      "skill_name": "feature_explanation",
+      "start_time": "2026-11-09T18:30:35.736326+00:00",
+      "end_time": "2026-11-09T18:30:35.738472+00:00",
+      "status": "completed",
+      "error_message": null,
+      "timestamp": "2026-11-09T18:30:35.738475+00:00",
+      "run_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "call_id": "1abf848261854149ae64477de19e7401",
+      "owner_id": "wesad_live_evaluation",
+      "session_id": "csv_analysis_1",
+      "skill": "feature_explanation",
+      "version": "1.0",
+      "input_version": "wesad_v1",
+      "input_fields": [
+        "prediction_ref",
+        "top_k"
+      ],
+      "output_fields": [
+        "analysis_ref",
+        "base_value",
+        "contribution_units",
+        "global_importance",
+        "global_importance_method",
+        "highest_risk_window",
+        "limitations",
+        "local_evidence",
+        "method",
+        "raw_margin",
+        "schema_version",
+        "scope"
+      ],
+      "budget_used": 5,
+      "latency_ms": 2.1555409766733646,
+      "error_code": null,
+      "error_rule": null,
+      "validation_error": null,
+      "harness_version": "1.0",
+      "harness_hash": "690db9cc23b71db33f1bc070b17e40f24456bcafa53c4aef1a0255e5187d1f7e"
+    }
+  ],
+  "skill_calls": [
+    {
+      "skill": "csv_analysis",
+      "agent": "data_analysis",
+      "arguments_valid": true,
+      "allowed": true,
+      "status": "success",
+      "error_code": null,
+      "output_refs": [
+        "art_185181981a7f439d96be995d7eb84672"
+      ],
+      "injected": false,
+      "start_time": "2026-11-09T18:30:35.670700+00:00",
+      "call_id": "6084cfc3b6104801b77dbc5be60177ed",
+      "end_time": "2026-11-09T18:30:35.678921+00:00",
+      "latency_ms": 8.23529198532924
+    },
+    {
+      "skill": "signal_processing",
+      "agent": "data_analysis",
+      "arguments_valid": true,
+      "allowed": true,
+      "status": "success",
+      "error_code": null,
+      "output_refs": [
+        "art_4b19412a902a417a89f646afc784c879"
+      ],
+      "injected": false,
+      "start_time": "2026-11-09T18:30:35.682118+00:00",
+      "call_id": "a8f3c2677f85481f961d93ab26fa4a3e",
+      "end_time": "2026-11-09T18:30:35.705621+00:00",
+      "latency_ms": 23.541125003248453
+    },
+    {
+      "skill": "feature_extraction",
+      "agent": "data_analysis",
+      "arguments_valid": true,
+      "allowed": true,
+      "status": "success",
+      "error_code": null,
+      "output_refs": [
+        "art_0c651e8f38344f0d902e56dc4f0a5ec0"
+      ],
+      "injected": false,
+      "start_time": "2026-11-09T18:30:35.708877+00:00",
+      "call_id": "e0bc07a7bee14a8eb8ca0e23d0884277",
+      "end_time": "2026-11-09T18:30:35.728159+00:00",
+      "latency_ms": 19.313584023620933
+    },
+    {
+      "skill": "anomaly_prediction",
+      "agent": "data_analysis",
+      "arguments_valid": true,
+      "allowed": true,
+      "status": "success",
+      "error_code": null,
+      "output_refs": [
+        "art_42d06051fc6a423cac117515ede0ed56"
+      ],
+      "injected": false,
+      "start_time": "2026-11-09T18:30:35.731422+00:00",
+      "call_id": "c4c18940c75d49cf89fbe1922a077798",
+      "end_time": "2026-11-09T18:30:35.733228+00:00",
+      "latency_ms": 1.810916990507394
+    },
+    {
+      "skill": "feature_explanation",
+      "agent": "data_analysis",
+      "arguments_valid": true,
+      "allowed": true,
+      "status": "success",
+      "error_code": null,
+      "output_refs": [
+        "art_20ffa147d1c44536aeee86dab03eca85"
+      ],
+      "injected": false,
+      "start_time": "2026-11-09T18:30:35.736323+00:00",
+      "call_id": "1abf848261854149ae64477de19e7401",
+      "end_time": "2026-11-09T18:30:35.738577+00:00",
+      "latency_ms": 2.259249973576516
+    }
+  ],
+  "provider_attempts": [
+    {
+      "agent": "planner",
+      "status": "success",
+      "error_code": null,
+      "error_reason": null,
+      "start_time": "2026-11-09T18:30:35.666927+00:00",
+      "network_dispatched": false,
+      "injected": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "end_time": "2026-11-09T18:30:35.666993+00:00",
+      "latency_ms": 0.0688339932821691
+    },
+    {
+      "agent": "data_analysis",
+      "status": "success",
+      "error_code": null,
+      "error_reason": null,
+      "start_time": "2026-11-09T18:30:35.670423+00:00",
+      "network_dispatched": false,
+      "injected": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "end_time": "2026-11-09T18:30:35.670549+00:00",
+      "latency_ms": 0.12870796490460634
+    },
+    {
+      "agent": "data_analysis",
+      "status": "success",
+      "error_code": null,
+      "error_reason": null,
+      "start_time": "2026-11-09T18:30:35.681876+00:00",
+      "network_dispatched": false,
+      "injected": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "end_time": "2026-11-09T18:30:35.681976+00:00",
+      "latency_ms": 0.102125050034374
+    },
+    {
+      "agent": "data_analysis",
+      "status": "success",
+      "error_code": null,
+      "error_reason": null,
+      "start_time": "2026-11-09T18:30:35.708636+00:00",
+      "network_dispatched": false,
+      "injected": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "end_time": "2026-11-09T18:30:35.708742+00:00",
+      "latency_ms": 0.10820804163813591
+    },
+    {
+      "agent": "data_analysis",
+      "status": "success",
+      "error_code": null,
+      "error_reason": null,
+      "start_time": "2026-11-09T18:30:35.731180+00:00",
+      "network_dispatched": false,
+      "injected": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "end_time": "2026-11-09T18:30:35.731287+00:00",
+      "latency_ms": 0.10904204100370407
+    },
+    {
+      "agent": "data_analysis",
+      "status": "success",
+      "error_code": null,
+      "error_reason": null,
+      "start_time": "2026-11-09T18:30:35.736091+00:00",
+      "network_dispatched": false,
+      "injected": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "end_time": "2026-11-09T18:30:35.736193+00:00",
+      "latency_ms": 0.10383303742855787
+    },
+    {
+      "agent": "data_analysis",
+      "status": "success",
+      "error_code": null,
+      "error_reason": null,
+      "start_time": "2026-11-09T18:30:35.741810+00:00",
+      "network_dispatched": false,
+      "injected": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "end_time": "2026-11-09T18:30:35.742016+00:00",
+      "latency_ms": 0.2092909999191761
+    },
+    {
+      "agent": "planner",
+      "status": "success",
+      "error_code": null,
+      "error_reason": null,
+      "start_time": "2026-11-09T18:30:35.743061+00:00",
+      "network_dispatched": false,
+      "injected": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "end_time": "2026-11-09T18:30:35.743114+00:00",
+      "latency_ms": 0.054917007219046354
+    }
+  ],
+  "decision_actions": [
+    {
+      "action": "delegate",
+      "agent": "planner",
+      "injected": false
+    },
+    {
+      "action": "call_skill",
+      "agent": "data_analysis",
+      "injected": false,
+      "skill": "csv_analysis",
+      "allowed": true,
+      "arguments_valid": true
+    },
+    {
+      "action": "call_skill",
+      "agent": "data_analysis",
+      "injected": false,
+      "skill": "signal_processing",
+      "allowed": true,
+      "arguments_valid": true
+    },
+    {
+      "action": "call_skill",
+      "agent": "data_analysis",
+      "injected": false,
+      "skill": "feature_extraction",
+      "allowed": true,
+      "arguments_valid": true
+    },
+    {
+      "action": "call_skill",
+      "agent": "data_analysis",
+      "injected": false,
+      "skill": "anomaly_prediction",
+      "allowed": true,
+      "arguments_valid": true
+    },
+    {
+      "action": "call_skill",
+      "agent": "data_analysis",
+      "injected": false,
+      "skill": "feature_explanation",
+      "allowed": true,
+      "arguments_valid": true
+    },
+    {
+      "action": "finish",
+      "agent": "data_analysis",
+      "injected": false
+    },
+    {
+      "action": "finish",
+      "agent": "planner",
+      "injected": false
+    }
+  ],
+  "artifacts": [
+    {
+      "ref": "art_c441bddafcc84117a3e69a4925f4fc36",
+      "kind": "upload",
+      "source_ref": null,
+      "input_version": "wesad_v1",
+      "schema_version": "1.0",
+      "sha256": "b304f3b6c5d76bb2b134c1b699f8bb739f7d503e329cdfe02fccbf23fa056478"
+    },
+    {
+      "ref": "art_185181981a7f439d96be995d7eb84672",
+      "kind": "dataset",
+      "source_ref": "art_c441bddafcc84117a3e69a4925f4fc36",
+      "input_version": "wesad_v1",
+      "schema_version": "1.0",
+      "sha256": "d85242de00c3ae9c2019c405bb113e70a1731f6c6fbf1f500ee044fb3d5beda7"
+    },
+    {
+      "ref": "art_4b19412a902a417a89f646afc784c879",
+      "kind": "window_set",
+      "source_ref": "art_185181981a7f439d96be995d7eb84672",
+      "input_version": "wesad_v1",
+      "schema_version": "1.0",
+      "sha256": "2dc224bcc63df4e2a8674643a9af0cf842b78368f1ae40ce297eeacb4370e286"
+    },
+    {
+      "ref": "art_0c651e8f38344f0d902e56dc4f0a5ec0",
+      "kind": "feature_set",
+      "source_ref": "art_4b19412a902a417a89f646afc784c879",
+      "input_version": "wesad_v1",
+      "schema_version": "1.0",
+      "sha256": "46c51ce76d92964f736e4ac452eddf74451530f94348af50030c32ae7e09d502"
+    },
+    {
+      "ref": "art_42d06051fc6a423cac117515ede0ed56",
+      "kind": "prediction",
+      "source_ref": "art_0c651e8f38344f0d902e56dc4f0a5ec0",
+      "input_version": "wesad_v1",
+      "schema_version": "1.0",
+      "sha256": "d661a395fc0951a1467c4c1ce777dcf051df00d1ca15523c69227545f9bd8d32"
+    },
+    {
+      "ref": "art_20ffa147d1c44536aeee86dab03eca85",
+      "kind": "analysis",
+      "source_ref": "art_42d06051fc6a423cac117515ede0ed56",
+      "input_version": "wesad_v1",
+      "schema_version": "1.0",
+      "sha256": "fc040c7ea4db46a19b88a1f8a1f9869296a4072186042c5ac9f1aa93285498c4"
+    }
+  ],
+  "fault": {
+    "kind": "none",
+    "target_skill": "csv_analysis",
+    "triggered": false,
+    "events": []
+  },
+  "latency_ms": 87.44645799743012,
+  "reference_prediction": {
+    "risk_score": 0.9991934523929149,
+    "prediction": "stress",
+    "window_count": 19
+  },
+  "max_execution_steps": 32,
+  "max_tool_calls": 18,
+  "error_code": null,
+  "effective_limits": {
+    "max_decisions": 32,
+    "max_llm_requests": 32,
+    "max_tool_calls": 18,
+    "max_data_tool_calls": 8,
+    "max_rag_tool_calls": 4,
+    "max_writer_tool_calls": 3,
+    "max_safety_tool_calls": 3,
+    "max_delegations": 8,
+    "max_total_tokens": 65536,
+    "run_timeout_seconds": 180.0,
+    "decision_timeout_seconds": 30.0,
+    "max_active_runs": 8,
+    "max_retained_runs": 128,
+    "retention_seconds": 604800.0,
+    "result_ttl_seconds": 3600.0,
+    "max_observations": 32,
+    "simple_max_decisions": 4,
+    "simple_max_llm_requests": 4,
+    "simple_timeout_seconds": 30.0
+  },
+  "execution_spans": [
+    {
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "step_id": "c9f49235cb3e456dabd5714fe289d26a",
+      "agent_name": "planner",
+      "skill_name": null,
+      "operation": "task",
+      "start_time": "2026-11-09T18:30:35.660512+00:00",
+      "end_time": "2026-11-09T18:30:35.745883+00:00",
+      "status": "completed",
+      "error_code": null,
+      "error_message": null
+    },
+    {
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "step_id": "cf4fbf45bdf04f2ea7af27cf39749b8a",
+      "agent_name": "planner",
+      "skill_name": null,
+      "operation": "agent",
+      "start_time": "2026-11-09T18:30:35.666725+00:00",
+      "end_time": "2026-11-09T18:30:35.744490+00:00",
+      "status": "completed",
+      "error_code": null,
+      "error_message": null
+    },
+    {
+      "task_id": "66f3fc08f4d64f4fb2abee50aa31de42",
+      "step_id": "d7ddb55f0c8d4ad4b675595314e28293",
+      "agent_name": "data_analysis",
+      "skill_name": null,
+      "operation": "agent",
+      "start_time": "2026-11-09T18:30:35.667080+00:00",
+      "end_time": "2026-11-09T18:30:35.742819+00:00",
+      "status": "completed",
+      "error_code": null,
+      "error_message": null
+    }
+  ],
+  "grades": {
+    "contract_version": "agent-contract-v2.3",
+    "check_scope": "contract",
+    "eligible": true,
+    "success": true,
+    "checks": {
+      "snapshot_schema": true,
+      "expected_status": true,
+      "required_skills": true,
+      "required_artifacts": true,
+      "fault_triggered": true,
+      "no_publication": true,
+      "required_completion": true,
+      "result_schema": true,
+      "result_kind": true,
+      "publication_verified": true,
+      "artifact_provenance": true,
+      "requested_plots": true,
+      "prediction_matches_reference": true
+    },
+    "failures": [],
+    "invariants": {
+      "final_result_only_completed": true,
+      "completed_has_final_result": true,
+      "tool_budget": true,
+      "decision_budget": true,
+      "no_unauthorized_execution": true,
+      "state_transitions": true,
+      "call_accounting": true,
+      "terminal_quiescence": true,
+      "publication_precedes_chunks": true
+    },
+    "invariant_violations": [],
+    "live_exercised": false,
+    "live_attempted": false,
+    "router_only": false,
+    "attempted_violations": 0,
+    "prevented_violations": 0,
+    "fault": {
+      "configured": false,
+      "triggered": false,
+      "recovered": null,
+      "safe_termination": null
+    },
+    "counts": {
+      "model_tool_calls": 5,
+      "valid_arguments": 5,
+      "permitted_tool_calls": 5,
+      "physical_tool_calls": 5,
+      "physical_tool_successes": 5,
+      "model_physical_tool_calls": 5,
+      "model_physical_tool_successes": 5,
+      "citations": 0,
+      "citations_valid": 0
+    },
+    "semantic_grounding": null,
+    "outcome_components": {
+      "method": "full_guard",
+      "released": true,
+      "guard_violations": [],
+      "label_violation": false,
+      "fabricated_quantitative": false,
+      "text_citations": {
+        "total": 0,
+        "valid": 0
+      },
+      "text_citation_fabrication": false,
+      "prediction_exercised": true
+    },
+    "outcome_success": true,
+    "outcome_failures": []
+  },
+  "fixture_provenance": {
+    "fixture_sha256": "ba0261acce29ef49ce23cb3b1d3ca28376fb376ffdc475e6a840a5c55c57ba42",
+    "manifest_sha256": "4381c309506427ece7d3efc5201fabdfdd7289d12c331a9ef7b9a30ac4f20a3f",
+    "source_subject": "S17"
+  }
+}

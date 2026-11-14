@@ -12,7 +12,9 @@ from smarthealth.skills.base_skill import BaseSkill, SkillModel
 
 class CSVAnalysisInput(SkillModel):
     upload_ref: Ref
-    data_profile: Literal["synthetic_physiology_v1"] = "synthetic_physiology_v1"
+    data_profile: Literal["synthetic_physiology_v1", "wesad_physiology_v1"] = (
+        "synthetic_physiology_v1"
+    )
 
 
 class CSVAnalysisOutput(SkillModel):
@@ -33,4 +35,8 @@ class CSVAnalysisSkill(BaseSkill[CSVAnalysisInput, CSVAnalysisOutput]):
         self.service = service
 
     def execute(self, input: CSVAnalysisInput, context: SkillContext) -> CSVAnalysisOutput:
-        return CSVAnalysisOutput.model_validate(self.service.inspect_csv(input.upload_ref, context))
+        return CSVAnalysisOutput.model_validate(
+            self.service.inspect_csv(
+                input.upload_ref, context, data_profile=input.data_profile
+            )
+        )

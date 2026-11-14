@@ -6,8 +6,9 @@ from smarthealth.pipeline.preprocess import parse_csv, preprocess
 
 
 def analyze_csv(content: bytes, predictor: BasePredictor) -> dict:
-    windows, quality = preprocess(parse_csv(content))
-    features = extract_features(windows)
+    profile = predictor.profile
+    windows, quality = preprocess(parse_csv(content, profile=profile), profile=profile)
+    features = extract_features(windows, profile=profile)
     return {
         "prediction": predictor.predict(features),
         "explanation": predictor.explain(features),

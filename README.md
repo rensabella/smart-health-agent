@@ -7,6 +7,7 @@ evidence-linked reports and reproducible evaluation — packaged as a Python app
 
 [Architecture](docs/architecture.md) · [Deployment](docs/deployment.md) ·
 [Evaluation](docs/evaluation.md) · [Recorded results](evaluation/evaluation_report.md) ·
+[Runtime Guard v2](docs/runtime_guard_v2.md) ·
 [中文项目报告](docs/project_report.md)
 
 ## Motivation

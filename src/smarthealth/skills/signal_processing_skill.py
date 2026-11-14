@@ -12,7 +12,9 @@ from smarthealth.skills.base_skill import BaseSkill, SkillModel
 
 class SignalProcessingInput(SkillModel):
     dataset_ref: Ref
-    processing_profile: Literal["1hz_30s_v1"] = "1hz_30s_v1"
+    # An omitted profile follows the dataset's declared lineage; an explicit value
+    # is cross-checked against it by AnalysisService (fail-closed invalid_input).
+    processing_profile: Literal["1hz_30s_v1", "1hz_60s_stride30_v1"] | None = None
 
 
 class SignalProcessingOutput(SkillModel):
@@ -36,5 +38,7 @@ class SignalProcessingSkill(BaseSkill[SignalProcessingInput, SignalProcessingOut
         self, input: SignalProcessingInput, context: SkillContext
     ) -> SignalProcessingOutput:
         return SignalProcessingOutput.model_validate(
-            self.service.process_signal(input.dataset_ref, context)
+            self.service.process_signal(
+                input.dataset_ref, context, processing_profile=input.processing_profile
+            )
         )

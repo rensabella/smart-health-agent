@@ -21,6 +21,14 @@ data/models/
 data/knowledge/
 models_saved/*
 !models_saved/.gitkeep
+# External datasets are gated operator downloads; only digests and derived
+# reviewed fixtures (resources/) are versioned.
+data_external/
+# WESAD prepared tables are derived from the gated dataset download; the
+# checksum manifest is versioned, canonical tables are regenerated via
+# smarthealth.wesad.prepare.
+evaluation/wesad/prepared/*
+!evaluation/wesad/prepared/prepare_manifest.json
 *.joblib
 *.onnx
 *.safetensors

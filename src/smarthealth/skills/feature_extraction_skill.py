@@ -10,7 +10,11 @@ from smarthealth.skills.base_skill import BaseSkill, SkillModel
 
 class FeatureExtractionInput(SkillModel):
     window_set_ref: Ref
-    feature_profile: Literal["physiology_statistics_v1"] = "physiology_statistics_v1"
+    # An omitted profile follows the window set's declared lineage; an explicit
+    # value is cross-checked against it by AnalysisService (fail-closed invalid_input).
+    feature_profile: Literal["physiology_statistics_v1", "wesad_physiology_statistics_v1"] | None = (
+        None
+    )
 
 
 class FeatureExtractionOutput(SkillModel):
@@ -34,5 +38,5 @@ class FeatureExtractionSkill(BaseSkill[FeatureExtractionInput, FeatureExtraction
         self, input: FeatureExtractionInput, context: SkillContext
     ) -> FeatureExtractionOutput:
         return FeatureExtractionOutput.model_validate(
-            self.service.extract(input.window_set_ref, context)
+            self.service.extract(input.window_set_ref, context, feature_profile=input.feature_profile)
         )

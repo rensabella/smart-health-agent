@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "fixture": "wesad_fixture.csv",
+  "label_column_absent": true,
+  "dataset": {
+    "name": "WESAD",
+    "license": "CC-BY-4.0",
+    "citation": "Schmidt, Philip, et al. 'Introducing WESAD, a multimodal dataset for wearable stress and affect detection.' ICMI 2018.",
+    "source_subject": "S17",
+    "wesad_zip_sha256": "5e15d2606adf16d819ba535c1786d92e94bae5ff5392f7ae01fb63f9938fd71c",
+    "source_table": "evaluation/wesad/prepared/fixture_subject.csv",
+    "source_table_sha256": "687a96256a7f24ca9b8606ab7e21a6ca8683451a02a32e5452a6588e3ebbfada"
+  },
+  "derivation": {
+    "profile": "wesad_physiology_v1",
+    "derivation_version": "wesad_canonical_v1",
+    "chest_only": true,
+    "source_row_indexing": "zero_based",
+    "source_row_start": 3513,
+    "source_row_end_inclusive": 4112,
+    "row_count": 600,
+    "window_seconds": 60,
+    "note": "Contiguous slice of the held-out subject's canonical 1 Hz chest-signal table; the label column is removed, so the fixture carries no ground truth and is used only for infrastructure validation, never accuracy claims."
+  },
+  "columns": [
+    "timestamp",
+    "subject_id",
+    "session_id",
+    "hr",
+    "eda",
+    "emg",
+    "temp",
+    "resp",
+    "acc_mag",
+    "scr"
+  ],
+  "rows": 600,
+  "fixture_sha256": "ba0261acce29ef49ce23cb3b1d3ca28376fb376ffdc475e6a840a5c55c57ba42"
+}

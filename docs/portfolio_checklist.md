@@ -1,11 +1,11 @@
 # 求职展示与待补充清单
 
-更新日期：2026-10-13。此页将已经具备的展示材料、发布状态和需要项目所有者补充的信息分开记录。它不是临床、合规或线上性能认证。
+更新日期：2026-10-15。此页将已经具备的展示材料、发布状态和需要项目所有者补充的信息分开记录。它不是临床、合规或线上性能认证。
 
 ## 当前可展示
 
 - Live LLM 评测框架：20 个合成任务、共享 token/费用预算、隔离故障注入、执行 trace 与产物校验。
-  默认 dry-run；尚未进行真实模型评测，不应在简历写为“已通过 live benchmark”。
+  默认 dry-run；已提交的框架验证报告不包含真实模型成绩。单独授权的本地 live 试跑存放于被 Git 忽略的 `evaluation/live_runs/`，未经核验完整任务结果不应在简历写为“已通过 live benchmark”。
   本地与 [云端 CI](https://github.com/rensabella/smart-health-agent/actions/runs/38421067133) 均通过 614 项测试；独立 wheel 验证及 Docker 镜像构建通过，见 [评测框架验证记录](LIVE_LLM_EVALUATION_VERIFICATION.md)。
   实际工程测试与 dry-run 证据见 [验证记录](LIVE_LLM_EVALUATION_VERIFICATION.md)。
 

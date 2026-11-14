@@ -1,7 +1,9 @@
-"""Strict synthetic_physiology_v1 CSV contract and deterministic window cleaning.
+"""Strict per-profile CSV contracts and deterministic window cleaning.
 
 Input rows represent seconds, not raw ECG or EEG waveforms. Missing samples are
-never synthesized across a timestamp gap or a window boundary.
+never synthesized across a timestamp gap or a window boundary. The default
+profile keeps the historical synthetic_physiology_v1 contract byte-for-byte;
+registered profiles (see ``pipeline/profiles.py``) add other data origins.
 """
 
 from __future__ import annotations
@@ -36,8 +38,16 @@ def _fail(code: str, message: str) -> None:
     raise SkillError(code, message)
 
 
-def parse_csv(content: bytes) -> pd.DataFrame:
+def _default_profile():
+    from smarthealth.pipeline.profiles import SYNTHETIC_V1
+
+    return SYNTHETIC_V1
+
+
+def parse_csv(content: bytes, *, profile=None) -> pd.DataFrame:
     """Read one session. Targets and arbitrary extra columns are rejected online."""
+    if profile is None:
+        profile = _default_profile()
     if not content:
         _fail("invalid_csv", "CSV must contain a header and data rows.")
     if len(content) > MAX_CSV_BYTES:
@@ -48,9 +58,18 @@ def parse_csv(content: bytes) -> pd.DataFrame:
         header = next(reader)
         if len(header) != len(set(header)):
             _fail("invalid_columns", "Duplicate column names are not supported.")
-        allowed = set(SIGNAL_COLUMNS + OPTIONAL_COLUMNS)
-        if not set(SIGNAL_COLUMNS).issubset(header) or not set(header).issubset(allowed):
-            _fail("invalid_columns", "CSV must follow the synthetic_physiology_v1 schema.")
+        allowed = set(profile.signal_columns + profile.optional_columns)
+        if not set(profile.signal_columns).issubset(header) or not set(header).issubset(allowed):
+            from smarthealth.pipeline.profiles import suggest_profile
+
+            message = f"CSV must follow the {profile.name} schema."
+            suggestion = suggest_profile(header, exclude=profile.name)
+            if suggestion:
+                message += (
+                    f" Column layout matches registered profile '{suggestion}';"
+                    " retry with that value."
+                )
+            _fail("invalid_columns", message)
         rows = []
         for row in reader:
             if len(row) != len(header):
@@ -61,25 +80,28 @@ def parse_csv(content: bytes) -> pd.DataFrame:
         if not rows:
             _fail("invalid_csv", "CSV must contain data rows.")
         frame = pd.DataFrame(rows, columns=header)
-        for name in SIGNAL_COLUMNS:
+        for name in profile.signal_columns:
             # Only empty fields mean missing; misspellings and strings are errors.
             frame[name] = pd.to_numeric(frame[name].replace(r"^\s*$", np.nan, regex=True))
     except (UnicodeDecodeError, csv.Error, StopIteration, ValueError, TypeError):
         _fail("invalid_csv", "CSV must be UTF-8 with valid numeric signal values.")
-    return _validate_frame(frame)
+    return _validate_frame(frame, profile=profile)
 
 
-def _validate_frame(frame: pd.DataFrame) -> pd.DataFrame:
+def _validate_frame(frame: pd.DataFrame, *, profile=None) -> pd.DataFrame:
+    if profile is None:
+        profile = _default_profile()
     if not isinstance(frame, pd.DataFrame) or frame.empty:
         _fail("invalid_data", "A nonempty signal table is required.")
-    if not frame.columns.is_unique or not set(SIGNAL_COLUMNS).issubset(frame.columns):
+    if not frame.columns.is_unique or not set(profile.signal_columns).issubset(frame.columns):
         _fail("invalid_columns", "Required signal columns must be unique and present.")
-    if not set(frame.columns).issubset(SIGNAL_COLUMNS + OPTIONAL_COLUMNS):
+    if not set(frame.columns).issubset(profile.signal_columns + profile.optional_columns):
         _fail("invalid_columns", "Unsupported columns cannot enter signal processing.")
     if len(frame) > MAX_ROWS:
         _fail("file_too_large", "Signal table exceeds the supported row limit.")
     frame = frame.copy(deep=True).reset_index(drop=True)
-    for name in SIGNAL_COLUMNS:
+    rules = {column: rule for rule in profile.value_rules for column in rule.columns}
+    for name in profile.signal_columns:
         if not pd.api.types.is_numeric_dtype(frame[name]) or pd.api.types.is_bool_dtype(
             frame[name]
         ):
@@ -89,12 +111,9 @@ def _validate_frame(frame: pd.DataFrame) -> pd.DataFrame:
         if np.isinf(values).any():
             _fail("invalid_data", "Infinite signal values are not supported.")
         valid = frame[name].dropna()
-        if name == "heart_rate" and (valid <= 0).any():
-            _fail("invalid_data", "Heart rate must be positive when present.")
-        if name in ("EDA", "EEG_feature") and (valid < 0).any():
-            _fail("invalid_data", "EDA and the synthetic EEG proxy must be nonnegative.")
-        if name in ("activity", "sleep_quality") and ((valid < 0) | (valid > 1)).any():
-            _fail("invalid_data", "Normalized context values must be within zero and one.")
+        rule = rules.get(name)
+        if rule is not None and rule.violated(valid.to_numpy(dtype=float)):
+            _fail("invalid_data", rule.message)
     for name in ("subject_id", "session_id"):
         if name in frame and (
             frame[name].isna().any()
@@ -102,9 +121,10 @@ def _validate_frame(frame: pd.DataFrame) -> pd.DataFrame:
             or frame[name].nunique() != 1
         ):
             _fail("multiple_sessions", "Each upload must contain exactly one subject and session.")
-    sleep = frame["sleep_quality"].dropna()
-    if len(sleep) and float(sleep.max() - sleep.min()) > 1e-8:
-        _fail("invalid_data", "Sleep quality must be constant within a session.")
+    for rule in profile.constant_columns:
+        column = frame[rule.column].dropna()
+        if len(column) and float(column.max() - column.min()) > 1e-8:
+            _fail("invalid_data", rule.message)
     if "timestamp" in frame:
         if pd.api.types.is_numeric_dtype(frame["timestamp"]):
             _fail("invalid_timestamp", "Timestamps must be ISO-8601 datetime values.")
@@ -125,16 +145,18 @@ def _validate_frame(frame: pd.DataFrame) -> pd.DataFrame:
     return frame
 
 
-def inspect_data(frame: pd.DataFrame) -> dict:
-    frame = _validate_frame(frame)
-    missing = frame[list(SIGNAL_COLUMNS)].isna()
+def inspect_data(frame: pd.DataFrame, *, profile=None) -> dict:
+    if profile is None:
+        profile = _default_profile()
+    frame = _validate_frame(frame, profile=profile)
+    missing = frame[list(profile.signal_columns)].isna()
     return {
-        "input_profile": INPUT_PROFILE,
+        "input_profile": profile.name,
         "row_count": len(frame),
         "columns": list(frame.columns),
-        "sample_rate_hz": 1,
+        "sample_rate_hz": profile.processing_config["sample_rate_hz"],
         "timestamp_present": "timestamp" in frame,
-        "missing_values": {column: int(missing[column].sum()) for column in SIGNAL_COLUMNS},
+        "missing_values": {column: int(missing[column].sum()) for column in profile.signal_columns},
         "missing_fraction": float(missing.to_numpy().mean()),
         "warnings": (
             [] if "timestamp" in frame else ["Timestamps absent; row order is interpreted as 1 Hz."]
@@ -151,40 +173,75 @@ def _longest_gap(series: pd.Series) -> int:
     return best
 
 
-def preprocess(frame: pd.DataFrame) -> tuple[list[pd.DataFrame], dict]:
-    frame = _validate_frame(frame)
-    quality = inspect_data(frame)
-    window_rows = PROCESSING_CONFIG["window_rows"]
-    if len(frame) < window_rows:
-        _fail("insufficient_data", "At least 30 consecutive one-second rows are required.")
-    if any(
-        _longest_gap(frame[name]) > PROCESSING_CONFIG["max_gap_rows"] for name in SIGNAL_COLUMNS
-    ):
-        _fail("poor_data_quality", "A signal contains a missing span longer than three seconds.")
+def _collect_windows(
+    frame: pd.DataFrame, *, profile, fail_closed: bool
+) -> tuple[list[pd.DataFrame], int, int, int]:
+    """Slice and clean windows by the shared rule; rejects raise or are counted.
+
+    The acceptance rule, interpolation and window arithmetic exist exactly once
+    here. ``preprocess`` fails closed on the first rejected window (the runtime
+    upload contract); the training-side ``clean_windows`` collector instead drops
+    rejects and counts them so quality filtering keeps an honest denominator.
+    """
+    config = profile.processing_config
+    window_rows = config["window_rows"]
+    stride_rows = config["stride_rows"]
     windows: list[pd.DataFrame] = []
     imputed = 0
-    tail = len(frame) % window_rows
-    for start in range(0, len(frame) - tail, window_rows):
+    rejected = 0
+    last_start = ((len(frame) - window_rows) // stride_rows) * stride_rows
+    tail = len(frame) - (last_start + window_rows)
+    for start in range(0, last_start + 1, stride_rows):
         window = frame.iloc[start : start + window_rows].copy().reset_index(drop=True)
-        signals = window[list(SIGNAL_COLUMNS)]
+        signals = window[list(profile.signal_columns)]
         if (
             float(signals.isna().to_numpy().mean())
-            > PROCESSING_CONFIG["max_window_missing_fraction"]
-            or (signals.isna().mean() > PROCESSING_CONFIG["max_channel_missing_fraction"]).any()
+            > config["max_window_missing_fraction"]
+            or (signals.isna().mean() > config["max_channel_missing_fraction"]).any()
             or any(
-                _longest_gap(signals[name]) > PROCESSING_CONFIG["max_gap_rows"]
-                for name in SIGNAL_COLUMNS
+                _longest_gap(signals[name]) > config["max_gap_rows"]
+                for name in profile.signal_columns
             )
         ):
-            _fail(
-                "poor_data_quality",
-                "A window has excessive missing data or an unsupported long gap.",
-            )
+            if fail_closed:
+                _fail(
+                    "poor_data_quality",
+                    "A window has excessive missing data or an unsupported long gap.",
+                )
+            rejected += 1
+            continue
         imputed += int(signals.isna().to_numpy().sum())
-        window[list(SIGNAL_COLUMNS)] = signals.interpolate(method="linear", limit_direction="both")
-        if window[list(SIGNAL_COLUMNS)].isna().any().any():
-            _fail("poor_data_quality", "A window cannot be cleaned without crossing its boundary.")
+        cleaned = signals.interpolate(method="linear", limit_direction="both")
+        if cleaned.isna().any().any():
+            if fail_closed:
+                _fail(
+                    "poor_data_quality",
+                    "A window cannot be cleaned without crossing its boundary.",
+                )
+            rejected += 1
+            continue
+        window[list(profile.signal_columns)] = cleaned
         windows.append(window)
+    return windows, imputed, rejected, tail
+
+
+def preprocess(frame: pd.DataFrame, *, profile=None) -> tuple[list[pd.DataFrame], dict]:
+    if profile is None:
+        profile = _default_profile()
+    frame = _validate_frame(frame, profile=profile)
+    quality = inspect_data(frame, profile=profile)
+    config = profile.processing_config
+    window_rows = config["window_rows"]
+    if len(frame) < window_rows:
+        _fail(
+            "insufficient_data",
+            f"At least {window_rows} consecutive one-second rows are required.",
+        )
+    if any(
+        _longest_gap(frame[name]) > config["max_gap_rows"] for name in profile.signal_columns
+    ):
+        _fail("poor_data_quality", "A signal contains a missing span longer than three seconds.")
+    windows, imputed, _rejected, tail = _collect_windows(frame, profile=profile, fail_closed=True)
     quality.update(
         {
             "window_count": len(windows),
@@ -192,7 +249,7 @@ def preprocess(frame: pd.DataFrame) -> tuple[list[pd.DataFrame], dict]:
             "processed_rows": len(windows) * window_rows,
             "dropped_tail_rows": tail,
             "imputed_values": imputed,
-            "processing_version": PROCESSING_CONFIG["version"],
+            "processing_version": config["version"],
         }
     )
     if tail:
@@ -200,3 +257,32 @@ def preprocess(frame: pd.DataFrame) -> tuple[list[pd.DataFrame], dict]:
     if imputed:
         quality["warnings"].append("Short missing spans were filled within their own windows.")
     return windows, quality
+
+
+def clean_windows(frame: pd.DataFrame, *, profile=None) -> tuple[list[pd.DataFrame], dict]:
+    """Every window that passes the shared cleaning rule, with rejects counted.
+
+    Training-side quality filtering over one clean segment: this never raises on
+    a rejected window, it drops and counts it. The rule itself is the shared
+    production contract above, so training and inference accept exactly the same
+    windows; only the failure policy differs (see ``_collect_windows``).
+    """
+    if profile is None:
+        profile = _default_profile()
+    frame = _validate_frame(frame, profile=profile)
+    config = profile.processing_config
+    window_rows = config["window_rows"]
+    if len(frame) < window_rows:
+        _fail(
+            "insufficient_data",
+            f"At least {window_rows} consecutive one-second rows are required.",
+        )
+    windows, imputed, rejected, tail = _collect_windows(frame, profile=profile, fail_closed=False)
+    return windows, {
+        "window_rows": window_rows,
+        "accepted_windows": len(windows),
+        "rejected_windows": rejected,
+        "dropped_tail_rows": tail,
+        "imputed_values": imputed,
+        "processing_version": config["version"],
+    }

@@ -59,6 +59,12 @@ RandomForest/LightGBM bundle is loaded once per application lifespan.
 - `runtime/context.py` and `runtime/guard.py`: server-owned identity, atomic call
   budgets, deadlines and cooperative cancellation. A timed-out thread is not
   assumed to have stopped.
+- `runtime/action_policy.py`: Guard v2 derives permitted upgrades and terminal
+  result actions from the current task and verified artifacts. The provider tool
+  catalogue and executor use the same constraints.
+- `runtime/token_budget.py`: per-run admission before live provider requests,
+  exact prepared-payload byte reservations, settlement and retained unknown usage.
+  See [Runtime Guard v2](runtime_guard_v2.md) for semantics and validation.
 - `runtime/harness/`: validated YAML policy, role constraints, lineage checks and
   deterministic report publication controls. Business safety rules remain here.
 - `runtime/events.py`: bounded progress events, SSE replay and privacy-safe local

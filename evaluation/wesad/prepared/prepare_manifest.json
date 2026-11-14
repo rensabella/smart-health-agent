@@ -1,0 +1,459 @@
+{
+  "schema_version": "1.0",
+  "derivation_version": "wesad_canonical_v1",
+  "dataset": {
+    "name": "WESAD",
+    "license": "CC-BY-4.0",
+    "citation": "Schmidt, Philip, et al. 'Introducing WESAD, a multimodal dataset for wearable stress and affect detection.' ICMI 2018.",
+    "wesad_zip_sha256": "5e15d2606adf16d819ba535c1786d92e94bae5ff5392f7ae01fb63f9938fd71c",
+    "subjects": [
+      "S2",
+      "S3",
+      "S4",
+      "S5",
+      "S6",
+      "S7",
+      "S8",
+      "S9",
+      "S10",
+      "S11",
+      "S13",
+      "S14",
+      "S15",
+      "S16",
+      "S17"
+    ],
+    "holdout_subject": "S17",
+    "chest_sample_rate_hz": 700
+  },
+  "derivation": {
+    "chest_only": true,
+    "ecg_bandpass_hz": [
+      0.5,
+      40.0
+    ],
+    "ecg_filter_order": 3,
+    "ecg_min_rr_seconds": 0.3,
+    "ecg_prominence_mv": 0.25,
+    "hr_plausible_bpm": [
+      30.0,
+      220.0
+    ],
+    "eda_tonic_cutoff_hz": 0.05,
+    "eda_filter_order": 4,
+    "scr_prominence_u_s": 0.05,
+    "scr_min_interval_s": 0.5,
+    "label_map_protocol_to_canonical": {
+      "1": 0,
+      "2": 1,
+      "3": 2
+    }
+  },
+  "subjects": {
+    "S2": {
+      "pkl_sha256": "36ef5e8afc0f91998eefba7c12fc9fa97b7b07198cbec0126917d7abb436ca23",
+      "rows": 6079,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1143,
+        "1": 614,
+        "2": 361
+      },
+      "unlabeled_seconds": 3961,
+      "hr": {
+        "median_bpm": 71.2159008610284,
+        "p05_bpm": 60.518731988472624,
+        "p95_bpm": 102.85305597318636,
+        "nan_seconds": 6
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S3": {
+      "pkl_sha256": "5c8bd4a82af029c082e610bca28a011fca2ae3b23e14a18458ebb5990be4015e",
+      "rows": 6493,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1139,
+        "1": 639,
+        "2": 374
+      },
+      "unlabeled_seconds": 4341,
+      "hr": {
+        "median_bpm": 57.77166437414031,
+        "p05_bpm": 45.60260586319219,
+        "p95_bpm": 93.00376235442312,
+        "nan_seconds": 580
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S4": {
+      "pkl_sha256": "0f0740a79388723360ff12b4f47c465665ea7827d1399b18ac43908daac17900",
+      "rows": 6423,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1157,
+        "1": 634,
+        "2": 371
+      },
+      "unlabeled_seconds": 4261,
+      "hr": {
+        "median_bpm": 63.4441087613293,
+        "p05_bpm": 52.62169817535077,
+        "p95_bpm": 87.1492409716383,
+        "nan_seconds": 165
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S5": {
+      "pkl_sha256": "74bd187e3a9c1ca4259af52d04974c8e7ff7dc49ceea7e269f499ca98fe6d8ec",
+      "rows": 6258,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1197,
+        "1": 644,
+        "2": 373
+      },
+      "unlabeled_seconds": 4044,
+      "hr": {
+        "median_bpm": 66.98564593301435,
+        "p05_bpm": 58.57740585774059,
+        "p95_bpm": 91.82133098202517,
+        "nan_seconds": 16
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S6": {
+      "pkl_sha256": "8aa9bf57b69f4fe5bce06c550230857627c3f05befa2f787151646bb29ee8f62",
+      "rows": 7071,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1179,
+        "1": 649,
+        "2": 371
+      },
+      "unlabeled_seconds": 4872,
+      "hr": {
+        "median_bpm": 69.07894736842105,
+        "p05_bpm": 60.518731988472624,
+        "p95_bpm": 87.86764705882354,
+        "nan_seconds": 10
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S7": {
+      "pkl_sha256": "9cb62705ae7f53dca327a9a00a6f9fdabf5128d449174ab37594658e912cb6d8",
+      "rows": 5238,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1185,
+        "1": 639,
+        "2": 371
+      },
+      "unlabeled_seconds": 3043,
+      "hr": {
+        "median_bpm": 68.07131280388978,
+        "p05_bpm": 53.92913596298729,
+        "p95_bpm": 109.06558008920214,
+        "nan_seconds": 93
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S8": {
+      "pkl_sha256": "dac1141dac11d56b3641be982f45da63f05e9d74154f59e6ea0cdcf47fc72710",
+      "rows": 5466,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1168,
+        "1": 669,
+        "2": 369
+      },
+      "unlabeled_seconds": 3260,
+      "hr": {
+        "median_bpm": 78.79924953095684,
+        "p05_bpm": 60.69364161849711,
+        "p95_bpm": 169.35483870967744,
+        "nan_seconds": 15
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S9": {
+      "pkl_sha256": "24dc004e201bd541f092989443f0a29ebf89e4a227a80bb6b6d1987255039544",
+      "rows": 5223,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1179,
+        "1": 644,
+        "2": 371
+      },
+      "unlabeled_seconds": 3029,
+      "hr": {
+        "median_bpm": 77.77777777777777,
+        "p05_bpm": 65.31881804043546,
+        "p95_bpm": 96.99769053117784,
+        "nan_seconds": 2
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S10": {
+      "pkl_sha256": "41da29c68366f33650f3d41a6be78107bf6942929c3bb0ef46238078ddddee9f",
+      "rows": 5496,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1179,
+        "1": 724,
+        "2": 371
+      },
+      "unlabeled_seconds": 3222,
+      "hr": {
+        "median_bpm": 92.51101321585902,
+        "p05_bpm": 69.19275123558485,
+        "p95_bpm": 120.8665623463009,
+        "nan_seconds": 0
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S11": {
+      "pkl_sha256": "f39557a8d660b10154936f51debf2926aea7ebb9b26a168858f59502f914d8f7",
+      "rows": 5233,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1179,
+        "1": 679,
+        "2": 367
+      },
+      "unlabeled_seconds": 3008,
+      "hr": {
+        "median_bpm": 86.5979381443299,
+        "p05_bpm": 66.56101426307448,
+        "p95_bpm": 127.961303474754,
+        "nan_seconds": 1
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S13": {
+      "pkl_sha256": "772fb490f19b279e49367271e009fc10d3a3ca1e3456df0d68b9063a73992066",
+      "rows": 5537,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1179,
+        "1": 663,
+        "2": 381
+      },
+      "unlabeled_seconds": 3314,
+      "hr": {
+        "median_bpm": 85.80192813321648,
+        "p05_bpm": 68.29268292682927,
+        "p95_bpm": 113.98250221372622,
+        "nan_seconds": 4
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S14": {
+      "pkl_sha256": "e7bd33c57538319a25c6d53e6a9fb6c1abd12800cfc64bb63275d89de8d2fd60",
+      "rows": 5548,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1179,
+        "1": 674,
+        "2": 371
+      },
+      "unlabeled_seconds": 3324,
+      "hr": {
+        "median_bpm": 80.92485549132948,
+        "p05_bpm": 68.62745098039215,
+        "p95_bpm": 133.5456475583864,
+        "nan_seconds": 0
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S15": {
+      "pkl_sha256": "1ea573bc6b45ba79fb134f9460d691b86176f60dce23420dc514c28017d4049c",
+      "rows": 5252,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1174,
+        "1": 685,
+        "2": 371
+      },
+      "unlabeled_seconds": 3022,
+      "hr": {
+        "median_bpm": 79.09604519774011,
+        "p05_bpm": 64.9171028581382,
+        "p95_bpm": 96.66393167841237,
+        "nan_seconds": 10
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S16": {
+      "pkl_sha256": "f65cf40cada75c3e9f5813276d7dcc90359c3b06dec41d68656c0a6e61dbc575",
+      "rows": 5631,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1179,
+        "1": 672,
+        "2": 367
+      },
+      "unlabeled_seconds": 3413,
+      "hr": {
+        "median_bpm": 81.49645422105786,
+        "p05_bpm": 59.0717299578059,
+        "p95_bpm": 132.0754716981132,
+        "nan_seconds": 24
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    },
+    "S17": {
+      "pkl_sha256": "3315796a75227d54d7b0056736f671484fd2fb85afffa65818fd76aeff2920fa",
+      "rows": 5920,
+      "dropped_partial_samples": 0,
+      "label_seconds": {
+        "0": 1180,
+        "1": 722,
+        "2": 371
+      },
+      "unlabeled_seconds": 3647,
+      "hr": {
+        "median_bpm": 71.67235494880546,
+        "p05_bpm": 53.503184713375795,
+        "p95_bpm": 129.84268511136196,
+        "nan_seconds": 100
+      },
+      "wrist_available": true,
+      "wrist_signals": [
+        "ACC",
+        "BVP",
+        "EDA",
+        "TEMP"
+      ],
+      "extra_top_level_keys": [],
+      "extra_chest_keys": []
+    }
+  },
+  "totals": {
+    "rows": 86868,
+    "label_seconds": {
+      "0": 17596,
+      "1": 9951,
+      "2": 5560
+    },
+    "unlabeled_seconds": 53761,
+    "wrist_available_subjects": 15
+  },
+  "outputs": {
+    "canonical": "canonical/SXX.csv",
+    "training": "training.csv",
+    "fixture_subject": "fixture_subject.csv"
+  }
+}

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, ClassVar, Generic, Literal, TypeVar
+from typing import Annotated, Any, ClassVar, Generic, Literal, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -16,9 +16,28 @@ class SkillModel(BaseModel):
     )
 
 
+class ValidationIssue(SkillModel):
+    category: Annotated[str, Field(pattern=r"^[a-z_]{1,64}$")]
+    field_path: Annotated[str, Field(max_length=256)]
+    expected: Annotated[str, Field(max_length=400)]
+    actual_type: Literal[
+        "missing", "null", "boolean", "integer", "number", "string", "array", "object", "other"
+    ]
+
+
+class InputValidationError(SkillModel):
+    issues: Annotated[list[ValidationIssue], Field(min_length=1, max_length=4)]
+    truncated: bool = False
+    retryable: bool = True
+    remaining_corrections: Annotated[int, Field(ge=0, le=1)] | None = None
+
+
 class SkillFailure(SkillModel):
     code: str
     message: str
+    validation_error: InputValidationError | None = None
+    # Bounded, sanitized context: stable reason/rule codes and reference field names only.
+    details: dict[str, Any] | None = None
 
 
 class SkillResult(SkillModel):

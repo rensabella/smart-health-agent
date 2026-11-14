@@ -35,14 +35,16 @@ class ScoreProtocol(SkillModel):
     model_fingerprint: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
     input_profile: Version
     feature_schema_version: Version
-    task_scope: Literal["synthetic_anomaly_only"] = "synthetic_anomaly_only"
-    window_seconds: Literal[30] = 30
+    task_scope: Literal["synthetic_anomaly_only", "wesad_stress_only"] = "synthetic_anomaly_only"
+    window_seconds: Literal[30, 60] = 30
     aggregation: Literal["max"] = "max"
-    score_semantics: Literal["synthetic_anomaly_model_score"] = "synthetic_anomaly_model_score"
+    score_semantics: Literal[
+        "synthetic_anomaly_model_score", "wesad_stress_model_score"
+    ] = "synthetic_anomaly_model_score"
 
 
 class ScoreSummary(ScoreProtocol):
-    prediction: Literal["normal", "anomaly"]
+    prediction: Literal["normal", "anomaly", "baseline", "stress", "amusement"]
     risk_score: Annotated[float, Field(ge=0, le=1)]
     risk_level: Literal["low", "medium", "high"]
     window_count: Annotated[int, Field(ge=1, le=100000)]
@@ -153,8 +155,13 @@ def render_entry(entry: LongTermEntry) -> str:
         return f"Explicit report preferences 语言 {entry.preferences.language} detail {entry.preferences.detail}"
     a = entry.analysis
     level = {"low": "低", "medium": "中", "high": "高"}[a.risk_level]
+    domain = (
+        "WESAD stress analysis 压力模式分析"
+        if a.score_semantics == "wesad_stress_model_score"
+        else "Synthetic physiological analysis 合成生理异常分析"
+    )
     return (
-        f"Synthetic physiological analysis 合成生理异常分析 {a.prediction}; "
+        f"{domain} {a.prediction}; "
         f"risk 风险 {a.risk_level} {level}; score 分数 {a.risk_score:.3f}; "
         f"windows {a.window_count}; model {a.model_name} {a.model_version}. "
         "Model score only; not a clinical disease probability. 不是临床患病概率。"

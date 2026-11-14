@@ -238,6 +238,68 @@ async def test_yaml_timeout_bounds_execution_and_keeps_shared_budget(facts, monk
         await registry.aclose()
 
 
+@pytest.mark.parametrize(
+    "tamper,rule",
+    [
+        (
+            lambda p: p.update(window_count=p["window_count"] + 1),
+            "prediction.window_count",
+        ),
+        (lambda p: p.update(risk_score=0.123456), "prediction.risk_score"),
+        (lambda p: p.update(highest_risk_window=999), "prediction.highest_risk_window"),
+        (
+            lambda p: p.update(risk_level="medium" if p["risk_level"] != "medium" else "low"),
+            "prediction.risk_level",
+        ),
+        (lambda p: p.update(anomalous_ratio=0.123456), "prediction.anomalous_ratio"),
+        (
+            lambda p: p.update(prediction="normal" if p["prediction"] == "anomaly" else "anomaly"),
+            "prediction.label",
+        ),
+        (
+            lambda p: p["window_predictions"][0].update(window_index=99),
+            "prediction.window_indices",
+        ),
+        (
+            lambda p: p["model"].update(task_scope="clinical_diagnosis"),
+            "prediction.model_task_scope",
+        ),
+        (
+            lambda p: p["model"]["metadata"].update(score_semantics="disease_probability"),
+            "prediction.model_metadata.score_semantics",
+        ),
+        (
+            lambda p: p["model"]["metadata"].update(threshold=0.123456),
+            "prediction.model_metadata.threshold",
+        ),
+    ],
+)
+def test_rejected_prediction_carries_stable_rule_id(facts, tamper, rule):
+    prediction = deepcopy({k: facts["predicted"][k] for k in Prediction.model_fields})
+    tamper(prediction)
+    typed = Prediction.model_validate(prediction)
+    with pytest.raises(SkillError, match="Output does not satisfy") as error:
+        HarnessValidator().check_prediction(typed, facts["service"].predictor.metadata)
+    assert error.value.code == "harness_invalid_output"
+    assert error.value.details == {"rule": rule}
+
+
+def test_lineage_mismatch_reports_stable_rule_id(facts):
+    service, context = facts["service"], facts["context"]
+    parent = service.store.put({"kind": "parent"}, kind="dataset", context=context)
+    other = service.store.put({"kind": "other"}, kind="dataset", context=context)
+    child = service.store.put(
+        {"kind": "child"}, kind="dataset", context=context, source_ref=parent
+    )
+    with pytest.raises(SkillError) as error:
+        service.store.check_source(
+            child, source_ref=other, kind="dataset", context=context
+        )
+    assert error.value.code == "harness_invalid_output"
+    assert error.value.details == {"rule": "lineage.source_ref_mismatch"}
+    assert error.value.message == "Artifact source does not match input."
+
+
 def test_catalogue_version_mismatch_fails_before_calls(facts):
     config = load_config().model_dump()
     config["skills"]["skills"][0]["version"] = "999"

@@ -4,21 +4,20 @@ from __future__ import annotations
 
 import numpy as np
 
-from smarthealth.pipeline.feature_engineering import FEATURE_NAMES
-
 
 def explain_prediction(predictor, features, highest: int, *, top_k: int) -> dict:
     current = features.iloc[[highest]]
     contribution, base_value, raw_margin = predictor.contributions(current)
     metadata = predictor.metadata
     reference = metadata["normal_reference"]
+    names = metadata["feature_names"]
     importance = predictor.global_importance()
     order = np.argsort(
         -np.abs(contribution) if contribution is not None else -importance, kind="stable"
     )[:top_k]
     evidence = []
     for index in order:
-        name = FEATURE_NAMES[index]
+        name = names[index]
         observed = float(current.iloc[0, index])
         mean, std = reference[name]["mean"], reference[name]["std"]
         value = float(contribution[index]) if contribution is not None else None
@@ -42,12 +41,7 @@ def explain_prediction(predictor, features, highest: int, *, top_k: int) -> dict
                 "direction": direction,
             }
         )
-    limitations = [
-        "Trained on synthetic anomaly events; outputs are not clinical diagnoses or disease probabilities.",
-        "Session score is the maximum window score and increases exposure to isolated extreme windows.",
-        "Feature associations do not establish causal explanations of an individual's physiology.",
-        "Reference deviations use normal training windows with a standard-deviation floor of 1e-6.",
-    ]
+    limitations = list(predictor.profile.explain_limitations)
     if contribution is None:
         limitations.append(
             "RandomForest global impurity importance and reference deviations are not local model attribution."

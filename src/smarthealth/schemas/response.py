@@ -27,7 +27,8 @@ class ModelInfo(SkillModel):
 class WindowPrediction(SkillModel):
     window_index: Annotated[int, Field(ge=0)]
     risk_score: Score
-    prediction: Literal["anomaly", "normal"]
+    # Synthetic binary labels plus the WESAD three-class vocabulary.
+    prediction: Literal["anomaly", "normal", "baseline", "stress", "amusement"]
 
 
 class LocalEvidence(SkillModel):
@@ -41,7 +42,7 @@ class LocalEvidence(SkillModel):
 
 
 class Prediction(SkillModel):
-    prediction: Literal["anomaly", "normal"]
+    prediction: Literal["anomaly", "normal", "baseline", "stress", "amusement"]
     risk_score: Score
     important_features: list[ImportantFeature]
     model: ModelInfo

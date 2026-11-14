@@ -24,6 +24,7 @@ class Settings(BaseModel):
     llm_base_url: str = "https://api.openai.com/v1"
     llm_model: str = ""
     llm_api_key: SecretStr | None = Field(default=None, exclude=True, repr=False)
+    llm_api_profile: Literal["standard", "dashscope"] = "standard"
     harness_config_dir: Path = Field(default_factory=lambda: resource_path("configs"))
     agent_trace_dir: Path | None = None
     rag_mode: Literal["disabled", "local"] = "disabled"

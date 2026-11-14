@@ -30,12 +30,14 @@ class AnalysisService:
     def create_upload(self, content: bytes, context: SkillContext) -> str:
         return self.store.put(content, kind="upload", context=context)
 
-    def inspect_csv(self, upload_ref: str, context: SkillContext) -> dict:
+    def inspect_csv(self, upload_ref: str, context: SkillContext, *, data_profile=None) -> dict:
         from smarthealth.pipeline.preprocess import inspect_data, parse_csv
+        from smarthealth.pipeline.profiles import get_profile
 
+        profile = get_profile(data_profile) if data_profile is not None else None
         content = self.store.get(upload_ref, kind="upload", context=context)
-        frame = parse_csv(content)
-        quality = inspect_data(frame)
+        frame = parse_csv(content, profile=profile)
+        quality = inspect_data(frame, profile=profile)
         ref = self.store.put(
             {"frame": frame, "upload_ref": upload_ref, "quality_report": quality},
             kind="dataset",
@@ -49,11 +51,21 @@ class AnalysisService:
             "quality_report": quality,
         }
 
-    def process_signal(self, dataset_ref: str, context: SkillContext) -> dict:
+    def process_signal(
+        self, dataset_ref: str, context: SkillContext, *, processing_profile=None
+    ) -> dict:
         from smarthealth.pipeline.preprocess import preprocess
+        from smarthealth.pipeline.profiles import get_profile
 
         dataset = self.store.get(dataset_ref, kind="dataset", context=context)
-        windows, report = preprocess(dataset["frame"])
+        profile = get_profile(dataset["quality_report"]["input_profile"])
+        if processing_profile is not None and processing_profile != profile.processing_profile:
+            raise SkillError(
+                "invalid_input",
+                "The requested processing profile does not match this dataset's input profile.",
+                details={"expected_processing_profile": profile.processing_profile},
+            )
+        windows, report = preprocess(dataset["frame"], profile=profile)
         ref = self.store.put(
             {"windows": windows, "dataset_ref": dataset_ref, "cleaning_report": report},
             kind="window_set",
@@ -67,26 +79,31 @@ class AnalysisService:
             "warnings": report.get("warnings", []),
         }
 
-    def extract(self, window_set_ref: str, context: SkillContext) -> dict:
-        from smarthealth.pipeline.feature_engineering import (
-            FEATURE_SCHEMA_VERSION,
-            extract_features,
-        )
+    def extract(self, window_set_ref: str, context: SkillContext, *, feature_profile=None) -> dict:
+        from smarthealth.pipeline.feature_engineering import extract_features
+        from smarthealth.pipeline.profiles import get_profile
 
         window_set = self.store.get(window_set_ref, kind="window_set", context=context)
-        frame = extract_features(window_set["windows"])
+        profile = get_profile(window_set["cleaning_report"]["input_profile"])
+        if feature_profile is not None and feature_profile != profile.feature_profile:
+            raise SkillError(
+                "invalid_input",
+                "The requested feature profile does not match this window set's input profile.",
+                details={"expected_feature_profile": profile.feature_profile},
+            )
+        frame = extract_features(window_set["windows"], profile=profile)
         ref = self.store.put(
             {"frame": frame, "window_set_ref": window_set_ref},
             kind="feature_set",
             context=context,
             source_ref=window_set_ref,
-            schema_version=FEATURE_SCHEMA_VERSION,
+            schema_version=profile.feature_schema_version,
         )
         return {
             "feature_set_ref": ref,
             "feature_names": list(frame.columns),
             "window_count": len(frame),
-            "feature_schema_version": FEATURE_SCHEMA_VERSION,
+            "feature_schema_version": profile.feature_schema_version,
         }
 
     def predict(self, feature_set_ref: str, context: SkillContext) -> dict:
@@ -116,6 +133,7 @@ class AnalysisService:
         return {"analysis_ref": ref, **explanation.model_dump(mode="json")}
 
     def visualize(self, analysis_ref: str, plot_types: list[str], context: SkillContext) -> dict:
+        from smarthealth.pipeline.profiles import get_profile
         from smarthealth.visualization.plots import render_plots
 
         analysis = self.store.get(analysis_ref, kind="analysis", context=context)
@@ -125,7 +143,11 @@ class AnalysisService:
         )
         window_set = self.store.get(features["window_set_ref"], kind="window_set", context=context)
         plots = render_plots(
-            window_set["windows"], prediction["result"], analysis["explanation"], plot_types
+            window_set["windows"],
+            prediction["result"],
+            analysis["explanation"],
+            plot_types,
+            profile=get_profile(window_set["cleaning_report"]["input_profile"]),
         )
         artifacts = []
         for plot in plots:

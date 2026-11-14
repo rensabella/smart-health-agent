@@ -12,6 +12,7 @@ dependencies = [
   "pydantic>=2.10,<3", "fastapi>=0.115,<1", "uvicorn>=0.32,<1",
   "python-multipart>=0.0.20,<1", "pandas>=2.2,<3", "numpy>=1.26,<3",
   "scikit-learn>=1.5,<2", "lightgbm>=4.5,<5", "matplotlib>=3.9,<4", "joblib>=1.4,<2",
+  "scipy>=1.11,<2",
   "httpx>=0.27,<1",
   "qdrant-client>=1.19,<2",
   "PyYAML>=6.0.2,<7",
@@ -36,7 +37,7 @@ where = ["src"]
 include = ["smarthealth*"]
 
 [tool.setuptools.package-data]
-"smarthealth.resources" = ["configs/*.yaml", "configs/*.json", "configs/report/*.yaml", "knowledge/*.json", "knowledge/*.md", "data/sample/*.csv", "evaluation/*.json"]
+"smarthealth.resources" = ["configs/*.yaml", "configs/*.json", "configs/report/*.yaml", "knowledge/*.json", "knowledge/*.md", "data/sample/*.csv", "evaluation/*.json", "evaluation/*.csv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

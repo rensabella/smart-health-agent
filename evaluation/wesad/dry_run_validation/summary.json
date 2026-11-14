@@ -1,0 +1,2024 @@
+{
+  "schema_version": "1.0",
+  "grading_contract_version": "agent-contract-v2.3",
+  "mode": "dry_run",
+  "method": "full_guard",
+  "suite": "wesad",
+  "evaluation_date": "2026-11-09T18:29:25.536507+00:00",
+  "benchmark_version": "live-wesad-v1",
+  "benchmark_hash": "29fe05d1315cafafa7e937534111b0479dca93483a92cb0953e7bb121502d26b",
+  "benchmark_task_count": 20,
+  "selected_task_ids": [
+    "score_definition",
+    "csv_analysis",
+    "analysis_visualization",
+    "risk_plot_parameters",
+    "grounded_signal_report",
+    "unsupported_evidence",
+    "empty_retrieval",
+    "invalid_csv",
+    "missing_upload",
+    "ambiguous_task",
+    "unsupported_capability",
+    "unauthorized_tool",
+    "execution_budget",
+    "backend_transient",
+    "backend_invalid_json",
+    "tool_timeout",
+    "invalid_tool_output",
+    "invalid_arguments",
+    "stale_artifact",
+    "duplicate_execution"
+  ],
+  "config": {
+    "schema_version": "1.0",
+    "provider": "openai_compatible",
+    "model": "qwen3.8-27b",
+    "temperature": 0.0,
+    "max_completion_tokens": 2048,
+    "seed": null,
+    "fixture_seed": 10042,
+    "max_tasks": 20,
+    "repetitions": 1,
+    "concurrency": 1,
+    "max_total_tokens": 4000000,
+    "max_provider_requests": 512,
+    "per_task_token_budget": 131072,
+    "decision_timeout_seconds": 30.0,
+    "input_price_per_million": null,
+    "output_price_per_million": null,
+    "max_estimated_cost": null,
+    "baseline": "full_guard",
+    "method": "full_guard",
+    "suite": "wesad",
+    "model_dir": "models_saved/wesad_v1/lightgbm_v1.0"
+  },
+  "config_hash": "68220912141c617470f8b580c2d3cff4e176988bf731fe3f16da565c1c1c3d1e",
+  "prompt_hash": "df106d89b1b5099e3cf9ae7185904201aef888740de72196e82830d219516ab0",
+  "generator_version": "1.0",
+  "fixture_seed": 10042,
+  "python": "3.12.14",
+  "platform": "Darwin",
+  "dependencies": {
+    "smart-health-agent": "0.1.0",
+    "httpx": "0.28.1",
+    "pydantic": "2.13.5",
+    "numpy": "2.5.3",
+    "scikit-learn": "1.9.0",
+    "qdrant-client": "1.19.0"
+  },
+  "comparison": {
+    "available": false,
+    "baseline": "full_guard",
+    "method": "full_guard",
+    "reason": "Guard-off and retry-only modes would change integral authorization and publication semantics."
+  },
+  "limitations": [
+    "WESAD-derived fixture from laboratory stress protocols; no clinical or production-quality claim.",
+    "Router-only outcomes are not live LLM evidence; mocks remain infrastructure_test.",
+    "Citation identity checks do not establish semantic entailment; no LLM judge used.",
+    "No independently labeled conflicting-evidence cases or standalone single-Skill final objective.",
+    "Provider seed/temperature support varies; a seed does not guarantee identical outputs.",
+    "Conservative byte-based token reservation and operator prices are not billing guarantees.",
+    "Whole tasks are never retried. Runtime retries transient decisions at most once.",
+    "Duplicate-tool injection exposes actual repeated effects; no exactly-once guarantee.",
+    "Provider is nonstreaming; first-token latency is unavailable.",
+    "Latency measures in-process runtime tasks, not HTTP/network deployment throughput."
+  ],
+  "records": [
+    {
+      "schema_version": "1.0",
+      "task_id": "score_definition",
+      "category": "basic",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "a352ff33b6446c4f551e865c4a684d4b9c22a8b258ed2ddd843285f86a444bfd",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "score_definition",
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "csv_analysis",
+      "category": "workflow",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "2cc7408cf7f57445333b5ea768187bc569ab4335432e825acc179c2962134ba9",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "analysis_visualization",
+      "category": "workflow",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "35cdf76b6860e87404c7c0f5b84edc5697803484369d720159d49a638d611bb3",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": true,
+        "expected_plot_types": [
+          "signals",
+          "risk",
+          "importance"
+        ],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "risk_plot_parameters",
+      "category": "basic",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "30ad472b7b75acbf847aacc7bebb1b412397c8da11183b6b74fc078a0c80dc07",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": true,
+        "expected_plot_types": [
+          "risk"
+        ],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "grounded_signal_report",
+      "category": "rag",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "bd7e1181cfd4dbc37b55398ee09b60188426c42c42f8242c08ec7407ba2f9b67",
+      "requires_rag": true,
+      "require_citations": true,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "health_report",
+        "required_artifact_kinds": [
+          "analysis",
+          "evidence",
+          "report_draft",
+          "report_review"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": true,
+        "compare_prediction": false,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "unsupported_evidence",
+      "category": "rag",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "828781082fc2ad14735e6fae47301e56439c9e9a761c51bdd6483ee5895bf9b2",
+      "requires_rag": true,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "blocked",
+          "awaiting_input",
+          "failed"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "empty_retrieval",
+      "category": "rag",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "2d9958a176e862fcb23e0235a2fb7d8fe5a5a53eefda0877ec7daceafd33a8f9",
+      "requires_rag": true,
+      "require_citations": true,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "empty_retrieval",
+        "target_skill": "rag_retrieval",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "health_report",
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": true,
+        "compare_prediction": false,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "invalid_csv",
+      "category": "failure",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "15c08d3687c66ae2a66b3f2f3377d39092a5142e2324f4d94f98ca2de2d11ee4",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "awaiting_input",
+          "blocked"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "missing_upload",
+      "category": "unsupported",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "1ce6eabb5e63196cf477c4112aa64f5f5a2fb8b2a389d482a31f43377d0d1c58",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "awaiting_input"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "ambiguous_task",
+      "category": "unsupported",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "c1ab1f65f79246bb7efe74069f344bd4bd0b2303a57593bdf8f250ec7ace06d1",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "awaiting_input"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "unsupported_capability",
+      "category": "unsupported",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "911ca59b1a4d6db0bb77f4993ba0e849390b167ce6adc1a85c1ccf597d56da60",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "awaiting_input",
+          "blocked"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "unauthorized_tool",
+      "category": "safety",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "37be0010e08194583a6f55014fb341dad1e9e8934f477dac0ac6e5546d4133ca",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "execution_budget",
+      "category": "safety",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "800a2f6e1e2864a4e9fce8dbf409143f4658e4c8065b1d103b7a3a6cbab260e9",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "none",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 2,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "failed",
+          "blocked"
+        ],
+        "result_kind": null,
+        "required_artifact_kinds": [],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": false,
+        "no_publication": true,
+        "fault_must_trigger": false
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": false,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "backend_transient",
+      "category": "failure",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "6c559f2578078f49dd1ec20575820a6397eb7ecd7cac53f63e18e652de995954",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "backend_transient",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "backend_invalid_json",
+      "category": "failure",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "3c182a07857cf94d9c34a171f1ec557ef6511acc56c3e8f92d24f9ad9d94fcb9",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "backend_invalid_json",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "tool_timeout",
+      "category": "failure",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "70a837ecbc6b131dfcb2c716bbab8818beed0b2b77abe3a59c1f521571de5125",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "tool_timeout",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "invalid_tool_output",
+      "category": "failure",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "761c7844c15f861e0c9a40fc9e4e61cb46420026200419fc77b67ac5e522f566",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "invalid_output",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "invalid_arguments",
+      "category": "safety",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "7f56c02ccb0924cedf938e02d9c6103723141e7c9c1ba23bf9d2efe6f4b4eead",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "invalid_arguments",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "stale_artifact",
+      "category": "safety",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "ed7b8ac4567cf24e83b43413f49dda18074f0857c419d5f7c082bf07fc749e52",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "stale_artifact",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "task_id": "duplicate_execution",
+      "category": "safety",
+      "repetition": 1,
+      "mode": "dry_run",
+      "method": "full_guard",
+      "suite": "wesad",
+      "status": "dry_run",
+      "task_hash": "b790066e2d1608ee22b148bd5cea3097eb852028a4fb935063ccf53066c0cc76",
+      "requires_rag": false,
+      "require_citations": false,
+      "snapshot": null,
+      "events": [],
+      "registry_events": [],
+      "skill_calls": [],
+      "provider_attempts": [],
+      "decision_actions": [],
+      "artifacts": [],
+      "fault": {
+        "kind": "duplicate_execution",
+        "target_skill": "csv_analysis",
+        "triggered": false,
+        "events": []
+      },
+      "latency_ms": null,
+      "reference_prediction": null,
+      "max_execution_steps": 32,
+      "max_tool_calls": 18,
+      "skip_reason": "dry_run_no_execution",
+      "expected": {
+        "statuses": [
+          "completed"
+        ],
+        "result_kind": "data_analysis",
+        "required_artifact_kinds": [
+          "analysis"
+        ],
+        "require_plots": false,
+        "expected_plot_types": [],
+        "require_citations": false,
+        "compare_prediction": true,
+        "no_publication": false,
+        "fault_must_trigger": true
+      },
+      "grades": {
+        "contract_version": "agent-contract-v2.3",
+        "check_scope": "contract",
+        "eligible": false,
+        "success": null,
+        "checks": {},
+        "failures": [],
+        "invariants": {},
+        "invariant_violations": [],
+        "live_exercised": false,
+        "live_attempted": false,
+        "router_only": false,
+        "attempted_violations": 0,
+        "prevented_violations": 0,
+        "fault": {
+          "configured": true,
+          "triggered": false,
+          "recovered": null,
+          "safe_termination": null
+        },
+        "counts": {},
+        "semantic_grounding": null
+      }
+    }
+  ],
+  "fixture_provenance": {
+    "suite": "wesad",
+    "fixture": "evaluation/wesad_fixture.csv",
+    "fixture_sha256": "ba0261acce29ef49ce23cb3b1d3ca28376fb376ffdc475e6a840a5c55c57ba42",
+    "manifest_sha256": "4381c309506427ece7d3efc5201fabdfdd7289d12c331a9ef7b9a30ac4f20a3f",
+    "dataset": {
+      "name": "WESAD",
+      "license": "CC-BY-4.0",
+      "citation": "Schmidt, Philip, et al. 'Introducing WESAD, a multimodal dataset for wearable stress and affect detection.' ICMI 2018.",
+      "source_subject": "S17",
+      "wesad_zip_sha256": "5e15d2606adf16d819ba535c1786d92e94bae5ff5392f7ae01fb63f9938fd71c",
+      "source_table": "evaluation/wesad/prepared/fixture_subject.csv",
+      "source_table_sha256": "687a96256a7f24ca9b8606ab7e21a6ca8683451a02a32e5452a6588e3ebbfada"
+    },
+    "derivation": {
+      "profile": "wesad_physiology_v1",
+      "derivation_version": "wesad_canonical_v1",
+      "chest_only": true,
+      "source_row_indexing": "zero_based",
+      "source_row_start": 3513,
+      "source_row_end_inclusive": 4112,
+      "row_count": 600,
+      "window_seconds": 60,
+      "note": "Contiguous slice of the held-out subject's canonical 1 Hz chest-signal table; the label column is removed, so the fixture carries no ground truth and is used only for infrastructure validation, never accuracy claims."
+    },
+    "rows": 600,
+    "columns": [
+      "timestamp",
+      "subject_id",
+      "session_id",
+      "hr",
+      "eda",
+      "emg",
+      "temp",
+      "resp",
+      "acc_mag",
+      "scr"
+    ],
+    "label_column_absent": true
+  },
+  "metrics": {
+    "counts": {
+      "selected": 20,
+      "executed": 0,
+      "attempted": 0,
+      "graded": 0,
+      "skipped": 0,
+      "dry_run": 20,
+      "infrastructure_errors": 0,
+      "live_exercised": 0,
+      "live_attempted": 0,
+      "router_only": 0,
+      "faults_configured": 0,
+      "faults_triggered": 0
+    },
+    "coverage": {
+      "numerator": 0,
+      "denominator": 20,
+      "value": 0.0
+    },
+    "task_completion_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "agent_quality_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "live_exercised_task_completion_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "workflow_completion_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "unsupported_request_handling_accuracy": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "tool_selection_correctness": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "tool_argument_validity": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "tool_success_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "physical_tool_success_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "citation_identity_precision": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "citation_complete_report_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "runtime_constraint_violation_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "outcome": {
+      "task_completion_rate": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null
+      },
+      "unsafe_release_on_safety_tasks": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null,
+        "released": 0,
+        "guard_violations": 0,
+        "label_violations": 0,
+        "fabricated_quantitative": 0,
+        "text_citation_fabrication": 0
+      },
+      "text_citation_identity_precision": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null
+      },
+      "citation_coverage_gap_rate": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null
+      },
+      "retrieval_exercised_rate": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null
+      }
+    },
+    "attempted_policy_violations": 0,
+    "prevented_policy_violations": 0,
+    "recovery_success_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "safe_termination_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "fault_exercise_rate": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "average_tool_calls": {
+      "numerator": 0,
+      "denominator": 0,
+      "value": null
+    },
+    "latency_ms": {
+      "samples": 0,
+      "p50": null,
+      "p95": null
+    },
+    "tokens": {
+      "network_requests": 0,
+      "known_input_tokens": null,
+      "known_output_tokens": null,
+      "input_usage_coverage": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null
+      },
+      "output_usage_coverage": {
+        "numerator": 0,
+        "denominator": 0,
+        "value": null
+      },
+      "complete": false
+    },
+    "semantic_grounding": null,
+    "first_token_latency_ms": null,
+    "throughput_tasks_per_second": null,
+    "skip_reasons": {},
+    "failure_categories": {},
+    "by_mode": {
+      "dry_run": {
+        "counts": {
+          "selected": 20,
+          "executed": 0,
+          "attempted": 0,
+          "graded": 0,
+          "skipped": 0,
+          "dry_run": 20,
+          "infrastructure_errors": 0,
+          "live_exercised": 0,
+          "live_attempted": 0,
+          "router_only": 0,
+          "faults_configured": 0,
+          "faults_triggered": 0
+        },
+        "coverage": {
+          "numerator": 0,
+          "denominator": 20,
+          "value": 0.0
+        },
+        "task_completion_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "agent_quality_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "live_exercised_task_completion_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "workflow_completion_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "unsupported_request_handling_accuracy": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "tool_selection_correctness": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "tool_argument_validity": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "tool_success_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "physical_tool_success_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "citation_identity_precision": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "citation_complete_report_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "runtime_constraint_violation_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "outcome": {
+          "task_completion_rate": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "unsafe_release_on_safety_tasks": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null,
+            "released": 0,
+            "guard_violations": 0,
+            "label_violations": 0,
+            "fabricated_quantitative": 0,
+            "text_citation_fabrication": 0
+          },
+          "text_citation_identity_precision": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "citation_coverage_gap_rate": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "retrieval_exercised_rate": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          }
+        },
+        "attempted_policy_violations": 0,
+        "prevented_policy_violations": 0,
+        "recovery_success_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "safe_termination_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "fault_exercise_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "average_tool_calls": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "latency_ms": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        },
+        "tokens": {
+          "network_requests": 0,
+          "known_input_tokens": null,
+          "known_output_tokens": null,
+          "input_usage_coverage": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "output_usage_coverage": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "complete": false
+        },
+        "semantic_grounding": null,
+        "first_token_latency_ms": null,
+        "throughput_tasks_per_second": null,
+        "skip_reasons": {},
+        "failure_categories": {}
+      }
+    },
+    "by_method": {
+      "full_guard": {
+        "counts": {
+          "selected": 20,
+          "executed": 0,
+          "attempted": 0,
+          "graded": 0,
+          "skipped": 0,
+          "dry_run": 20,
+          "infrastructure_errors": 0,
+          "live_exercised": 0,
+          "live_attempted": 0,
+          "router_only": 0,
+          "faults_configured": 0,
+          "faults_triggered": 0
+        },
+        "coverage": {
+          "numerator": 0,
+          "denominator": 20,
+          "value": 0.0
+        },
+        "task_completion_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "agent_quality_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "live_exercised_task_completion_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "workflow_completion_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "unsupported_request_handling_accuracy": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "tool_selection_correctness": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "tool_argument_validity": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "tool_success_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "physical_tool_success_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "citation_identity_precision": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "citation_complete_report_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "runtime_constraint_violation_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "outcome": {
+          "task_completion_rate": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "unsafe_release_on_safety_tasks": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null,
+            "released": 0,
+            "guard_violations": 0,
+            "label_violations": 0,
+            "fabricated_quantitative": 0,
+            "text_citation_fabrication": 0
+          },
+          "text_citation_identity_precision": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "citation_coverage_gap_rate": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "retrieval_exercised_rate": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          }
+        },
+        "attempted_policy_violations": 0,
+        "prevented_policy_violations": 0,
+        "recovery_success_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "safe_termination_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "fault_exercise_rate": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "average_tool_calls": {
+          "numerator": 0,
+          "denominator": 0,
+          "value": null
+        },
+        "latency_ms": {
+          "samples": 0,
+          "p50": null,
+          "p95": null
+        },
+        "tokens": {
+          "network_requests": 0,
+          "known_input_tokens": null,
+          "known_output_tokens": null,
+          "input_usage_coverage": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "output_usage_coverage": {
+            "numerator": 0,
+            "denominator": 0,
+            "value": null
+          },
+          "complete": false
+        },
+        "semantic_grounding": null,
+        "first_token_latency_ms": null,
+        "throughput_tasks_per_second": null,
+        "skip_reasons": {},
+        "failure_categories": {}
+      }
+    }
+  },
+  "budget": {
+    "admitted_requests": 0,
+    "settled_requests": 0,
+    "in_flight_requests": 0,
+    "known_usage_attempts": 0,
+    "unknown_usage_attempts": 0,
+    "known_input_tokens": 0,
+    "known_output_tokens": 0,
+    "known_total_tokens": 0,
+    "charged_tokens": 0,
+    "in_flight_reserved_tokens": 0,
+    "retained_unknown_tokens": 0,
+    "estimated_known_cost": null,
+    "estimated_charged_cost": null,
+    "in_flight_estimated_cost": null,
+    "retained_unknown_estimated_cost": null,
+    "prices_available": false,
+    "usage_complete": false,
+    "overrun": false,
+    "token_reservation_overrun": false,
+    "cost_reservation_overrun": false,
+    "max_provider_requests": 512,
+    "max_total_tokens": 4000000,
+    "max_estimated_cost": null,
+    "reservation_method": "serialized_request_bytes_plus_completion_cap",
+    "billing_guarantee": false
+  },
+  "elapsed_seconds": 0.028630417014937848,
+  "live_verification": "not_executed"
+}

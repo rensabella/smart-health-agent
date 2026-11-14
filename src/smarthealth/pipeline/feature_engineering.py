@@ -1,11 +1,16 @@
-"""Window statistics; no claims to waveform-derived HRV or EEG band power."""
+"""Window statistics; no claims to waveform-derived HRV or EEG band power.
+
+The synthetic extractor is the historical default contract. Other registered
+profiles (see ``pipeline/profiles.py``) supply their own extractor; the
+synthetic feature set, ordering and failure messages are unchanged.
+"""
 
 from __future__ import annotations
 
 import numpy as np
 import pandas as pd
 
-from smarthealth.pipeline.preprocess import SIGNAL_COLUMNS
+from smarthealth.pipeline.preprocess import PROCESSING_CONFIG, SIGNAL_COLUMNS
 from smarthealth.runtime.errors import SkillError
 
 FEATURE_SCHEMA_VERSION = "1.0"
@@ -31,18 +36,21 @@ def _correlation(left: np.ndarray, right: np.ndarray) -> float:
     return float(np.corrcoef(left, right)[0, 1])
 
 
-def extract_features(windows: list[pd.DataFrame]) -> pd.DataFrame:
+def extract_synthetic_features(windows: list[pd.DataFrame]) -> pd.DataFrame:
     if not windows:
         raise SkillError("insufficient_data", "At least one complete window is required.")
+    window_rows = PROCESSING_CONFIG["window_rows"]
     records = []
     for window in windows:
         if (
-            len(window) != 30
+            len(window) != window_rows
             or not set(SIGNAL_COLUMNS).issubset(window.columns)
             or not np.isfinite(window[list(SIGNAL_COLUMNS)].to_numpy(dtype=float)).all()
         ):
             raise SkillError(
-                "invalid_features", "Feature extraction requires complete, finite 30-row windows."
+                "invalid_features",
+                "Feature extraction requires complete, finite "
+                f"{window_rows}-row windows.",
             )
         record = {}
         centered_time = np.arange(len(window), dtype=float) - (len(window) - 1) / 2
@@ -73,3 +81,10 @@ def extract_features(windows: list[pd.DataFrame]) -> pd.DataFrame:
     if not np.isfinite(result.to_numpy()).all():
         raise SkillError("invalid_features", "Extracted features must all be finite.")
     return result
+
+
+def extract_features(windows: list[pd.DataFrame], *, profile=None) -> pd.DataFrame:
+    """Delegate to the profile's extractor; the default keeps the synthetic contract."""
+    if profile is not None:
+        return profile.extractor(windows)
+    return extract_synthetic_features(windows)

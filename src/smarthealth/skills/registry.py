@@ -17,7 +17,7 @@ from smarthealth.runtime.context import SkillContext
 from smarthealth.runtime.errors import SkillError
 from smarthealth.runtime.trace import InMemoryTraceSink, TraceEvent
 from smarthealth.skills.base_skill import BaseSkill, SkillFailure, SkillModel, SkillResult
-from smarthealth.skills.validation import validate_input, validate_output
+from smarthealth.skills.validation import input_diagnostics, validate_input, validate_output
 
 _NAME = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
 
@@ -119,11 +119,12 @@ class SkillRegistry:
         child = None
         started = False
         input_fields: list[str] = []
+        validation_error = None
 
         def elapsed() -> float:
             return (time.monotonic() - start) * 1000
 
-        def emit(event: str, *, error_code=None, output_fields=None) -> None:
+        def emit(event: str, *, error_code=None, error_rule=None, output_fields=None) -> None:
             try:
                 self.trace_sink.emit(
                     TraceEvent(
@@ -158,6 +159,8 @@ class SkillRegistry:
                         budget_used=context.budget.used,
                         latency_ms=elapsed(),
                         error_code=error_code,
+                        error_rule=error_rule,
+                        validation_error=validation_error,
                         harness_version=self._harness.version if self._harness else None,
                         harness_hash=self._harness.fingerprint if self._harness else None,
                     )
@@ -200,7 +203,8 @@ class SkillRegistry:
                 raise SkillError("invalid_input", "Skill input must be a JSON object.")
             try:
                 validated = validate_input(skill.input_schema, payload)
-            except ValidationError:
+            except ValidationError as exc:
+                validation_error = input_diagnostics(skill.input_schema, exc)
                 raise SkillError(
                     "invalid_input", "Input does not match the Skill schema."
                 ) from None
@@ -269,10 +273,21 @@ class SkillRegistry:
                 )
             )
             try:
-                emit("skill.failed" if started else "skill.rejected", error_code=error.code)
+                emit(
+                    "skill.failed" if started else "skill.rejected",
+                    error_code=error.code,
+                    error_rule=(error.details or {}).get("rule"),
+                )
             except SkillError as trace_error:
                 error = trace_error
-            return result(error=SkillFailure(code=error.code, message=error.message))
+            return result(
+                error=SkillFailure(
+                    code=error.code,
+                    message=error.message,
+                    validation_error=validation_error,
+                    details=error.details,
+                )
+            )
 
     def _drained(self, task: asyncio.Task) -> None:
         self._tasks.discard(task)

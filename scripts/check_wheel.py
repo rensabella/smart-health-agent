@@ -27,7 +27,7 @@ from smarthealth.config.resources import resource_path
 from smarthealth.config.settings import Settings
 from smarthealth.evaluation.cases import load_cases
 from smarthealth.evaluation.live_llm.tasks import load_tasks
-from smarthealth.evaluation.live_llm.runner import main as live_eval_main
+from smarthealth.evaluation.live_llm.runner import load_wesad_fixture, main as live_eval_main
 from smarthealth.models.model_loader import load_model
 from smarthealth.runtime.harness.config import load_config
 
@@ -39,6 +39,11 @@ load_config(settings.harness_config_dir)
 load_config(resource_path("configs", "report"))
 load_cases(resource_path("evaluation", "test_cases.json"), root=resource_path())
 assert len(load_tasks()[0].tasks) == 20
+assert len(load_tasks("wesad")[0].tasks) == 20
+_, wesad_provenance = load_wesad_fixture()
+assert wesad_provenance["dataset"]["license"] == "CC-BY-4.0"
+assert wesad_provenance["dataset"]["source_subject"].startswith("S")
+assert wesad_provenance["rows"] == 600 and wesad_provenance["label_column_absent"]
 assert live_eval_main(["--dry-run", "--max-tasks", "20", "--output", "live-eval-dry"]) == 0
 frame = generate_dataset(subjects=16, sessions=2, windows=6, seed=42)
 dataset = Path("training.csv")
@@ -75,6 +80,10 @@ def main():
             name.startswith(("smarthealth/", "smart_health_agent-")) for name in archive.namelist()
         )
         assert "smarthealth/resources/configs/report/agent.yaml" in archive.namelist()
+        assert "smarthealth/resources/evaluation/wesad_fixture.csv" in archive.namelist()
+        assert (
+            "smarthealth/resources/evaluation/wesad_fixture_manifest.json" in archive.namelist()
+        )
     with tempfile.TemporaryDirectory(prefix="smarthealth-wheel-") as temporary:
         root = Path(temporary).resolve()
         venv = root / "venv"

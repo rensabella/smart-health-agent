@@ -1,0 +1,26 @@
+# Phase 4 WESAD suite: the 20 packaged tasks run against the reviewed
+# WESAD-derived fixture CSV (evaluation/wesad_fixture.csv, packaged with its
+# manifest in Stage 5) and the deployed stress-model bundle produced by
+# `smarthealth-train --profile wesad --cv loso --output-dir models_saved/wesad_v1`.
+# The fixture is pinned by manifest hashes and never generated from a seed;
+# model_dir resolves relative to the runtime home. The suite is defined for the
+# full-guard gated method only. This phase authorizes dry-run and scripted
+# infrastructure tests; no live provider budget is configured here.
+schema_version: "1.0"
+provider: openai_compatible
+model: qwen3.8-27b
+temperature: 0.0
+max_completion_tokens: 2048
+seed: null
+fixture_seed: 10042
+suite: wesad
+model_dir: models_saved/wesad_v1/lightgbm_v1.0
+max_tasks: 20
+repetitions: 1
+concurrency: 1
+max_total_tokens: 4000000
+max_provider_requests: 512
+per_task_token_budget: 131072
+decision_timeout_seconds: 30.0
+baseline: full_guard
+method: full_guard

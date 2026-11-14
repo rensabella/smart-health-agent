@@ -17,12 +17,7 @@ import numpy as np
 from smarthealth.models.base import BasePredictor
 from smarthealth.models.lightgbm_model import LightGBMPredictor
 from smarthealth.models.random_forest_model import RandomForestPredictor
-from smarthealth.pipeline.feature_engineering import (
-    FEATURE_CONFIG,
-    FEATURE_NAMES,
-    FEATURE_SCHEMA_VERSION,
-)
-from smarthealth.pipeline.preprocess import INPUT_PROFILE, PROCESSING_CONFIG
+from smarthealth.pipeline.profiles import get_profile
 from smarthealth.runtime.errors import SkillError
 
 
@@ -39,14 +34,17 @@ def load_model(bundle_dir: str | Path) -> BasePredictor:
         ):
             raise ValueError("integrity")
         metadata = json.loads(meta_bytes)
+        # The bundle must declare a registered input profile; unknown origins are
+        # a contract failure even when every other field happens to match.
+        profile = get_profile(metadata["input_profile"])
         if (
-            metadata["feature_names"] != list(FEATURE_NAMES)
-            or metadata["feature_schema_version"] != FEATURE_SCHEMA_VERSION
-            or metadata["input_profile"] != INPUT_PROFILE
-            or metadata["processing_config"] != PROCESSING_CONFIG
-            or metadata["feature_config"] != FEATURE_CONFIG
-            or metadata["label_mapping"] != {"0": "normal", "1": "anomaly"}
-            or metadata["score_semantics"] != "synthetic_anomaly_model_score"
+            metadata["feature_names"] != list(profile.feature_names)
+            or metadata["feature_schema_version"] != profile.feature_schema_version
+            or metadata["input_profile"] != profile.name
+            or metadata["processing_config"] != profile.processing_config
+            or metadata["feature_config"] != profile.feature_config
+            or metadata["label_mapping"] != profile.label_mapping
+            or metadata["score_semantics"] != profile.score_semantics
             or not 0 < metadata["threshold"] < 1
         ):
             raise ValueError("contract")
@@ -54,18 +52,18 @@ def load_model(bundle_dir: str | Path) -> BasePredictor:
             raise ValueError("backend")
         for package, version in metadata["dependencies"].items():
             if (
-                package in ("scikit-learn", "lightgbm", "numpy", "joblib")
+                package in profile.dependency_packages
                 and importlib.metadata.version(package) != version
             ):
                 raise ValueError("dependency")
-        if any(name not in metadata["normal_reference"] for name in FEATURE_NAMES):
+        if any(name not in metadata["normal_reference"] for name in profile.feature_names):
             raise ValueError("reference")
         # Deserialize exactly the bytes whose checksum was verified (no reopen race).
         import io
 
         estimator = joblib.load(io.BytesIO(model_bytes))
-        if list(estimator.feature_names_in_) != list(FEATURE_NAMES) or not np.array_equal(
-            estimator.classes_, np.array([0, 1])
+        if list(estimator.feature_names_in_) != list(profile.feature_names) or not np.array_equal(
+            estimator.classes_, np.array(profile.expected_classes)
         ):
             raise ValueError("estimator contract")
         cls = LightGBMPredictor if metadata["backend"] == "lightgbm" else RandomForestPredictor
