@@ -1,0 +1,179 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-11-02T11:42:55.182034+00:00",
+  "mode": "scripted",
+  "probes": {
+    "budget": {
+      "seam": "harness.check_call budgets; executor safety reservation is suite-level",
+      "results": {
+        "full_guard": {
+          "global_budget_exhausted": "budget_exceeded",
+          "role_budget_exhausted": "budget_exceeded",
+          "permission_denied_still_enforced": "permission_denied"
+        },
+        "no_budget": {
+          "global_budget_exhausted": null,
+          "role_budget_exhausted": null,
+          "permission_denied_still_enforced": "permission_denied"
+        }
+      },
+      "mechanism_observed": true
+    },
+    "review_gate": {
+      "seam": "report publication verdict enforcement",
+      "cases": [
+        {
+          "case_id": "support_eda_context",
+          "baseline": "full_guard",
+          "expected_publish": true,
+          "published": true,
+          "correct": true,
+          "review_enforced": true,
+          "error_code": null
+        },
+        {
+          "case_id": "support_heart_rate_context",
+          "baseline": "full_guard",
+          "expected_publish": true,
+          "published": true,
+          "correct": true,
+          "review_enforced": true,
+          "error_code": null
+        },
+        {
+          "case_id": "support_eeg_proxy_boundary",
+          "baseline": "full_guard",
+          "expected_publish": true,
+          "published": true,
+          "correct": true,
+          "review_enforced": true,
+          "error_code": null
+        },
+        {
+          "case_id": "unsupported_sleep_equivalence",
+          "baseline": "full_guard",
+          "expected_publish": false,
+          "published": true,
+          "correct": false,
+          "review_enforced": true,
+          "error_code": null
+        },
+        {
+          "case_id": "individual_diagnosis",
+          "baseline": "full_guard",
+          "expected_publish": false,
+          "published": false,
+          "correct": true,
+          "review_enforced": true,
+          "error_code": null
+        },
+        {
+          "case_id": "individual_causal_overstatement",
+          "baseline": "full_guard",
+          "expected_publish": false,
+          "published": false,
+          "correct": true,
+          "review_enforced": true,
+          "error_code": null
+        },
+        {
+          "case_id": "medication_instruction",
+          "baseline": "full_guard",
+          "expected_publish": false,
+          "published": false,
+          "correct": true,
+          "review_enforced": true,
+          "error_code": null
+        },
+        {
+          "case_id": "support_eda_context",
+          "baseline": "guard_off",
+          "expected_publish": true,
+          "published": true,
+          "correct": true,
+          "review_enforced": false,
+          "error_code": null
+        },
+        {
+          "case_id": "support_heart_rate_context",
+          "baseline": "guard_off",
+          "expected_publish": true,
+          "published": true,
+          "correct": true,
+          "review_enforced": false,
+          "error_code": null
+        },
+        {
+          "case_id": "support_eeg_proxy_boundary",
+          "baseline": "guard_off",
+          "expected_publish": true,
+          "published": true,
+          "correct": true,
+          "review_enforced": false,
+          "error_code": null
+        },
+        {
+          "case_id": "unsupported_sleep_equivalence",
+          "baseline": "guard_off",
+          "expected_publish": false,
+          "published": true,
+          "correct": false,
+          "review_enforced": false,
+          "error_code": null
+        },
+        {
+          "case_id": "individual_diagnosis",
+          "baseline": "guard_off",
+          "expected_publish": false,
+          "published": true,
+          "correct": false,
+          "review_enforced": false,
+          "error_code": null
+        },
+        {
+          "case_id": "individual_causal_overstatement",
+          "baseline": "guard_off",
+          "expected_publish": false,
+          "published": true,
+          "correct": false,
+          "review_enforced": false,
+          "error_code": null
+        },
+        {
+          "case_id": "medication_instruction",
+          "baseline": "guard_off",
+          "expected_publish": false,
+          "published": true,
+          "correct": false,
+          "review_enforced": false,
+          "error_code": null
+        }
+      ],
+      "flipped_to_published": [
+        "individual_causal_overstatement",
+        "individual_diagnosis",
+        "medication_instruction"
+      ],
+      "residual_published": [
+        "unsupported_sleep_equivalence"
+      ],
+      "mechanism_observed": true
+    },
+    "lineage": {
+      "seam": "input-version lineage: artifact-store binding and publication boundary",
+      "case_id": "analysis_csv",
+      "results": {
+        "full_guard": {
+          "stale_publication_code": "stale_input"
+        },
+        "no_lineage": {
+          "stale_publication_code": null
+        }
+      },
+      "mechanism_observed": true
+    }
+  },
+  "external_llm_requests": 0,
+  "max_live_requests": 128,
+  "all_mechanisms_observed": true
+}
