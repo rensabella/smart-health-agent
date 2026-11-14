@@ -26,8 +26,17 @@ ReviewReason = Literal[
 
 
 class ClaimDraft(SkillModel):
+    """Evidence IDs must be unique within each claim."""
+
     claim_id: ClaimId
-    text: Annotated[str, Field(min_length=1, max_length=800)]
+    text: Annotated[
+        str,
+        Field(
+            min_length=1,
+            max_length=800,
+            description="Trimmed nonblank qualitative plain text only; no numbers, numeric facts, URLs, markup, control or formatting characters.",
+        ),
+    ]
     evidence_ids: Annotated[list[EvidenceId], Field(min_length=1, max_length=4)]
 
     @field_validator("text")
@@ -58,6 +67,10 @@ class ClaimDraft(SkillModel):
 
 
 class GenerationInput(SkillModel):
+    """Claim IDs must be unique. A revision requires both previous_draft_ref and
+    previous_review_ref; omit both for the initial draft.
+    """
+
     analysis_ref: ArtifactRef
     evidence_ref: ArtifactRef
     claims: Annotated[list[ClaimDraft], Field(min_length=1, max_length=6)]
@@ -161,6 +174,13 @@ class PublicationSafety(SkillModel):
     safe: Literal[True] = True
     warnings: list[str] = Field(default_factory=list)
     revision_needed: Literal[False] = False
+    # True review outcome plus the enforcement state that admitted this report.
+    # guard_off ablation publishes with review_enforced=False, review_safe as the
+    # reviewer's actual verdict and the reviewer's warnings; defaults keep the
+    # production fail-closed record unchanged.
+    review_enforced: bool = True
+    review_safe: bool = True
+    review_revision_needed: bool = False
     draft_version: Annotated[int, Field(ge=1, le=3)]
     draft_hash: Digest
     evidence_hash: Digest

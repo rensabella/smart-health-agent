@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 
 from smarthealth.agents.backends import OpenAICompatibleBackend
-from smarthealth.agents.contracts import CreateRunRequest
+from smarthealth.agents.contracts import CreateRunRequest, DecisionRequest
 from smarthealth.agents.executor import AgentRuntime
 from smarthealth.agents.router import HealthRouter
 from smarthealth.evaluation.live_llm.budget import EvaluationBudget
@@ -22,6 +22,7 @@ from smarthealth.evaluation.live_llm.trace_collector import (
     SkillCollector,
 )
 from smarthealth.runtime.context import SkillContext
+from smarthealth.runtime.errors import SkillError
 from smarthealth.runtime.events import RunEventStore
 from smarthealth.runtime.harness.harness_validator import HarnessValidator
 from smarthealth.services.analysis_service import AnalysisService
@@ -161,7 +162,9 @@ async def test_mock_http_fault_recovery_uses_real_adapter_and_existing_runtime(
         assert len(requests) == transport.network_dispatches == 1
         assert backend.attempts[0]["error_code"] == error
         assert backend.attempts[0]["injected"] and not backend.attempts[0]["network_dispatched"]
+        assert backend.attempts[0]["provider_http_status"] is None
         assert backend.attempts[1]["status"] == "success"
+        assert backend.attempts[1]["provider_http_status"] == 200
         assert not backend.attempts[1]["injected"] and backend.attempts[1]["network_dispatched"]
         assert backend.attempts[1]["input_tokens"] == 42
         assert backend.attempts[1]["output_tokens"] == 12
@@ -177,4 +180,53 @@ async def test_mock_http_fault_recovery_uses_real_adapter_and_existing_runtime(
         assert "arguments" not in json.dumps(backend.actions)
     finally:
         await runtime.aclose()
+        await registry.aclose()
+
+
+async def test_observed_backend_attributes_failure_reason_without_payloads(predictor):
+    calls = []
+
+    def respond(request):
+        calls.append(request)
+        reply = finish_response()
+        if len(calls) == 1:
+            reply["choices"][0]["finish_reason"] = "stop"
+        return httpx.Response(200, json=reply)
+
+    transport = httpx.MockTransport(respond)
+    service = AnalysisService(ArtifactCollector(), predictor)
+    registry = create_registry(service)
+    budget = EvaluationBudget(EvalConfig(max_total_tokens=200000))
+    adapter = OpenAICompatibleBackend(
+        "https://provider.invalid/v1", "test-only-secret", "test-model", transport=transport
+    )
+    backend = ObservedBackend(adapter, budget, registry, None)
+    request = DecisionRequest(
+        run_id="reason-attribution",
+        agent="data_analysis",
+        task="Explain the risk score.",
+        objective="score_definition",
+        include_visualizations=False,
+        available_refs={},
+        observations=[],
+        tools=[],
+        allowed_delegates=[],
+        remaining_tool_calls=3,
+        remaining_decisions=4,
+    )
+    try:
+        with pytest.raises(SkillError) as error:
+            await backend.decide(request)
+        assert error.value.code == "backend_invalid_response"
+        assert error.value.details["reason"] == "finish_reason"
+        assert backend.attempts[0]["error_code"] == "backend_invalid_response"
+        assert backend.attempts[0]["error_reason"] == "finish_reason"
+        reply = await backend.decide(request)
+        assert reply.decision.action == "finish"
+        assert backend.attempts[1]["status"] == "success"
+        assert backend.attempts[1]["error_reason"] is None
+        serialized = json.dumps(backend.attempts)
+        assert "test-only-secret" not in serialized and "SECRET" not in serialized
+    finally:
+        await backend.aclose()
         await registry.aclose()

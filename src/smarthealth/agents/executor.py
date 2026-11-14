@@ -26,9 +26,11 @@ from smarthealth.agents.contracts import (
     RequestInputAction,
     RunSnapshot,
     UpgradeWorkflowAction,
+    action_diagnostics,
 )
 from smarthealth.agents.planner import build_decision_request
 from smarthealth.agents.router import RouteDecision
+from smarthealth.runtime.action_policy import GUARD_VERSION, action_policy
 from smarthealth.runtime.context import CallBudget, SkillContext
 from smarthealth.runtime.errors import SkillError
 from smarthealth.runtime.execution_trace import traced_execution
@@ -43,9 +45,31 @@ from smarthealth.runtime.memory.memory_manager import score_summary
 from smarthealth.runtime.memory.schemas import ExecutionSummary, MemoryContext, TurnSummary
 from smarthealth.runtime.state import RunState as _Run
 from smarthealth.runtime.state import utcnow
+from smarthealth.runtime.token_budget import RunTokenBudget, TokenBudgetSnapshot
 from smarthealth.schemas.response import AnalyzeResponse, Explanation, Prediction
 
 logger = logging.getLogger("smart_health")
+MAX_WRITER_SCHEMA_CORRECTIONS = 1
+# Observation recovery may carry constant guidance text, but journal event data is
+# whitelist-validated: only these sanitized keys survive into agent.action_rejected.
+_JOURNAL_SAFE = frozenset(
+    {
+        "skill",
+        "result_ref",
+        "result_kind",
+        "draft_ref",
+        "expected_previous_draft_ref",
+        "expected_previous_review_ref",
+    }
+)
+
+
+def _journal_view(details):
+    """Project SkillError details onto journal-safe event keys (codes and refs only)."""
+    view = {key: value for key, value in (details or {}).items() if key in _JOURNAL_SAFE}
+    if isinstance((details or {}).get("rule"), str):
+        view["error_rule"] = details["rule"]
+    return view
 
 
 _REF_INPUTS = {
@@ -92,7 +116,10 @@ class AgentRuntime:
     ):
         self.registry, self.service, self.backend, self.events = registry, service, backend, events
         base_harness = harness or registry.harness or HarnessValidator()
-        self.harness = HarnessValidator(base_harness.config, limits=limits)
+        # Preserve the ablation baseline; the rebuild must not silently restore full_guard.
+        self.harness = HarnessValidator(
+            base_harness.config, limits=limits, baseline=base_harness.baseline
+        )
         self.limits = self.harness.limits
         registry.bind_harness(self.harness)
         # The HTTP application always supplies a router. None supports isolated engine tests.
@@ -146,6 +173,12 @@ class AgentRuntime:
                     workflow_upgrades=metadata.get("workflow_upgrades", 0),
                     harness_version=metadata.get("harness_version"),
                     harness_hash=metadata.get("harness_hash"),
+                    guard_version=metadata.get("guard_version"),
+                    historical_token_budget=TokenBudgetSnapshot.model_validate(
+                        metadata["token_budget"]
+                    )
+                    if metadata.get("token_budget")
+                    else None,
                 )
                 self._runs[context.run_id] = record
             except (KeyError, ValueError):
@@ -161,7 +194,11 @@ class AgentRuntime:
             run_id=run_id or uuid4().hex,
             allowed_skills=self.harness.allowed_skills("data_analysis"),
             deadline=time.monotonic() + self.limits.run_timeout_seconds,
-            budget=CallBudget(self.limits.max_tool_calls),
+            # no_budget also lifts the runtime-level Skill call cap; token admission,
+            # decision/LLM-request limits and timeouts stay enforced in every baseline.
+            budget=CallBudget(
+                None if self.harness.baseline == "no_budget" else self.limits.max_tool_calls
+            ),
         )
 
     def cleanup(self):
@@ -287,6 +324,10 @@ class AgentRuntime:
                 initial_workflow_type=route.workflow_type if route else None,
                 harness_version=self.harness.version,
                 harness_hash=self.harness.fingerprint,
+                guard_version=GUARD_VERSION,
+                token_budget=RunTokenBudget(self.limits.max_total_tokens)
+                if self.backend.mode == "live"
+                else None,
             )
             if route and route.reason_code == "existing_result":
                 source = self._source_result(request, owner_id, context)
@@ -308,6 +349,7 @@ class AgentRuntime:
                     "route": route.model_dump(mode="json") if route else None,
                     "harness_version": record.harness_version,
                     "harness_hash": record.harness_hash,
+                    "guard_version": record.guard_version,
                 },
             )
             self._emit(record, "run.queued", data={"backend_mode": record.backend_mode})
@@ -321,6 +363,9 @@ class AgentRuntime:
                     "harness_hash": record.harness_hash,
                 },
             )
+            self._emit(record, "guard.loaded", data={"guard_version": GUARD_VERSION})
+            if record.token_budget:
+                self._emit_budget(record, "budget.loaded")
             if self.memory is not None:
                 try:
                     record.memory_lease = self.memory.begin(
@@ -379,7 +424,9 @@ class AgentRuntime:
 
     def _source_result(self, request, owner_id, context):
         source = self._owned(request.source_run_id, owner_id, request.session_id)
-        if source.context.input_version != request.input_version:
+        if self.harness.baseline != "no_lineage" and (
+            source.context.input_version != request.input_version
+        ):
             raise SkillError("stale_input", "The prior result belongs to another input version.")
         if self._result_expired(source, time.monotonic()):
             self._expire_result(source)
@@ -572,6 +619,8 @@ class AgentRuntime:
 
     def _check_active(self, record):
         record.context.check_active()
+        if record.status in TERMINAL_STATUSES:
+            raise SkillError("run_terminal", "A terminal run cannot execute further actions.")
         if time.monotonic() >= self._deadline(record):
             raise SkillError("timeout", "The workflow deadline has elapsed.")
 
@@ -622,6 +671,8 @@ class AgentRuntime:
             memory_status=record.memory_status,
             harness_version=record.harness_version,
             harness_hash=record.harness_hash,
+            guard_version=record.guard_version,
+            token_budget=record.budget_snapshot(),
         )
 
     def get_events(self, run_id, *, owner_id, session_id, after_id=0):
@@ -677,13 +728,21 @@ class AgentRuntime:
             )
         return emitted
 
-    def _transition(self, record, status, *, error_code=None, message=None):
+    def _transition(self, record, status, *, error_code=None, message=None, error_rule=None):
+        allowed = {
+            "queued": {"running", "cancelled", "failed"},
+            "running": {"verifying", "awaiting_input", "blocked", "failed", "cancelled"},
+            "verifying": {"completed", "blocked", "failed", "cancelled"},
+        }
+        if status not in allowed.get(record.status, set()):
+            raise SkillError("invalid_run_transition", "Run state cannot make this transition.")
         self._emit(
             record,
             f"run.{status}",
             data={
                 "status": status,
                 "error_code": error_code,
+                "error_rule": error_rule,
                 "decision_count": record.decision_count,
                 "llm_requests": record.llm_requests,
                 "tool_calls": record.context.budget.used,
@@ -848,11 +907,12 @@ class AgentRuntime:
                         "harness_invalid_output",
                         "skill_disabled",
                         "skill_version_mismatch",
+                        "skill_validation_exhausted",
                     }
                     else "failed"
                 )
             )
-            self._fail(record, exc.code, status=status)
+            self._fail(record, exc.code, status=status, error_rule=(exc.details or {}).get("rule"))
         except Exception:
             record.context.cancelled.set()
             self._fail(record, "internal_error")
@@ -866,30 +926,64 @@ class AgentRuntime:
                 record.quality_reports.clear()
                 record.plots.clear()
 
-    def _fail(self, record, code, status="failed"):
+    def _fail(self, record, code, status="failed", *, error_rule=None):
         if record.status in TERMINAL_STATUSES:
             return
         record.final_result = None
         try:
-            self._transition(record, status, error_code=code)
+            self._transition(record, status, error_code=code, error_rule=error_rule)
         except SkillError:
             # Publication stays closed even if the journal itself is unavailable.
             record.status, record.error_code = "failed", "trace_unavailable"
             record.finished_at, record.updated_at = time.monotonic(), utcnow()
 
-    async def _decision(self, record, role, task):
-        for attempt in range(2):
-            self._check_active(record)
-            if record.input_tokens + record.output_tokens >= self.limits.max_total_tokens:
-                raise SkillError("token_budget_exceeded", "Reported token budget exhausted.")
-            if record.decision_count >= self._decision_cap(record):
-                raise SkillError("decision_budget_exceeded", "Decision budget exhausted.")
-            if self.backend.mode == "live" and record.llm_requests >= self._llm_cap(record):
-                raise SkillError("llm_budget_exceeded", "LLM request budget exhausted.")
-            record.decision_count += 1
-            if self.backend.mode == "live":
-                record.llm_requests += 1
-            step_id = uuid4().hex
+    def _emit_budget(self, record, event, *, error_code=None, prepared=None):
+        budget = record.token_budget.snapshot()
+        demand = {}
+        if prepared is not None:
+            requested = prepared.input_bound + prepared.output_bound
+            # At admission the reservation is already charged; rejected demand has
+            # not touched the ledger. Both report the pre-reservation availability.
+            available = budget.available_tokens + (requested if event == "budget.admitted" else 0)
+            demand = {
+                "admission_demand": {
+                    "request_bytes": len(prepared.payload),
+                    "input_bound": prepared.input_bound,
+                    "output_cap": prepared.output_bound,
+                    "requested_tokens": requested,
+                    "available_tokens": available,
+                    "shortfall_tokens": max(0, requested - available),
+                }
+            }
+        self._emit(
+            record,
+            event,
+            data={
+                "token_budget": budget.model_dump(),
+                "input_tokens": record.input_tokens,
+                "output_tokens": record.output_tokens,
+                "token_usage_available": record.token_usage_available,
+                **({"error_code": error_code} if error_code else {}),
+                **demand,
+            },
+        )
+
+    async def _decision_attempt(self, record, role, task, step_id, attempt):
+        request = build_decision_request(self, record, role, task)
+        prepared = ticket = reply = None
+        if self.backend.mode == "live":
+            # Prepare once: the bytes admitted here are exactly the bytes sent by
+            # the provider adapter and counted by the evaluation's outer ledger.
+            prepared = self.backend.prepare(request)
+            try:
+                ticket = record.token_budget.reserve(prepared.input_bound, prepared.output_bound)
+            except SkillError as exc:
+                self._emit_budget(record, "budget.rejected", error_code=exc.code, prepared=prepared)
+                raise
+            record.llm_requests += 1
+        try:
+            if ticket:
+                self._emit_budget(record, "budget.admitted", prepared=prepared)
             self._emit(
                 record,
                 "agent.thinking",
@@ -901,28 +995,89 @@ class AgentRuntime:
                     "attempt": attempt + 1,
                 },
             )
-            request = build_decision_request(self, record, role, task)
+            value = await asyncio.wait_for(
+                self.backend.decide_prepared(prepared)
+                if prepared is not None
+                else self.backend.decide(request),
+                timeout=min(
+                    self.limits.decision_timeout_seconds,
+                    max(0.001, self._deadline(record) - time.monotonic()),
+                ),
+            )
             try:
-                reply = await asyncio.wait_for(
-                    self.backend.decide(request),
-                    timeout=min(
-                        self.limits.decision_timeout_seconds,
-                        max(0.001, self._deadline(record) - time.monotonic()),
-                    ),
+                reply = DecisionReply.model_validate(value.model_dump(warnings=False), strict=True)
+            except (ValidationError, AttributeError):
+                try:
+                    payload = value.model_dump(warnings=False)
+                except Exception:
+                    payload = None
+                candidate = (
+                    payload.get("decision") if isinstance(payload, dict) else payload
                 )
-                self._check_active(record)
-                reply = DecisionReply.model_validate(reply.model_dump(warnings=False), strict=True)
-                decision = ACTION_ADAPTER.validate_python(reply.decision.model_dump(), strict=True)
-                if reply.input_tokens is not None and reply.output_tokens is not None:
-                    record.input_tokens += reply.input_tokens
-                    record.output_tokens += reply.output_tokens
-                else:
-                    record.usage_missing = True
-                record.token_usage_available = not record.usage_missing
-                if record.input_tokens + record.output_tokens > self.limits.max_total_tokens:
-                    raise SkillError(
-                        "token_budget_exceeded", "Reported token usage exceeded the run allowance."
-                    )
+                raise SkillError(
+                    "invalid_decision",
+                    "Decision did not match the action contract.",
+                    details={
+                        "reason": "reply_schema",
+                        "validation_error": action_diagnostics(candidate).model_dump(
+                            mode="json"
+                        ),
+                    },
+                ) from None
+        finally:
+            if ticket:
+                record.token_budget.settle(
+                    ticket,
+                    reply.input_tokens if reply else None,
+                    reply.output_tokens if reply else None,
+                )
+                budget = record.token_budget.snapshot()
+                record.input_tokens, record.output_tokens = (
+                    budget.known_input_tokens,
+                    budget.known_output_tokens,
+                )
+                record.token_usage_available = budget.usage_complete
+                record.usage_missing = budget.unknown_usage_attempts > 0
+                self._emit_budget(record, "budget.settled")
+        if prepared is None:
+            if reply.input_tokens is not None and reply.output_tokens is not None:
+                record.input_tokens += reply.input_tokens
+                record.output_tokens += reply.output_tokens
+            else:
+                record.usage_missing = True
+            record.token_usage_available = not record.usage_missing
+        self._check_active(record)
+        if (record.token_budget and record.token_budget.snapshot().bound_exceeded) or (
+            record.input_tokens + record.output_tokens > self.limits.max_total_tokens
+        ):
+            raise SkillError("token_budget_exceeded", "Observed usage exceeded its reservation.")
+        try:
+            return ACTION_ADAPTER.validate_python(reply.decision.model_dump(), strict=True)
+        except ValidationError:
+            raise SkillError(
+                "invalid_decision",
+                "Decision did not match the action contract.",
+                details={
+                    "reason": "action_schema",
+                    "validation_error": action_diagnostics(
+                        reply.decision.model_dump(warnings=False)
+                    ).model_dump(mode="json"),
+                },
+            ) from None
+
+    async def _decision(self, record, role, task):
+        for attempt in range(2):
+            self._check_active(record)
+            if record.input_tokens + record.output_tokens >= self.limits.max_total_tokens:
+                raise SkillError("token_budget_exceeded", "Reported token budget exhausted.")
+            if record.decision_count >= self._decision_cap(record):
+                raise SkillError("decision_budget_exceeded", "Decision budget exhausted.")
+            if self.backend.mode == "live" and record.llm_requests >= self._llm_cap(record):
+                raise SkillError("llm_budget_exceeded", "LLM request budget exhausted.")
+            record.decision_count += 1
+            step_id = uuid4().hex
+            try:
+                decision = await self._decision_attempt(record, role, task, step_id, attempt)
                 return step_id, decision
             except (ValidationError, AttributeError):
                 error = SkillError(
@@ -932,16 +1087,17 @@ class AgentRuntime:
                 error = SkillError("llm_timeout", "The decision backend timed out.")
             except SkillError as exc:
                 error = exc
+            failed_data = {"error_code": error.code, "attempt": attempt + 1}
+            for key in ("reason", "validation_error"):
+                if (error.details or {}).get(key) is not None:
+                    failed_data[key] = error.details[key]
             self._emit(
                 record,
                 "agent.decision_failed",
                 agent=role,
                 step_id=step_id,
-                data={"error_code": error.code, "attempt": attempt + 1},
+                data=failed_data,
             )
-            if self.backend.mode == "live":
-                record.usage_missing = True
-                record.token_usage_available = False
             if attempt or error.code not in {
                 "llm_timeout",
                 "backend_timeout",
@@ -954,6 +1110,7 @@ class AgentRuntime:
 
     @traced_execution("agent")
     async def _agent_loop(self, record, role, task, *, depth=0, parent_step_id=None):
+        self._check_active(record)
         self._emit(record, "agent.started", agent=role, parent_step_id=parent_step_id)
         while record.status == "running":
             try:
@@ -965,7 +1122,9 @@ class AgentRuntime:
                     "backend_invalid_response",
                 }:
                     raise
-                self._observe(record, role, uuid4().hex, "decision", error_code=exc.code)
+                self._observe(
+                    record, role, uuid4().hex, "decision", error_code=exc.code, data=exc.details
+                )
                 continue
             public_action = {
                 "action": action.action,
@@ -977,6 +1136,8 @@ class AgentRuntime:
             }
             if isinstance(action, CallSkillAction):
                 public_action["skill"] = action.skill if action.skill in ALL_SKILLS else "unknown"
+            if isinstance(action, RequestInputAction):
+                public_action["reason"] = action.reason
             self._emit(
                 record,
                 "agent.decision",
@@ -987,6 +1148,22 @@ class AgentRuntime:
             )
             if self._is_simple(record) and isinstance(action, (CallSkillAction, DelegateAction)):
                 self._reject(record, role, step_id, action.action, "workflow_upgrade_required")
+                continue
+            self._check_active(record)
+            policy = action_policy(self, record, role, self._report_context(record, role))
+            try:
+                policy.validate(action)
+            except SkillError as exc:
+                self._reject(
+                    record,
+                    role,
+                    step_id,
+                    action.action,
+                    exc.code,
+                    recovery={"result_ref": policy.terminal_ref, "result_kind": policy.finish_kind}
+                    if policy.terminal_reason
+                    else None,
+                )
                 continue
             if isinstance(action, CallSkillAction):
                 await self._call_skill(record, role, step_id, action, parent_step_id)
@@ -1075,7 +1252,15 @@ class AgentRuntime:
                                 action.result_ref, kind=kind, context=record.context
                             )
                     except SkillError as exc:
-                        self._reject(record, role, step_id, "finish", exc.code)
+                        self._reject(
+                            record,
+                            role,
+                            step_id,
+                            "finish",
+                            exc.code,
+                            recovery={"message": exc.message, **(exc.details or {})},
+                            journal=_journal_view(exc.details),
+                        )
                         continue
                     self._emit(
                         record,
@@ -1114,7 +1299,15 @@ class AgentRuntime:
                         )
                     )
                 except SkillError as exc:
-                    self._reject(record, role, step_id, "finish", exc.code)
+                    self._reject(
+                        record,
+                        role,
+                        step_id,
+                        "finish",
+                        exc.code,
+                        recovery={"message": exc.message, **(exc.details or {})},
+                        journal=_journal_view(exc.details),
+                    )
                     if self._is_simple(record) and exc.code in {
                         "source_result_unavailable",
                         "source_visualization_unavailable",
@@ -1146,10 +1339,16 @@ class AgentRuntime:
                         "publication.rejected",
                         data={
                             "error_code": exc.code,
+                            "error_rule": (exc.details or {}).get("rule"),
                             "harness_hash": record.harness_hash,
                         },
                     )
-                    self._fail(record, exc.code, status="blocked")
+                    self._fail(
+                        record,
+                        exc.code,
+                        status="blocked",
+                        error_rule=(exc.details or {}).get("rule"),
+                    )
                     return None
                 self._emit(
                     record,
@@ -1174,14 +1373,15 @@ class AgentRuntime:
                 record.final_result = candidate
                 return candidate
 
-    def _reject(self, record, role, step_id, action, code):
-        self._observe(record, role, step_id, action, error_code=code)
+    def _reject(self, record, role, step_id, action, code, *, recovery=None, journal=None):
+        self._observe(record, role, step_id, action, error_code=code, data=recovery)
+        safe = recovery if journal is None else journal
         self._emit(
             record,
             "agent.action_rejected",
             agent=role,
             step_id=step_id,
-            data={"action": action, "error_code": code},
+            data={"action": action, "error_code": code, **(safe or {})},
         )
 
     def _check_report_action(self, record, action):
@@ -1197,14 +1397,36 @@ class AgentRuntime:
         elif action.skill == "report_generation":
             if args.get("analysis_ref") != analysis or args.get("evidence_ref") != evidence:
                 raise SkillError("stale_input", "Draft must use the latest analysis and evidence.")
-            if draft and (
-                args.get("previous_draft_ref") != draft
-                or args.get("previous_review_ref") != review
-                or not review
-            ):
-                raise SkillError(
-                    "revision_required", "Revise the current draft using its failed review."
-                )
+            if draft:
+                # The service lineage check requires the previous review to belong to the
+                # draft being revised, so only a review of the current draft admits a
+                # revision here; otherwise the writer must return the draft for review.
+                current = False
+                if review:
+                    prior = self.service.store.get(
+                        review, kind="report_review", context=context
+                    )
+                    current = prior.get("draft_ref") == draft
+                if current:
+                    if (
+                        args.get("previous_draft_ref") != draft
+                        or args.get("previous_review_ref") != review
+                    ):
+                        raise SkillError(
+                            "revision_required",
+                            "Revise the current draft using its failed review.",
+                            details={
+                                "expected_previous_draft_ref": draft,
+                                "expected_previous_review_ref": review,
+                            },
+                        )
+                else:
+                    raise SkillError(
+                        "draft_awaiting_review",
+                        "The current draft has no completed review. Return it using finish "
+                        "with result_kind 'draft' and the current draft reference.",
+                        details={"draft_ref": draft},
+                    )
         elif action.skill == "safety_verification":
             if args.get("draft_ref") != draft:
                 raise SkillError("stale_input", "Review only the current draft.")
@@ -1212,7 +1434,7 @@ class AgentRuntime:
                 prior = self.service.store.get(review, kind="report_review", context=context)
                 if prior.get("draft_ref") == draft:
                     raise SkillError(
-                        "revision_required", "An unchanged draft cannot be reviewed repeatedly."
+                        "review_already_exists", "Return the existing review for this draft."
                     )
 
     def _report_result(self, record, ref):
@@ -1221,10 +1443,13 @@ class AgentRuntime:
             raise SkillError(
                 "unreviewed_report", "Finish requires the current independent review reference."
             )
-        report = self.service.reports.publication(draft, review, record.context)
-        if report.analysis_ref != self._latest(
-            record, "analysis"
-        ) or report.evidence_ref != self._latest(record, "evidence"):
+        report = self.service.reports.publication(
+            draft, review, record.context, enforce_review=self.harness.baseline != "guard_off"
+        )
+        if self.harness.baseline != "no_lineage" and (
+            report.analysis_ref != self._latest(record, "analysis")
+            or report.evidence_ref != self._latest(record, "evidence")
+        ):
             raise SkillError("stale_input", "Report evidence does not match the current run.")
         analysis = self._analysis_result(record, report.analysis_ref)["analysis"]
         return {
@@ -1250,6 +1475,7 @@ class AgentRuntime:
         return body[index * 400 : (index + 1) * 400]
 
     async def _call_skill(self, record, role, step_id, action, parent_step_id):
+        self._check_active(record)
         if self._is_simple(record):
             self._reject(record, role, step_id, "call_skill", "workflow_upgrade_required")
             return
@@ -1268,7 +1494,8 @@ class AgentRuntime:
             self._reject(record, role, step_id, "call_skill", exc.code)
             return
         if (
-            record.request.objective == "health_report"
+            self.harness.baseline != "no_budget"
+            and record.request.objective == "health_report"
             and role != "safety_verification"
             and record.context.budget.used >= self.limits.max_tool_calls - 1
         ):
@@ -1285,7 +1512,16 @@ class AgentRuntime:
                 self._report_prerequisite(record, role)
                 self._check_report_action(record, action)
             except SkillError as exc:
-                self._reject(record, role, step_id, "call_skill", exc.code)
+                recovery = {"skill": action.skill, "message": exc.message, **(exc.details or {})}
+                self._reject(
+                    record,
+                    role,
+                    step_id,
+                    "call_skill",
+                    exc.code,
+                    recovery=recovery,
+                    journal=_journal_view(recovery),
+                )
                 return
         self._emit(
             record,
@@ -1306,6 +1542,20 @@ class AgentRuntime:
             record.data_tool_calls += consumed
         record.context.check_active()
         safe_data = {}
+        correction_exhausted = False
+        if result.error and result.error.validation_error is not None:
+            feedback = result.error.validation_error.model_copy(deep=True)
+            if action.skill == "report_generation":
+                # Exactly one schema correction after the first invalid attempt,
+                # across this run. Model attempts still use all existing budgets.
+                record.writer_schema_failures += 1
+                remaining = max(
+                    0, 1 + MAX_WRITER_SCHEMA_CORRECTIONS - record.writer_schema_failures
+                )
+                feedback.remaining_corrections = remaining
+                feedback.retryable = remaining > 0
+                correction_exhausted = not feedback.retryable
+            safe_data["validation_error"] = feedback.model_dump(mode="json")
         if not result.error:
             safe_data = self._commit_skill(record, action, result.data)
             if action.skill == "safety_verification":
@@ -1342,9 +1592,19 @@ class AgentRuntime:
                 "latency_ms": result.latency_ms,
                 "tool_calls": record.context.budget.used,
                 "error_code": result.error.code if result.error else None,
+                "error_rule": (result.error.details or {}).get("rule") if result.error else None,
                 "output_refs": [v for k, v in safe_data.items() if k.endswith("_ref")],
+                **(
+                    {"validation_error": safe_data["validation_error"]}
+                    if "validation_error" in safe_data
+                    else {}
+                ),
             },
         )
+        if correction_exhausted:
+            raise SkillError(
+                "skill_validation_exhausted", "Report schema correction limit reached."
+            )
         if not result.error and action.skill == "safety_verification" and not result.data["safe"]:
             draft = self.service.store.get(
                 self._latest(record, "draft"), kind="report_draft", context=record.context
@@ -1367,7 +1627,11 @@ class AgentRuntime:
             "rag_index_invalid",
             "rag_embedding_unavailable",
         }:
-            raise SkillError(result.error.code, "Required Skill execution is unavailable.")
+            raise SkillError(
+                result.error.code,
+                "Required Skill execution is unavailable.",
+                details=result.error.details,
+            )
 
     def _commit_skill(self, record, action, data):
         """Only bounded derived facts and refs enter LLM observations; never sensor rows."""
@@ -1442,7 +1706,12 @@ class AgentRuntime:
             image["url"] += (
                 f"?session_id={context.session_id}&input_version={context.input_version}"
             )
-        summary = analysis_summary(predicted)
+        summary = analysis_summary(
+            predicted,
+            profile_name=dataset["quality_report"].get(
+                "input_profile", predicted.model.metadata.get("input_profile")
+            ),
+        )
         response = AnalyzeResponse(
             request_id=record.request_id,
             session_id=context.session_id,
@@ -1462,7 +1731,9 @@ class AgentRuntime:
         predictor = self.service.predictor
         if predictor is None:
             raise SkillError("model_unavailable", "A loaded model card is required.")
-        return score_definition(predictor.metadata)
+        return score_definition(
+            predictor.metadata, profile_name=predictor.profile.name
+        )
 
     async def aclose(self):
         self._closed = True

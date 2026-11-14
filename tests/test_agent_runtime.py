@@ -3,11 +3,13 @@ import json
 import threading
 from uuid import uuid4
 
+import httpx
 import pytest
 from agent_helpers import scripted_analysis
+from test_agent_backends import response
 
-from app.agents.backends import DecisionBackend, ScriptedDecisionBackend
-from app.agents.contracts import CallSkillAction, CreateRunRequest, DecisionReply, FinishAction
+from app.agents.backends import OpenAICompatibleBackend, ScriptedDecisionBackend
+from app.agents.contracts import CallSkillAction, CreateRunRequest, FinishAction
 from app.agents.events import RunEventStore
 from app.agents.runtime import AgentLimits, AgentRuntime
 from app.core.artifacts import ArtifactStore
@@ -231,10 +233,10 @@ async def test_cancel_during_native_skill_prevents_late_write(predictor, csv_byt
     entered, release = threading.Event(), threading.Event()
     original = runtime.service.inspect_csv
 
-    def slow(ref, context):
+    def slow(ref, context, **kwargs):
         entered.set()
         release.wait(3)
-        return original(ref, context)
+        return original(ref, context, **kwargs)
 
     monkeypatch.setattr(runtime.service, "inspect_csv", slow)
     try:
@@ -270,34 +272,30 @@ async def test_shared_tool_budget_terminates_delegated_work(predictor, csv_bytes
 
 
 async def test_live_retry_is_accounted_and_bounded(predictor):
-    class FakeLive(DecisionBackend):
-        mode = "live"
+    calls = []
 
-        def __init__(self):
-            self.calls = 0
+    def handle(request):
+        calls.append(request)
+        if len(calls) == 1:
+            return httpx.Response(429)
+        value = response()
+        value["usage"] = {"prompt_tokens": 20, "completion_tokens": 5}
+        return httpx.Response(200, json=value)
 
-        async def decide(self, state):
-            self.calls += 1
-            if self.calls == 1:
-                raise SkillError("backend_rate_limited", "Controlled failure")
-            return DecisionReply(
-                decision=FinishAction(result_kind="score_definition"),
-                input_tokens=20,
-                output_tokens=5,
-            )
-
-        async def aclose(self):
-            pass
-
-    backend = FakeLive()
+    backend = OpenAICompatibleBackend(
+        "https://llm.example/v1", "test-secret", "fixture", transport=httpx.MockTransport(handle)
+    )
     runtime = make_runtime(predictor, backend=backend)
     try:
         initial = await runtime.create(
             request_for(runtime, objective="score_definition"), owner_id="owner", request_id="retry"
         )
         result = await complete(runtime, initial)
-        assert result.status == "completed" and result.llm_requests == backend.calls == 2
+        assert result.status == "completed" and result.llm_requests == len(calls) == 2
         assert result.input_tokens == 20 and result.output_tokens == 5
+        assert result.token_budget.unknown_usage_attempts == 1
+        assert result.token_budget.retained_unknown_tokens == len(calls[0].content) + 2048
+        assert not result.token_usage_available
     finally:
         await close(runtime)
 
@@ -516,6 +514,48 @@ async def test_real_adapter_with_mock_http_runs_actual_skills(predictor, csv_byt
         assert result.llm_requests == len(calls) == 8
         assert result.decision_model == "protocol-fixture-model"
         assert result.input_tokens == 160 and result.output_tokens == 80
+    finally:
+        await close(runtime)
+
+
+async def test_invalid_decision_feedback_is_sanitized_observed_and_serializable(predictor):
+    seen = []
+
+    def policy(state):
+        seen.append(state)
+        if not state.observations:
+            # Schema-shaped object, but result_kind is outside the declared enum.
+            return {"action": "finish", "result_kind": "SECRET", "result_ref": None}
+        return FinishAction(result_kind="score_definition")
+
+    runtime = make_runtime(predictor, policy)
+    try:
+        result = await complete(
+            runtime,
+            await runtime.create(
+                request_for(runtime, objective="score_definition"),
+                owner_id="owner",
+                request_id="invalid-decision",
+            ),
+        )
+        assert result.status == "completed" and result.final_result is not None
+        assert result.decision_count == 2
+        observation = seen[1].observations[-1]
+        assert observation.error_code == "backend_invalid_decision"
+        assert observation.data["reason"] == "reply_schema"
+        issue = observation.data["validation_error"]["issues"][0]
+        assert issue["field_path"] == "$.result_kind"
+        assert '"score_definition"' in issue["expected"]
+        json.dumps(observation.data)  # Model-visible feedback must stay serializable.
+        events = runtime.get_events(
+            result.run_id, owner_id="owner", session_id=result.session_id
+        )
+        failed = [e for e in events if e.event == "agent.decision_failed"]
+        assert len(failed) == 1
+        assert failed[0].data["reason"] == "reply_schema"
+        assert failed[0].data["validation_error"]["issues"][0]["field_path"] == "$.result_kind"
+        serialized = json.dumps([e.model_dump() for e in events])
+        assert "SECRET" not in serialized
     finally:
         await close(runtime)
 

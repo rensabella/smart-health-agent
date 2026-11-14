@@ -34,7 +34,7 @@ def retrieval(tmp_path):
     service.close()
 
 
-def make(predictor, retrieval, policy=scripted_report, config=None):
+def make(predictor, retrieval, policy=scripted_report, config=None, events=None):
     harness = HarnessValidator(config if config else load_config("configs/report"))
     store = ArtifactStore()
     service = AnalysisService(
@@ -47,7 +47,7 @@ def make(predictor, retrieval, policy=scripted_report, config=None):
         service=service,
         registry=create_registry(service, harness=harness),
         backend=ScriptedDecisionBackend(policy),
-        events=RunEventStore(),
+        events=events or RunEventStore(),
         router=HealthRouter(),
         harness=harness,
         memory=MemoryManager(long_term=QdrantLongTermStore()),
@@ -289,3 +289,175 @@ def test_http_sse_only_streams_approved_body_and_replays(predictor, csv_bytes, r
             for line in replay.text.splitlines()
             if line.startswith("data: ")
         )
+
+
+def _fail_first_review(state, action):
+    """Reject the first-draft review so the scripted writer must revise it."""
+    if (
+        state.agent == "safety_verification"
+        and isinstance(action, CallSkillAction)
+        and state.report_context["draft_version"] <= 1
+    ):
+        for review in action.arguments["reviews"]:
+            review.update(supported=False, reason="insufficient_support")
+
+
+async def test_revision_pairing_with_prior_review_is_rejected_not_terminal(
+    predictor, csv_bytes, retrieval, tmp_path
+):
+    """Live-failure replay: after v2 exists, report_generation pairing the current
+    draft with the previous draft's review used to die as a terminal
+    harness_invalid_output. It must now be a retryable draft_awaiting_review."""
+    attempted, captured, replayed = set(), {}, {}
+
+    def policy(state):
+        action = scripted_report(state)
+        _fail_first_review(state, action)
+        if isinstance(action, CallSkillAction) and action.skill == "report_generation":
+            captured.update(action.arguments)
+        if (
+            state.agent == "report_writer"
+            and isinstance(action, FinishAction)
+            and action.result_kind == "draft"
+            and state.report_context.get("draft_version", 0) >= 2
+            and "replayed" not in attempted
+        ):
+            attempted.add("replayed")
+            replayed["draft"] = state.available_refs["draft"][-1]
+            return CallSkillAction(
+                skill="report_generation",
+                arguments={
+                    "analysis_ref": captured["analysis_ref"],
+                    "evidence_ref": captured["evidence_ref"],
+                    "claims": captured["claims"],
+                    "previous_draft_ref": replayed["draft"],
+                    "previous_review_ref": state.available_refs["review"][-1],
+                },
+            )
+        if "replayed" in attempted and "observed" not in attempted:
+            attempted.add("observed")
+            replayed["observations"] = [o.model_dump() for o in state.observations]
+        return action
+
+    runtime = make(predictor, retrieval, policy, events=RunEventStore(tmp_path))
+    try:
+        result = await execute(runtime, csv_bytes)
+        assert result.status == "completed", result.model_dump()
+        assert result.final_result["report"]["safety"]["draft_version"] == 2
+        rejection = next(
+            o for o in replayed["observations"] if o["error_code"] == "draft_awaiting_review"
+        )
+        assert rejection["data"]["draft_ref"] == replayed["draft"]
+        assert "finish" in rejection["data"]["message"]
+        events = runtime.get_events(result.run_id, owner_id="owner", session_id=result.session_id)
+        rejected = [
+            e
+            for e in events
+            if e.event == "agent.action_rejected" and e.data.get("error_code") == (
+                "draft_awaiting_review"
+            )
+        ]
+        assert len(rejected) == 1
+        assert rejected[0].data["skill"] == "report_generation"
+        assert rejected[0].data["draft_ref"] == replayed["draft"]
+        # Guidance text reaches the model observation but never the journal whitelist.
+        assert "message" not in rejected[0].data
+        # The rejected call never dispatched, so tool budgets are unchanged.
+        assert result.tool_calls == 10
+    finally:
+        await close(runtime)
+
+
+async def test_revision_without_expected_refs_reports_them_and_recovers(
+    predictor, csv_bytes, retrieval
+):
+    attempted, expected = set(), {}
+
+    def policy(state):
+        action = scripted_report(state)
+        _fail_first_review(state, action)
+        if (
+            isinstance(action, CallSkillAction)
+            and action.skill == "report_generation"
+            and "previous_draft_ref" in action.arguments
+            and "stripped" not in attempted
+        ):
+            attempted.add("stripped")
+            expected["draft"] = action.arguments["previous_draft_ref"]
+            expected["review"] = action.arguments["previous_review_ref"]
+            return CallSkillAction(
+                skill="report_generation",
+                arguments={
+                    "analysis_ref": action.arguments["analysis_ref"],
+                    "evidence_ref": action.arguments["evidence_ref"],
+                    "claims": action.arguments["claims"],
+                },
+            )
+        return action
+
+    runtime = make(predictor, retrieval, policy)
+    try:
+        result = await execute(runtime, csv_bytes)
+        assert result.status == "completed", result.model_dump()
+        assert result.final_result["report"]["safety"]["draft_version"] == 2
+        events = runtime.get_events(result.run_id, owner_id="owner", session_id=result.session_id)
+        rejected = [
+            e
+            for e in events
+            if e.event == "agent.action_rejected" and e.data.get("error_code") == (
+                "revision_required"
+            )
+        ]
+        assert len(rejected) == 1
+        assert rejected[0].data["expected_previous_draft_ref"] == expected["draft"]
+        assert rejected[0].data["expected_previous_review_ref"] == expected["review"]
+        assert rejected[0].data["skill"] == "report_generation"
+        assert "message" not in rejected[0].data
+    finally:
+        await close(runtime)
+
+
+async def test_regeneration_before_any_review_directs_writer_to_finish(
+    predictor, csv_bytes, retrieval
+):
+    attempted, captured = set(), {}
+
+    def policy(state):
+        action = scripted_report(state)
+        if isinstance(action, CallSkillAction) and action.skill == "report_generation":
+            captured.update(action.arguments)
+        if (
+            state.agent == "report_writer"
+            and isinstance(action, FinishAction)
+            and action.result_kind == "draft"
+            and "regenerated" not in attempted
+        ):
+            attempted.add("regenerated")
+            return CallSkillAction(
+                skill="report_generation",
+                arguments={
+                    "analysis_ref": captured["analysis_ref"],
+                    "evidence_ref": captured["evidence_ref"],
+                    "claims": captured["claims"],
+                },
+            )
+        return action
+
+    runtime = make(predictor, retrieval, policy)
+    try:
+        result = await execute(runtime, csv_bytes)
+        assert result.status == "completed", result.model_dump()
+        assert result.final_result["report"]["safety"]["draft_version"] == 1
+        events = runtime.get_events(result.run_id, owner_id="owner", session_id=result.session_id)
+        rejected = [
+            e
+            for e in events
+            if e.event == "agent.action_rejected" and e.data.get("error_code") == (
+                "draft_awaiting_review"
+            )
+        ]
+        assert len(rejected) == 1
+        assert rejected[0].data["draft_ref"] == result.final_result["report"]["draft_ref"]
+        assert result.tool_calls == 8
+    finally:
+        await close(runtime)

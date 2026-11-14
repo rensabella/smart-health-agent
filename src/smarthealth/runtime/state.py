@@ -10,6 +10,7 @@ from smarthealth.agents.router import RouteDecision
 from smarthealth.runtime.context import SkillContext
 from smarthealth.runtime.execution_trace import ExecutionTrace
 from smarthealth.runtime.memory.schemas import MemoryContext
+from smarthealth.runtime.token_budget import RunTokenBudget, TokenBudgetSnapshot
 
 
 def utcnow():
@@ -32,6 +33,8 @@ class RunState:
     delegation_count: int = 0
     data_tool_calls: int = 0
     role_tool_calls: dict[str, int] = field(default_factory=dict)
+    # Run-wide: delegation or successful revision cannot reset correction allowance.
+    writer_schema_failures: int = 0
     input_tokens: int = 0
     output_tokens: int = 0
     token_usage_available: bool = False
@@ -56,6 +59,12 @@ class RunState:
     memory_status: str = "disabled"
     harness_version: str | None = None
     harness_hash: str | None = None
+    guard_version: str | None = None
+    token_budget: RunTokenBudget | None = None
+    historical_token_budget: TokenBudgetSnapshot | None = None
+
+    def budget_snapshot(self):
+        return self.token_budget.snapshot() if self.token_budget else self.historical_token_budget
 
     def __post_init__(self):
         self.execution_trace = ExecutionTrace(self.context.run_id)

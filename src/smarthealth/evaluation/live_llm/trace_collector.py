@@ -15,6 +15,7 @@ import httpx
 from pydantic import ValidationError
 
 from smarthealth.agents.backends import DecisionBackend
+from smarthealth.evaluation.baselines.backend import FINAL_ANSWER_TOOL, FinalAnswerInput
 from smarthealth.runtime.artifacts import ArtifactStore
 from smarthealth.runtime.errors import SkillError
 
@@ -26,8 +27,8 @@ def utcnow():
 class ArtifactCollector(ArtifactStore):
     """Keep bounded lineage manifests; all actual artifacts stay in the existing store."""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.manifests: list[dict] = []
         self._manifest_lock = threading.Lock()
 
@@ -173,6 +174,7 @@ class EvaluationTransport(httpx.AsyncBaseTransport):
         self.inner = inner or httpx.AsyncHTTPTransport(retries=0)
         self.fault = fault
         self.network_dispatches = 0
+        self.http_statuses: list[int] = []
         self.triggered = False
         self.events = []
 
@@ -186,7 +188,9 @@ class EvaluationTransport(httpx.AsyncBaseTransport):
                 return httpx.Response(503, json={"error": "evaluation_injected"})
             return httpx.Response(200, content=b"{", headers={"content-type": "application/json"})
         self.network_dispatches += 1
-        return await self.inner.handle_async_request(request)
+        response = await self.inner.handle_async_request(request)
+        self.http_statuses.append(response.status_code)
+        return response
 
     async def aclose(self):
         await self.inner.aclose()
@@ -202,11 +206,21 @@ class ObservedBackend(DecisionBackend):
         self.actions: list[dict] = []
 
     async def decide(self, request):
+        return await self._decide(request)
+
+    def prepare(self, request):
+        return self.inner.prepare(request)
+
+    async def decide_prepared(self, prepared):
+        return await self._decide(prepared.request, prepared)
+
+    async def _decide(self, request, prepared=None):
         start = time.perf_counter()
         row = {
             "agent": request.agent,
             "status": "error",
             "error_code": "cancelled",
+            "error_reason": None,
             "start_time": utcnow(),
             "network_dispatched": False,
             "injected": False,
@@ -215,14 +229,19 @@ class ObservedBackend(DecisionBackend):
         }
         reservation = None
         network_before = self.transport.network_dispatches if self.transport else 0
+        statuses_before = len(self.transport.http_statuses) if self.transport else 0
         fault_before = self.transport.triggered if self.transport else False
         try:
             if self.mode == "live":
                 # Uses exact same serialization as production. Never persist it.
-                payload_bytes = self.inner.build_payload(request)
-                reservation = self.budget.reserve(len(payload_bytes))
+                prepared = prepared or self.prepare(request)
+                reservation = self.budget.reserve(prepared.input_bound)
                 row["reserved_tokens"] = reservation.tokens
-            reply = await self.inner.decide(request)
+            reply = (
+                await self.inner.decide_prepared(prepared)
+                if prepared is not None
+                else await self.inner.decide(request)
+            )
             row.update(
                 status="success",
                 error_code=None,
@@ -231,14 +250,24 @@ class ObservedBackend(DecisionBackend):
             )
             action = reply.decision
             safe = {"action": action.action, "agent": request.agent, "injected": False}
+            if action.action == "request_input":
+                safe["reason"] = action.reason
             if action.action == "call_skill":
                 skill = self.registry._skills.get(action.skill)
-                safe["skill"] = action.skill if skill else "unknown"
-                safe["allowed"] = action.skill in {t["function"]["name"] for t in request.tools}
+                # The evaluation-only final_answer pseudo tool is not a registered Skill.
+                final = action.skill == FINAL_ANSWER_TOOL
+                safe["skill"] = action.skill if skill or final else "unknown"
+                safe["allowed"] = final or action.skill in {
+                    t["function"]["name"] for t in request.tools
+                }
                 safe["arguments_valid"] = False
-                if skill:
+                if skill or final:
                     try:
-                        skill.input_schema.model_validate(action.arguments, strict=True)
+                        (
+                            skill.input_schema
+                            if skill
+                            else FinalAnswerInput
+                        ).model_validate(action.arguments, strict=True)
                         safe["arguments_valid"] = True
                     except (ValidationError, ValueError, TypeError):
                         pass
@@ -246,6 +275,10 @@ class ObservedBackend(DecisionBackend):
             return reply
         except SkillError as exc:
             row["error_code"] = exc.code
+            # Sanitized attribution only: a stable subcode from decision parsing or a
+            # harness rule id. Never a provider message or raw payload value.
+            details = exc.details or {}
+            row["error_reason"] = details.get("reason") or details.get("rule")
             raise
         except asyncio.CancelledError:
             raise
@@ -256,6 +289,11 @@ class ObservedBackend(DecisionBackend):
             if self.transport:
                 row["network_dispatched"] = self.transport.network_dispatches > network_before
                 row["injected"] = not fault_before and self.transport.triggered
+                row["provider_http_status"] = (
+                    self.transport.http_statuses[-1]
+                    if len(self.transport.http_statuses) > statuses_before
+                    else None
+                )
             row.update(end_time=utcnow(), latency_ms=(time.perf_counter() - start) * 1000)
             self.attempts.append(row)
             if reservation:

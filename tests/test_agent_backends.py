@@ -8,7 +8,7 @@ from app.agents.backends import (
     ScriptedDecisionBackend,
     backend_from_env,
 )
-from app.agents.contracts import DecisionRequest, FinishAction
+from app.agents.contracts import DecisionRequest, FinishAction, action_diagnostics
 from app.core.errors import SkillError
 
 
@@ -83,7 +83,6 @@ async def test_live_adapter_tool_protocol_and_usage():
         assert {t["function"]["name"] for t in payload["tools"]} == {
             "finish",
             "delegate",
-            "request_input",
         }
         assert "test-secret" not in request.content.decode()
     finally:
@@ -107,7 +106,8 @@ async def test_live_adapter_tool_protocol_and_usage():
         lambda r: r["usage"].update(prompt_tokens=True),
     ],
 )
-async def test_live_adapter_rejects_unsafe_or_ambiguous_response(mutate):
+@pytest.mark.parametrize("api_profile", ["standard", "dashscope"])
+async def test_live_adapter_rejects_unsafe_or_ambiguous_response(mutate, api_profile):
     result = response()
     mutate(result)
     backend = OpenAICompatibleBackend(
@@ -115,6 +115,7 @@ async def test_live_adapter_rejects_unsafe_or_ambiguous_response(mutate):
         "test-secret",
         "model",
         transport=httpx.MockTransport(lambda r: httpx.Response(200, json=result)),
+        api_profile=api_profile,
     )
     try:
         with pytest.raises(SkillError) as error:
@@ -122,6 +123,92 @@ async def test_live_adapter_rejects_unsafe_or_ambiguous_response(mutate):
         assert "SECRET" not in str(error.value) and "test-secret" not in str(error.value)
     finally:
         await backend.aclose()
+
+
+async def test_dashscope_profile_preserves_runtime_contract_and_input_schema():
+    request = state("planner").model_copy(
+        update={
+            "tools": [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "csv_analysis",
+                        "strict": True,
+                        "parameters": {
+                            "type": "object",
+                            "properties": {"upload_ref": {"type": "string"}},
+                            "required": ["upload_ref"],
+                            "additionalProperties": False,
+                        },
+                    },
+                }
+            ]
+        }
+    )
+    original = request.model_dump()
+    captured = []
+
+    def handle(http_request):
+        captured.append(http_request.content)
+        return httpx.Response(200, json=response())
+
+    backend = OpenAICompatibleBackend(
+        "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "test-secret",
+        "test-model",
+        api_profile="dashscope",
+        max_completion_tokens=1024,
+        transport=httpx.MockTransport(handle),
+    )
+    try:
+        reserved_payload = backend.build_payload(request)
+        reply = await backend.decide(request)
+        assert captured == [reserved_payload]
+        assert isinstance(reply.decision, FinishAction)
+        payload = json.loads(reserved_payload)
+        assert payload["tool_choice"] == "auto"
+        assert payload["enable_thinking"] is False
+        assert payload["max_tokens"] == 1024
+        assert payload["parallel_tool_calls"] is False
+        assert "max_completion_tokens" not in payload and "store" not in payload
+        assert all("strict" not in tool["function"] for tool in payload["tools"])
+        assert (
+            payload["tools"][0]["function"]["parameters"]
+            == (request.tools[0]["function"]["parameters"])
+        )
+        assert request.model_dump() == original
+        assert (reply.input_tokens, reply.output_tokens) == (31, 9)
+    finally:
+        await backend.aclose()
+
+
+async def test_dashscope_profile_is_shared_by_application_and_evaluation():
+    from smarthealth.config.settings import Settings
+    from smarthealth.evaluation.live_llm.config import EvalConfig
+    from smarthealth.evaluation.live_llm.runner import new_backend
+
+    config = Settings.from_env(
+        {
+            "HEALTH_AGENT_BACKEND": "openai_compatible",
+            "HEALTH_LLM_API_PROFILE": "dashscope",
+            "HEALTH_LLM_BASE_URL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+            "HEALTH_LLM_API_KEY": "test-secret",
+            "HEALTH_LLM_MODEL": "test-model",
+        }
+    )
+    app_backend = backend_from_env(config)
+    eval_backend = new_backend(EvalConfig(temperature=None, seed=None), config, None)
+    try:
+        assert app_backend.build_payload(state()) == eval_backend.build_payload(state())
+        assert app_backend.api_profile == eval_backend.api_profile == "dashscope"
+    finally:
+        await app_backend.aclose()
+        await eval_backend.aclose()
+
+
+def test_unknown_provider_profile_is_rejected_before_networking():
+    with pytest.raises(SkillError, match="configuration"):
+        OpenAICompatibleBackend("https://llm.example/v1", "test-secret", "model", api_profile="x")
 
 
 @pytest.mark.parametrize(
@@ -287,3 +374,188 @@ async def test_payload_preflight_enforces_same_context_bound_as_decide():
         assert calls == []
     finally:
         await backend.aclose()
+
+
+def parse_reply(mutate=None):
+    value = response()
+    if mutate:
+        mutate(value)
+    return OpenAICompatibleBackend._parse_reply(
+        json.dumps(value).encode(), frozenset({"finish", "delegate"})
+    )
+
+
+@pytest.mark.parametrize(
+    "mutate,code,reason",
+    [
+        (
+            lambda r: r.update(choices=[]),
+            "backend_invalid_response",
+            "choices_count",
+        ),
+        (
+            lambda r: r["choices"][0].update(finish_reason="stop"),
+            "backend_invalid_response",
+            "finish_reason",
+        ),
+        (
+            lambda r: r["choices"][0]["message"].update(role="user"),
+            "backend_invalid_response",
+            "role",
+        ),
+        (
+            lambda r: r["choices"][0]["message"].update(content="SECRET free diagnosis"),
+            "backend_invalid_response",
+            "content_not_empty",
+        ),
+        (
+            lambda r: r["choices"][0]["message"]["tool_calls"].extend(
+                r["choices"][0]["message"]["tool_calls"][:]
+            ),
+            "backend_invalid_response",
+            "tool_calls_count",
+        ),
+        (
+            lambda r: r["choices"][0]["message"]["tool_calls"][0].update(type="code"),
+            "backend_invalid_response",
+            "tool_call_type",
+        ),
+        (
+            lambda r: r["choices"][0]["message"]["tool_calls"][0]["function"].update(
+                name="SECRET_TOOL"
+            ),
+            "backend_invalid_decision",
+            "tool_not_available",
+        ),
+        (
+            lambda r: r["choices"][0]["message"]["tool_calls"][0]["function"].update(
+                arguments=5
+            ),
+            "backend_invalid_response",
+            "arguments_type",
+        ),
+        (
+            lambda r: r["choices"][0]["message"]["tool_calls"][0]["function"].update(
+                arguments="[1,2]"
+            ),
+            "backend_invalid_response",
+            "arguments_type",
+        ),
+        (
+            lambda r: r["choices"][0]["message"]["tool_calls"][0]["function"].update(
+                arguments="not-json{"
+            ),
+            "backend_invalid_response",
+            "arguments_encoding",
+        ),
+        (
+            lambda r: r["choices"][0]["message"]["tool_calls"][0]["function"].update(
+                arguments=json.dumps("x" * 33000)
+            ),
+            "backend_invalid_response",
+            "arguments_size",
+        ),
+        (
+            lambda r: r["choices"][0]["message"]["tool_calls"][0]["function"].update(
+                arguments='{"result_kind":"score_definition","action":"finish"}'
+            ),
+            "backend_invalid_response",
+            "arguments_action_key",
+        ),
+        (
+            lambda r: r["choices"][0]["message"]["tool_calls"][0]["function"].update(
+                arguments='{"result_kind":"SECRET"}'
+            ),
+            "backend_invalid_decision",
+            "action_schema",
+        ),
+        (
+            lambda r: r.update(usage="SECRET"),
+            "backend_invalid_response",
+            "usage_type",
+        ),
+        (
+            lambda r: r.update(usage={"prompt_tokens": "31", "completion_tokens": 9}),
+            "backend_invalid_decision",
+            "usage_type",
+        ),
+        (
+            lambda r: r["choices"][0]["message"].update(refusal="SECRET"),
+            "backend_refusal",
+            "provider_refusal",
+        ),
+    ],
+)
+def test_parse_reply_reports_stable_reason_subcode(mutate, code, reason):
+    with pytest.raises(SkillError) as error:
+        parse_reply(mutate)
+    assert error.value.code == code
+    assert error.value.details["reason"] == reason
+    serialized = json.dumps(error.value.details)
+    assert "SECRET" not in serialized and "SECRET" not in str(error.value)
+
+
+def test_parse_reply_reports_subcode_for_undecodable_payload():
+    with pytest.raises(SkillError) as error:
+        OpenAICompatibleBackend._parse_reply(b"{", frozenset({"finish"}))
+    assert error.value.code == "backend_invalid_response"
+    assert error.value.details == {"reason": "payload_json"}
+
+
+def test_action_schema_failure_carries_sanitized_validation_error():
+    with pytest.raises(SkillError) as error:
+        parse_reply(
+            lambda r: r["choices"][0]["message"]["tool_calls"][0]["function"].update(
+                arguments='{"result_kind":"SECRET"}'
+            )
+        )
+    report = error.value.details["validation_error"]
+    issue = report["issues"][0]
+    assert issue["field_path"] == "$.result_kind"
+    assert issue["category"] == "literal_error"
+    assert '"score_definition"' in issue["expected"]
+    assert "SECRET" not in json.dumps(report)
+
+
+@pytest.mark.parametrize(
+    "action,category,field_path,expected_fragment",
+    [
+        (
+            {"action": "finish", "result_kind": "SECRET"},
+            "literal_error",
+            "$.result_kind",
+            '"score_definition"',
+        ),
+        (
+            {"action": "finish", "result_kind": "score_definition", "result_ref": "not-a-ref"},
+            "string_pattern_mismatch",
+            "$.result_ref",
+            "art_",
+        ),
+        (
+            {"action": "call_skill", "skill": "csv_analysis", "arguments": "SECRET"},
+            "dict_type",
+            "$.arguments",
+            '"object"',
+        ),
+        (
+            {"action": "finish", "result_kind": "score_definition", "result_ref": None, "extra": 1},
+            "extra_forbidden",
+            "$.<unknown>",
+            "no_extra_fields",
+        ),
+        ({"action": "SECRET"}, "literal_error", "$.action", '"delegate"'),
+        ({"result_kind": "score_definition"}, "missing", "$.action", '"finish"'),
+        ("finish", "model_type", "$", "declared_schema_constraints"),
+    ],
+)
+def test_action_diagnostics_project_trusted_schema_metadata(
+    action, category, field_path, expected_fragment
+):
+    report = action_diagnostics(action).model_dump(mode="json")
+    issue = report["issues"][0]
+    assert issue["category"] == category
+    assert issue["field_path"] == field_path
+    assert expected_fragment in issue["expected"]
+    assert "SECRET" not in json.dumps(report)
+

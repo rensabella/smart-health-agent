@@ -7,11 +7,17 @@ from smarthealth.runtime.errors import SkillError
 
 
 class CallBudget:
-    """A budget shared by a run's calls, including failures and retries."""
+    """A budget shared by a run's calls, including failures and retries.
 
-    def __init__(self, max_calls: int = 18):
-        if isinstance(max_calls, bool) or not isinstance(max_calls, int) or max_calls < 0:
-            raise ValueError("max_calls must be a nonnegative integer")
+    ``max_calls=None`` removes the cap; usage is still counted. Evaluation-only
+    (``no_budget`` ablation); production callers always pass a finite cap.
+    """
+
+    def __init__(self, max_calls: int | None = 18):
+        if max_calls is not None and (
+            isinstance(max_calls, bool) or not isinstance(max_calls, int) or max_calls < 0
+        ):
+            raise ValueError("max_calls must be a nonnegative integer or None")
         self.max_calls = max_calls
         self._used = 0
         self._lock = threading.Lock()
@@ -23,7 +29,7 @@ class CallBudget:
 
     def reserve(self) -> int:
         with self._lock:
-            if self._used >= self.max_calls:
+            if self.max_calls is not None and self._used >= self.max_calls:
                 raise SkillError("budget_exceeded", "The run's Skill call budget is exhausted.")
             self._used += 1
             return self._used

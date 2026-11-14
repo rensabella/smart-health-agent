@@ -15,6 +15,7 @@ import math
 import re
 from abc import ABC, abstractmethod
 from collections.abc import Awaitable, Callable
+from dataclasses import dataclass, field
 from typing import Any, ClassVar
 from urllib.parse import urlsplit
 
@@ -30,6 +31,7 @@ from smarthealth.agents.contracts import (
     FinishAction,
     RequestInputAction,
     UpgradeWorkflowAction,
+    action_diagnostics,
 )
 from smarthealth.agents.prompts import build_messages
 from smarthealth.config.settings import Settings
@@ -45,9 +47,18 @@ _TOOL_NAME = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _MODEL_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
 
 
-def _error(code: str, message: str) -> SkillError:
+def _error(code: str, message: str, details: dict | None = None) -> SkillError:
     # Callers only use constant messages; provider text and credentials stay private.
-    return SkillError(code, message)
+    # ``details`` carries only stable reason codes and trusted schema projections.
+    return SkillError(code, message, details)
+
+
+class _ParseError(Exception):
+    """Internal control flow: which structural reply check failed (stable reason code)."""
+
+    def __init__(self, reason: str):
+        super().__init__(reason)
+        self.reason = reason
 
 
 def _validated_request(request: DecisionRequest) -> DecisionRequest:
@@ -67,9 +78,34 @@ def _validated_reply(value: Any) -> DecisionReply:
             return DecisionReply.model_validate(value)
         return DecisionReply(decision=ACTION_ADAPTER.validate_python(value))
     except Exception:
+        candidate = (
+            value.get("decision")
+            if isinstance(value, dict) and "decision" in value
+            else value
+        )
         raise _error(
-            "backend_invalid_decision", "The decision does not match its schema."
+            "backend_invalid_decision",
+            "The decision does not match its schema.",
+            details={
+                "reason": "reply_schema",
+                "validation_error": action_diagnostics(candidate).model_dump(mode="json"),
+            },
         ) from None
+
+
+@dataclass(frozen=True)
+class PreparedDecision:
+    """Exact provider payload; ephemeral and deliberately excluded from repr/logs."""
+
+    request: DecisionRequest = field(repr=False)
+    payload: bytes = field(repr=False)
+    callable_names: frozenset[str]
+    output_bound: int
+    owner: object = field(repr=False)
+
+    @property
+    def input_bound(self):
+        return len(self.payload)
 
 
 class DecisionBackend(ABC):
@@ -77,6 +113,14 @@ class DecisionBackend(ABC):
 
     mode: ClassVar[str]
     model_name: str | None = None
+
+    def prepare(self, request: DecisionRequest) -> PreparedDecision:
+        raise _error("backend_budget_unavailable", "Live backend must support request admission.")
+
+    async def decide_prepared(self, prepared: PreparedDecision) -> DecisionReply:
+        raise _error(
+            "backend_budget_unavailable", "Live backend must execute its prepared request."
+        )
 
     @abstractmethod
     async def decide(self, request: DecisionRequest) -> DecisionReply:
@@ -176,25 +220,43 @@ def _tools_for(request: DecisionRequest) -> tuple[list[dict], frozenset[str]]:
         ):
             raise _error("backend_invalid_request", "The decision tool schema is invalid.")
         names.add(name)
-    tools.extend(
-        [
-            _control_tool(
-                "finish", "Request publication of a runtime-verified result.", FinishAction
-            ),
-            _control_tool(
-                "request_input", "Pause this run for missing or unusable input.", RequestInputAction
-            ),
-        ]
+    finish = _control_tool(
+        "finish", "Return the current role result for runtime verification.", FinishAction
     )
-    if request.can_upgrade_workflow and request.workflow_type == "simple":
-        tools.append(
-            _control_tool(
-                "upgrade_workflow",
-                "Escalate this simple task once to a Planner workflow; budgets are shared.",
-                UpgradeWorkflowAction,
-            )
+    if request.allowed_finish_kinds is not None:
+        finish["function"]["parameters"]["properties"]["result_kind"]["enum"] = (
+            request.allowed_finish_kinds
         )
-    if request.agent == "planner" and request.allowed_delegates:
+    if request.terminal_result:
+        # Narrow the wire schema too; the Runtime independently enforces the same
+        # terminal reference and retains all publication checks.
+        tools = []
+        finish["function"]["parameters"]["properties"]["result_ref"] = {
+            "type": "string",
+            "enum": [request.terminal_result.result_ref],
+        }
+    tools.append(finish)
+    if not request.terminal_result and request.allowed_input_reasons:
+        request_input = _control_tool(
+            "request_input", "Request only a server-confirmed missing input.", RequestInputAction
+        )
+        request_input["function"]["parameters"]["properties"]["reason"]["enum"] = (
+            request.allowed_input_reasons
+        )
+        tools.append(request_input)
+    if request.can_upgrade_workflow and request.workflow_type == "simple":
+        upgrade = _control_tool(
+            "upgrade_workflow",
+            "Escalate this simple task once to a Planner workflow; budgets are shared.",
+            UpgradeWorkflowAction,
+        )
+        if request.allowed_upgrade_objectives is not None:
+            upgrade["function"]["parameters"]["properties"]["objective"]["enum"] = (
+                request.allowed_upgrade_objectives
+            )
+        if not request.terminal_result and request.allowed_upgrade_objectives != []:
+            tools.append(upgrade)
+    if request.agent == "planner" and request.allowed_delegates and not request.terminal_result:
         delegation = _control_tool(
             "delegate",
             "Ask an allowed specialized agent to work on this task; its result returns to the Planner.",
@@ -205,8 +267,59 @@ def _tools_for(request: DecisionRequest) -> tuple[list[dict], frozenset[str]]:
             "enum": sorted(set(request.allowed_delegates)),
         }
         tools.append(delegation)
-    names.update(tool["function"]["name"] for tool in tools)
+    names = {tool["function"]["name"] for tool in tools}
     return tools, frozenset(names)
+
+
+def _serialize_payload(
+    *,
+    model: str,
+    tools: list[dict],
+    messages: list[dict],
+    max_completion_tokens: int,
+    api_profile: str,
+    temperature: float | None,
+    seed: int | None,
+) -> bytes:
+    """Encode one Chat Completions request body; caller-supplied parts stay unchanged."""
+    body = {
+        "model": model,
+        "messages": messages,
+        "tools": tools,
+        "tool_choice": "required",
+        "parallel_tool_calls": False,
+        "max_completion_tokens": max_completion_tokens,
+        "n": 1,
+        "stream": False,
+        "store": False,
+    }
+    if api_profile == "dashscope":
+        # DashScope Qwen does not guarantee tool_choice=required. Request
+        # non-thinking tool selection and enforce the existing single-call
+        # contract locally; never turn free text into a synthetic action.
+        body["tool_choice"] = "auto"
+        body["enable_thinking"] = False
+        body["max_tokens"] = body.pop("max_completion_tokens")
+        body.pop("store")  # Not a documented DashScope Chat parameter.
+        body["tools"] = [
+            {
+                **tool,
+                "function": {
+                    key: value for key, value in tool["function"].items() if key != "strict"
+                },
+            }
+            for tool in tools
+        ]
+    if temperature is not None:
+        body["temperature"] = temperature
+    if seed is not None:
+        body["seed"] = seed
+    return json.dumps(
+        body,
+        ensure_ascii=False,
+        allow_nan=False,
+        separators=(",", ":"),
+    ).encode("utf-8")
 
 
 def _endpoint(base_url: str) -> str:
@@ -282,6 +395,7 @@ class OpenAICompatibleBackend(DecisionBackend):
         temperature: float | None = None,
         max_completion_tokens: int = MAX_COMPLETION_TOKENS,
         seed: int | None = None,
+        api_profile: str = "standard",
     ):
         self._endpoint = _endpoint(base_url)
         if (
@@ -290,6 +404,7 @@ class OpenAICompatibleBackend(DecisionBackend):
             or any(not 33 <= ord(character) <= 126 for character in api_key)
             or not isinstance(model, str)
             or _MODEL_NAME.fullmatch(model) is None
+            or api_profile not in ("standard", "dashscope")
             or isinstance(timeout_seconds, bool)
             or not isinstance(timeout_seconds, (int, float))
             or not math.isfinite(timeout_seconds)
@@ -322,6 +437,7 @@ class OpenAICompatibleBackend(DecisionBackend):
         self._temperature = temperature
         self._max_completion_tokens = max_completion_tokens
         self._seed = seed
+        self.api_profile = api_profile
         self._headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
@@ -344,33 +460,26 @@ class OpenAICompatibleBackend(DecisionBackend):
         Optional provider generation controls are omitted unless configured;
         support for temperature and seed is determined by the selected provider.
         """
-        return self._prepare_request(request)[0]
+        return self.prepare(request).payload
+
+    def prepare(self, request: DecisionRequest) -> PreparedDecision:
+        validated = _validated_request(request)
+        payload, names = self._prepare_request(validated)
+        return PreparedDecision(validated, payload, names, self._max_completion_tokens, self)
 
     def _prepare_request(self, request: DecisionRequest) -> tuple[bytes, frozenset[str]]:
         request = _validated_request(request)
         tools, callable_names = _tools_for(request)
         try:
-            body = {
-                "model": self._model,
-                "messages": build_messages(request),
-                "tools": tools,
-                "tool_choice": "required",
-                "parallel_tool_calls": False,
-                "max_completion_tokens": self._max_completion_tokens,
-                "n": 1,
-                "stream": False,
-                "store": False,
-            }
-            if self._temperature is not None:
-                body["temperature"] = self._temperature
-            if self._seed is not None:
-                body["seed"] = self._seed
-            payload = json.dumps(
-                body,
-                ensure_ascii=False,
-                allow_nan=False,
-                separators=(",", ":"),
-            ).encode("utf-8")
+            payload = _serialize_payload(
+                model=self._model,
+                tools=tools,
+                messages=build_messages(request),
+                max_completion_tokens=self._max_completion_tokens,
+                api_profile=self.api_profile,
+                temperature=self._temperature,
+                seed=self._seed,
+            )
         except Exception:
             raise _error(
                 "backend_invalid_request", "The decision state cannot be encoded."
@@ -382,14 +491,18 @@ class OpenAICompatibleBackend(DecisionBackend):
         return payload, callable_names
 
     async def decide(self, request: DecisionRequest) -> DecisionReply:
+        return await self.decide_prepared(self.prepare(request))
+
+    async def decide_prepared(self, prepared: PreparedDecision) -> DecisionReply:
+        if not isinstance(prepared, PreparedDecision) or prepared.owner is not self:
+            raise _error("backend_invalid_request", "Prepared request belongs to another backend.")
         if self._client.is_closed:
             raise _error("backend_unavailable", "The decision backend is closed.")
-        payload, callable_names = self._prepare_request(request)
         try:
             # httpx has per-operation timeouts; this also bounds the entire
             # response, including a provider that keeps sending tiny chunks.
             response_bytes = await asyncio.wait_for(
-                self._post_bounded(payload), timeout=self._timeout_seconds
+                self._post_bounded(prepared.payload), timeout=self._timeout_seconds
             )
         except SkillError:
             raise
@@ -401,7 +514,7 @@ class OpenAICompatibleBackend(DecisionBackend):
             raise _error(
                 "backend_transport_error", "The decision provider request failed."
             ) from None
-        return self._parse_reply(response_bytes, callable_names)
+        return self._parse_reply(response_bytes, prepared.callable_names)
 
     async def _post_bounded(self, payload: bytes) -> bytes:
         async with self._client.stream(
@@ -458,66 +571,103 @@ class OpenAICompatibleBackend(DecisionBackend):
     @staticmethod
     def _parse_reply(response_bytes: bytes, callable_names: frozenset[str]) -> DecisionReply:
         try:
-            response = _strict_json(response_bytes)
+            try:
+                response = _strict_json(response_bytes)
+            except Exception:
+                raise _ParseError("payload_json") from None
             choices = response["choices"]
             if not isinstance(choices, list) or len(choices) != 1:
-                raise ValueError
+                raise _ParseError("choices_count")
             choice = choices[0]
             message = choice["message"]
             if message.get("refusal") not in (None, ""):
-                raise _error("backend_refusal", "The decision provider declined the request.")
-            if (
-                choice.get("finish_reason") != "tool_calls"
-                or message.get("role") != "assistant"
-                or message.get("content") not in (None, "")
-            ):
-                raise ValueError
+                raise _error(
+                    "backend_refusal",
+                    "The decision provider declined the request.",
+                    details={"reason": "provider_refusal"},
+                )
+            if choice.get("finish_reason") != "tool_calls":
+                raise _ParseError("finish_reason")
+            if message.get("role") != "assistant":
+                raise _ParseError("role")
+            if message.get("content") not in (None, ""):
+                raise _ParseError("content_not_empty")
             calls = message["tool_calls"]
             if not isinstance(calls, list) or len(calls) != 1:
-                raise ValueError
+                raise _ParseError("tool_calls_count")
             call = calls[0]
             if call.get("type") != "function":
-                raise ValueError
+                raise _ParseError("tool_call_type")
             function = call["function"]
             name, argument_text = function["name"], function["arguments"]
             if not isinstance(name, str) or name not in callable_names:
                 raise _error(
-                    "backend_invalid_decision", "The provider selected an unavailable tool."
+                    "backend_invalid_decision",
+                    "The provider selected an unavailable tool.",
+                    details={"reason": "tool_not_available"},
                 )
-            if (
-                not isinstance(argument_text, str)
-                or len(argument_text.encode("utf-8")) > MAX_ARGUMENT_BYTES
-            ):
-                raise ValueError
-            arguments = _strict_json(argument_text)
+            if not isinstance(argument_text, str):
+                raise _ParseError("arguments_type")
+            if len(argument_text.encode("utf-8")) > MAX_ARGUMENT_BYTES:
+                raise _ParseError("arguments_size")
+            try:
+                arguments = _strict_json(argument_text)
+            except Exception:
+                raise _ParseError("arguments_encoding") from None
             if not isinstance(arguments, dict):
-                raise ValueError
+                raise _ParseError("arguments_type")
             if name in _CONTROL_NAMES:
                 if "action" in arguments:
-                    raise ValueError
+                    raise _ParseError("arguments_action_key")
                 action = {"action": name, **arguments}
             else:
                 action = {"action": "call_skill", "skill": name, "arguments": arguments}
-            decision = ACTION_ADAPTER.validate_python(action)
+            try:
+                decision = ACTION_ADAPTER.validate_python(action)
+            except ValidationError:
+                raise _error(
+                    "backend_invalid_decision",
+                    "The provider decision or usage does not match its schema.",
+                    details={
+                        "reason": "action_schema",
+                        "validation_error": action_diagnostics(action).model_dump(mode="json"),
+                    },
+                ) from None
             usage = response.get("usage")
             if usage is not None and not isinstance(usage, dict):
-                raise ValueError
+                raise _ParseError("usage_type")
             # Missing counters remain unavailable, never silently become zero.
-            return DecisionReply(
-                decision=decision,
-                input_tokens=usage.get("prompt_tokens") if usage is not None else None,
-                output_tokens=usage.get("completion_tokens") if usage is not None else None,
-            )
+            try:
+                return DecisionReply(
+                    decision=decision,
+                    input_tokens=usage.get("prompt_tokens") if usage is not None else None,
+                    output_tokens=usage.get("completion_tokens") if usage is not None else None,
+                )
+            except ValidationError:
+                raise _error(
+                    "backend_invalid_decision",
+                    "The provider decision or usage does not match its schema.",
+                    details={"reason": "usage_type"},
+                ) from None
         except SkillError:
             raise
+        except _ParseError as exc:
+            raise _error(
+                "backend_invalid_response",
+                "The provider response is not a valid action.",
+                details={"reason": exc.reason},
+            ) from None
         except ValidationError:
             raise _error(
                 "backend_invalid_decision",
                 "The provider decision or usage does not match its schema.",
+                details={"reason": "action_schema"},
             ) from None
         except Exception:
             raise _error(
-                "backend_invalid_response", "The provider response is not a valid action."
+                "backend_invalid_response",
+                "The provider response is not a valid action.",
+                details={"reason": "malformed_response"},
             ) from None
 
     async def aclose(self) -> None:
@@ -538,5 +688,8 @@ def backend_from_env(settings: Settings | None = None) -> DecisionBackend:
     if not config.llm_base_url or not key or not config.llm_model:
         raise _error("backend_configuration_error", "The provider configuration is incomplete.")
     return OpenAICompatibleBackend(
-        base_url=config.llm_base_url, api_key=key, model=config.llm_model
+        base_url=config.llm_base_url,
+        api_key=key,
+        model=config.llm_model,
+        api_profile=config.llm_api_profile,
     )

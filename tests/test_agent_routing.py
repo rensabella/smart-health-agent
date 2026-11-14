@@ -28,6 +28,19 @@ def routed_runtime(predictor, policy=scripted_analysis, **kwargs):
     return runtime
 
 
+class ConservativeRouter(HealthRouter):
+    """Test an authorized one-way upgrade without upgrading a score definition.
+
+    A pluggable router initially assigns a data request to the simple role. The
+    runtime must still upgrade before granting any Skill execution permission.
+    """
+
+    def route(self, **kwargs):
+        route = super().route(**kwargs)
+        assert route.reason_code == "data_analysis"
+        return route.model_copy(update={"workflow_type": "simple", "entry_agent": "data_analysis"})
+
+
 def request(runtime, query, csv_bytes=None, **kwargs):
     return request_for(runtime, csv_bytes, **kwargs).model_copy(update={"query": query})
 
@@ -56,7 +69,8 @@ async def test_automatic_entry_and_scope_override_client_hints(predictor, csv_by
         assert simple.route.workflow_type == "simple" and simple.decision_count == 1
         assert simple.tool_calls == simple.delegation_count == 0
         assert observed[0].tools == [] and observed[0].remaining_tool_calls == 0
-        assert observed[0].can_upgrade_workflow
+        assert not observed[0].can_upgrade_workflow
+        assert observed[0].allowed_upgrade_objectives == []
         assert simple.final_result["kind"] == "score_definition"
         observed.clear()
         complex_run = await execute(
@@ -127,8 +141,9 @@ async def test_upgrade_is_one_way_and_preserves_run_and_spent_budget(predictor, 
         return scripted_analysis(state)
 
     runtime = routed_runtime(predictor, policy)
+    runtime.router = ConservativeRouter()
     try:
-        result = await execute(runtime, request(runtime, "解释risk score", csv_bytes))
+        result = await execute(runtime, request(runtime, "分析CSV数据", csv_bytes))
         assert result.status == "completed", result.model_dump()
         assert result.initial_workflow_type == "simple" and result.route.workflow_type == "complex"
         assert result.workflow_upgrades == 1 and result.entry_agent == "planner"
@@ -141,15 +156,23 @@ async def test_upgrade_is_one_way_and_preserves_run_and_spent_budget(predictor, 
         await close(runtime)
 
 
-@pytest.mark.parametrize(
-    "objective,code", [("data_analysis", "missing_upload"), ("health_report", "safety_unavailable")]
-)
-async def test_upgrade_respects_missing_input_and_safety_gate(predictor, objective, code):
-    runtime = routed_runtime(predictor, lambda state: UpgradeWorkflowAction(objective=objective))
+@pytest.mark.parametrize("objective", ["data_analysis", "health_report"])
+async def test_definition_cannot_upgrade_to_obtain_new_capabilities(predictor, objective):
+    runtime = routed_runtime(
+        predictor,
+        lambda state: UpgradeWorkflowAction(objective=objective),
+        limits=AgentLimits(simple_max_decisions=2),
+    )
     try:
         result = await execute(runtime, request(runtime, "解释risk score"))
-        assert result.error_code == code and result.workflow_upgrades == 1
-        assert result.decision_count == 1 and result.final_result is None
+        assert result.error_code == "decision_budget_exceeded" and result.workflow_upgrades == 0
+        assert result.decision_count == 2 and result.final_result is None
+        assert result.tool_calls == result.delegation_count == 0
+        assert [
+            e.data["error_code"]
+            for e in trace(runtime, result)
+            if e.event == "agent.action_rejected"
+        ] == ["workflow_upgrade_denied"] * 2
     finally:
         await close(runtime)
 
@@ -160,8 +183,9 @@ async def test_upgrade_does_not_reset_global_budget(predictor, csv_bytes):
         lambda state: UpgradeWorkflowAction(objective="data_analysis"),
         limits=AgentLimits(max_decisions=1),
     )
+    runtime.router = ConservativeRouter()
     try:
-        result = await execute(runtime, request(runtime, "解释risk score", csv_bytes))
+        result = await execute(runtime, request(runtime, "分析CSV数据", csv_bytes))
         assert result.workflow_upgrades == 1 and result.decision_count == 1
         assert result.error_code == "decision_budget_exceeded" and result.final_result is None
     finally:
@@ -376,18 +400,17 @@ async def test_live_protocol_exposes_upgrade_only_on_simple_path_and_counts_it(
         "https://llm.example/v1", "secret", "model", transport=httpx.MockTransport(handle)
     )
     runtime = routed_runtime(predictor, backend=backend, limits=AgentLimits(max_llm_requests=2))
+    runtime.router = ConservativeRouter()
     try:
-        result = await execute(runtime, request(runtime, "解释risk score", csv_bytes))
+        result = await execute(runtime, request(runtime, "分析CSV数据", csv_bytes))
         assert result.workflow_upgrades == 1 and result.llm_requests == 2
         assert result.error_code == "llm_budget_exceeded" and result.final_result is None
         assert {t["function"]["name"] for t in payloads[0]["tools"]} == {
             "finish",
-            "request_input",
             "upgrade_workflow",
         }
         assert {t["function"]["name"] for t in payloads[1]["tools"]} == {
             "finish",
-            "request_input",
             "delegate",
         }
         assert result.input_tokens == 11 and result.output_tokens == 3
@@ -398,21 +421,29 @@ async def test_live_protocol_exposes_upgrade_only_on_simple_path_and_counts_it(
         await close(runtime)
 
 
-async def test_route_and_upgrade_survive_restart_without_result_restore(predictor, tmp_path):
+async def test_route_and_upgrade_survive_restart_without_result_restore(
+    predictor, csv_bytes, tmp_path
+):
     runtime = routed_runtime(
         predictor,
-        lambda state: UpgradeWorkflowAction(objective="health_report"),
+        lambda state: (
+            UpgradeWorkflowAction(objective="data_analysis")
+            if state.can_upgrade_workflow
+            else scripted_analysis(state)
+        ),
         events=RunEventStore(tmp_path),
     )
+    runtime.router = ConservativeRouter()
     try:
-        result = await execute(runtime, request(runtime, "解释risk score"))
+        result = await execute(runtime, request(runtime, "分析CSV数据", csv_bytes))
+        assert result.status == "completed"
     finally:
         await close(runtime)
     restored = routed_runtime(predictor, events=RunEventStore(tmp_path))
     try:
         restored.recover()
         snapshot = restored.snapshot(result.run_id, owner_id="owner", session_id=result.session_id)
-        assert snapshot.route == result.route and snapshot.objective == "health_report"
+        assert snapshot.route == result.route and snapshot.objective == "data_analysis"
         assert snapshot.entry_agent == "planner" and snapshot.workflow_upgrades == 1
         assert snapshot.initial_workflow_type == "simple" and snapshot.final_result is None
     finally:

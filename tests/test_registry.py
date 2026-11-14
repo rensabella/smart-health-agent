@@ -7,6 +7,7 @@ from pydantic import Field
 
 from app.core.artifacts import ArtifactStore
 from app.core.context import CallBudget, SkillContext
+from app.core.errors import SkillError
 from skills.base_skill import BaseSkill, SkillModel
 from skills.registry import SkillRegistry
 
@@ -183,3 +184,40 @@ async def test_audit_failure_prevents_execution():
     result = await registry.execute("echo", {"value": 1}, context())
     assert result.error.code == "trace_unavailable" and not skill.calls
     await registry.aclose()
+
+
+class _RuleHarness:
+    """Minimal harness double carrying policy constants only, never provider data."""
+
+    fingerprint = "f" * 64
+    version = "test"
+    enabled_skills = frozenset({"echo"})
+
+    def validate_catalogue(self, descriptions):
+        assert {d["name"] for d in descriptions} == {"echo"}
+
+    def skill_timeout(self, name, skill_version, timeout):
+        return timeout
+
+    def check_skill_output(self, name, payload, data, *, context, service):
+        raise SkillError(
+            "harness_invalid_output",
+            "Output does not satisfy the active Harness policy.",
+            details={"rule": "echo.lineage_parent"},
+        )
+
+
+async def test_harness_rule_id_reaches_error_and_trace(registry):
+    skill = Echo()
+    skill.service = None
+    registry.register(skill)
+    registry.bind_harness(_RuleHarness())
+    ctx = context()
+    result = await registry.execute("echo", {"value": 1}, ctx)
+    assert result.error.code == "harness_invalid_output"
+    assert result.error.details == {"rule": "echo.lineage_parent"}
+    events = registry.trace_sink.events_for(ctx)
+    assert [e["event"] for e in events] == ["skill.started", "skill.failed"]
+    assert events[-1]["error_code"] == "harness_invalid_output"
+    assert events[-1]["error_rule"] == "echo.lineage_parent"
+    assert json.dumps(events)  # Audit rows must stay serializable.

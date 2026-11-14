@@ -23,7 +23,8 @@ from pydantic import Field, ValidationError, field_validator, model_validator
 from smarthealth.agents.contracts import TERMINAL_STATUSES, Identifier, Objective, Role, RunEvent
 from smarthealth.agents.router import RouteDecision
 from smarthealth.runtime.errors import SkillError
-from smarthealth.skills.base_skill import SkillModel
+from smarthealth.runtime.token_budget import AdmissionDemand, TokenBudgetSnapshot
+from smarthealth.skills.base_skill import InputValidationError, SkillModel
 
 _IDENTIFIER = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
 _CODE = re.compile(r"^[a-z][a-z0-9_.]{0,63}$")
@@ -57,6 +58,7 @@ _CODE_FIELDS = frozenset(
     {
         "status",
         "error_code",
+        "error_rule",
         "skill",
         "action",
         "reason",
@@ -81,6 +83,8 @@ _REF_FIELDS = frozenset(
         "evidence_ref",
         "draft_ref",
         "review_ref",
+        "expected_previous_draft_ref",
+        "expected_previous_review_ref",
     }
 )
 _IDENTIFIER_FIELDS = frozenset({"call_id", "skill_call_id", "delegate_step_id", "source_run_id"})
@@ -119,6 +123,7 @@ class _Header(SkillModel):
     decision_model: (
         Annotated[str, Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")] | None
     ) = None
+    guard_version: Literal["2.0"] | None = None
     objective: Objective
     entry_agent: Role
     created_at: Annotated[str, Field(max_length=64)]
@@ -165,6 +170,7 @@ class _Run:
     token_usage_available: bool = False
     route: RouteDecision | None = None
     workflow_upgrades: int = 0
+    token_budget: TokenBudgetSnapshot | None = None
 
     def __post_init__(self) -> None:
         self.route = self.header.route.model_copy(deep=True) if self.header.route else None
@@ -190,7 +196,22 @@ def _validate_data(data: dict | None) -> dict:
         raise _invalid_event()
     clean: dict = {}
     for key, value in data.items():
-        if key == "harness_version":
+        if key in {"admission_demand", "validation_error"}:
+            model = AdmissionDemand if key == "admission_demand" else InputValidationError
+            try:
+                clean[key] = model.model_validate(value, strict=True).model_dump()
+            except (ValidationError, ValueError, TypeError):
+                raise _invalid_event() from None
+            continue
+        if key == "token_budget":
+            try:
+                clean[key] = TokenBudgetSnapshot.model_validate(value, strict=True).model_dump()
+            except (ValidationError, ValueError, TypeError):
+                raise _invalid_event() from None
+            continue
+        if key == "guard_version":
+            valid = value == "2.0"
+        elif key == "harness_version":
             valid = isinstance(value, str) and bool(_HARNESS_VERSION.fullmatch(value))
         elif key in {"harness_hash", "draft_hash", "report_hash"}:
             valid = isinstance(value, str) and bool(_HARNESS_HASH.fullmatch(value))
@@ -494,6 +515,7 @@ class RunEventStore:
                 run.header.route.workflow_type if run.header.route is not None else None
             ),
             "workflow_upgrades": run.workflow_upgrades,
+            "token_budget": run.token_budget.model_dump() if run.token_budget else None,
         }
 
     def _find(self, run_id: str) -> _Run:
@@ -527,14 +549,16 @@ class RunEventStore:
         run.events.append(event.model_copy(deep=True))
         run.latest_id = event.event_id
         run.updated_at = event.timestamp
-        status = event.data.get("status")
-        suffix = event.event.replace("_", ".").split(".")[-1]
-        if status in {"queued", "running", "verifying", *TERMINAL_STATUSES}:
-            run.status = status
-        elif suffix in TERMINAL_STATUSES:
-            run.status = suffix
-        if "error_code" in event.data:
-            run.error_code = event.data["error_code"]
+        # A delegated agent's completion is not completion of its parent run.
+        # Likewise, a rejected action or budget settlement cannot rewrite the
+        # terminal error recorded by run.cancelled / run.blocked.
+        if event.event.startswith("run."):
+            status = event.data.get("status", event.event.removeprefix("run."))
+            if status in {"queued", "running", "verifying", *TERMINAL_STATUSES}:
+                run.status = status
+                run.error_code = event.data.get("error_code")
+        if "token_budget" in event.data:
+            run.token_budget = TokenBudgetSnapshot.model_validate(event.data["token_budget"])
         if "token_usage_available" in event.data:
             run.token_usage_available = event.data["token_usage_available"]
         for field_name in _COUNTERS:

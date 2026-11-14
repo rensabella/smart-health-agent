@@ -2,18 +2,22 @@
 
 from __future__ import annotations
 
+import json
 from typing import Annotated, Literal
 
-from pydantic import Field, JsonValue, TypeAdapter, model_validator
+from pydantic import Field, JsonValue, TypeAdapter, ValidationError, model_validator
 
 from smarthealth.agents.router import RouteDecision
 from smarthealth.runtime.memory.schemas import MemoryContext
-from smarthealth.skills.base_skill import SkillModel
+from smarthealth.runtime.token_budget import TokenBudgetSnapshot
+from smarthealth.skills.base_skill import InputValidationError, SkillModel, ValidationIssue
+from smarthealth.skills.validation import input_diagnostics
 
 Identifier = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]{1,128}$")]
 ArtifactRef = Annotated[str, Field(pattern=r"^art_[0-9a-f]{32}$")]
 Role = Literal["planner", "data_analysis", "rag", "report_writer", "safety_verification"]
 Objective = Literal["data_analysis", "score_definition", "health_report"]
+InputReason = Literal["missing_upload", "invalid_data", "clarify_task"]
 ResultKind = Literal[
     "data_analysis", "score_definition", "health_report", "evidence", "draft", "review"
 ]
@@ -50,7 +54,7 @@ class FinishAction(SkillModel):
 
 class RequestInputAction(SkillModel):
     action: Literal["request_input"] = "request_input"
-    reason: Literal["missing_upload", "invalid_data", "clarify_task"]
+    reason: InputReason
 
 
 class UpgradeWorkflowAction(SkillModel):
@@ -64,6 +68,73 @@ AgentAction = Annotated[
 ]
 ACTION_ADAPTER = TypeAdapter(AgentAction)
 
+_TAG_MODELS = {
+    "call_skill": CallSkillAction,
+    "delegate": DelegateAction,
+    "finish": FinishAction,
+    "request_input": RequestInputAction,
+    "upgrade_workflow": UpgradeWorkflowAction,
+}
+_TAG_TYPES = {
+    type(None): "null",
+    bool: "boolean",
+    int: "integer",
+    float: "number",
+    str: "string",
+    list: "array",
+    dict: "object",
+}
+
+
+def action_diagnostics(action: object) -> InputValidationError:
+    """Project a rejected decision onto trusted action schema metadata, never its values.
+
+    Revalidates against the discriminated member model because adapter-level error
+    paths carry the union tag and do not project. Only schema-owned names, enum
+    values and type names survive.
+    """
+    if not isinstance(action, dict):
+        return InputValidationError(
+            issues=[
+                ValidationIssue(
+                    category="model_type",
+                    field_path="$",
+                    expected="declared_schema_constraints",
+                    actual_type="other",
+                )
+            ]
+        )
+    tag = action.get("action")
+    model = _TAG_MODELS.get(tag) if isinstance(tag, str) else None
+    if model is None:
+        expected = json.dumps(
+            {"enum": list(_TAG_MODELS)}, ensure_ascii=True, separators=(",", ":")
+        )[:400]
+        return InputValidationError(
+            issues=[
+                ValidationIssue(
+                    category="literal_error" if tag is not None else "missing",
+                    field_path="$.action",
+                    expected=expected,
+                    actual_type="missing" if tag is None else _TAG_TYPES.get(type(tag), "other"),
+                )
+            ]
+        )
+    try:
+        model.model_validate(action, strict=True)
+    except ValidationError as exc:
+        return input_diagnostics(model, exc)
+    return InputValidationError(
+        issues=[
+            ValidationIssue(
+                category="schema_validation",
+                field_path="$",
+                expected="declared_schema_constraints",
+                actual_type="object",
+            )
+        ]
+    )
+
 
 class Observation(SkillModel):
     step_id: str
@@ -73,6 +144,12 @@ class Observation(SkillModel):
     skill: str | None = None
     data: dict[str, JsonValue] = Field(default_factory=dict)
     error_code: str | None = None
+
+
+class TerminalResult(SkillModel):
+    reason: Literal["review_completed", "report_ready", "existing_result_ready"]
+    result_kind: ResultKind
+    result_ref: ArtifactRef
 
 
 class DecisionRequest(SkillModel):
@@ -91,6 +168,11 @@ class DecisionRequest(SkillModel):
     remaining_decisions: int
     workflow_type: Literal["simple", "complex"] | None = None
     can_upgrade_workflow: bool = False
+    allowed_upgrade_objectives: list[Literal["data_analysis", "health_report"]] | None = None
+    allowed_finish_kinds: list[ResultKind] | None = None
+    allowed_input_reasons: list[InputReason] = Field(default_factory=list, max_length=3)
+    terminal_result: TerminalResult | None = None
+    remaining_tokens: Annotated[int, Field(ge=0)] | None = None
     memory: MemoryContext = Field(default_factory=MemoryContext)
     report_context: dict[str, JsonValue] = Field(default_factory=dict)
 
@@ -155,6 +237,8 @@ class RunSnapshot(SkillModel):
     ] = "disabled"
     harness_version: Annotated[str, Field(pattern=r"^[A-Za-z0-9_.-]{1,64}$")] | None = None
     harness_hash: Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")] | None = None
+    guard_version: Literal["2.0"] | None = None
+    token_budget: TokenBudgetSnapshot | None = None
 
 
 class RunEvent(SkillModel):

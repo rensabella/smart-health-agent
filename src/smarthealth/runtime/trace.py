@@ -9,7 +9,7 @@ from pathlib import Path
 
 from smarthealth.runtime.context import SkillContext
 from smarthealth.runtime.logging import log_event
-from smarthealth.skills.base_skill import SkillModel
+from smarthealth.skills.base_skill import InputValidationError, SkillModel
 
 
 class TraceEvent(SkillModel):
@@ -34,6 +34,8 @@ class TraceEvent(SkillModel):
     budget_used: int
     latency_ms: float
     error_code: str | None = None
+    error_rule: str | None = None
+    validation_error: InputValidationError | None = None
     harness_version: str | None = None
     harness_hash: str | None = None
 

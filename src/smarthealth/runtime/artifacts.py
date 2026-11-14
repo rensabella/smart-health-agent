@@ -33,12 +33,14 @@ class _Artifact:
 class ArtifactStore:
     """Internal values are trusted Python objects; public callers only receive opaque refs."""
 
-    def __init__(self, ttl_seconds=3600, max_bytes=67108864, max_items=256):
+    def __init__(self, ttl_seconds=3600, max_bytes=67108864, max_items=256, lineage_enforced=True):
         if ttl_seconds <= 0 or max_bytes <= 0 or max_items <= 0:
             raise ValueError("Artifact bounds must be positive")
         self.ttl_seconds = ttl_seconds
         self.max_bytes = max_bytes
         self.max_items = max_items
+        # Evaluation-only ablation switch; production callers keep the input-version binding.
+        self.lineage_enforced = lineage_enforced
         self._items: dict[str, _Artifact] = {}
         self._bytes = 0
         self._lock = threading.RLock()
@@ -65,7 +67,7 @@ class ArtifactStore:
         if item.expires_at <= time.monotonic():
             self._remove(ref)
             raise SkillError("artifact_expired", "The artifact has expired; upload again.")
-        if item.input_version != context.input_version:
+        if self.lineage_enforced and item.input_version != context.input_version:
             raise SkillError("stale_input", "The artifact belongs to another input version.")
         if kind is not None and item.kind != kind:
             raise SkillError("invalid_artifact_type", "The artifact has an incompatible type.")
@@ -112,7 +114,11 @@ class ArtifactStore:
             item = self._get(ref, context, kind)
             self._get(source_ref, context)
             if item.source_ref != source_ref:
-                raise SkillError("harness_invalid_output", "Artifact source does not match input.")
+                raise SkillError(
+                    "harness_invalid_output",
+                    "Artifact source does not match input.",
+                    details={"rule": "lineage.source_ref_mismatch"},
+                )
 
     def delete(self, ref, *, context) -> None:
         with self._lock:

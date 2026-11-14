@@ -6,6 +6,7 @@ import pytest
 from app.agents.events import RunEventStore
 from app.agents.router import RouteDecision
 from app.core.errors import SkillError
+from smarthealth.runtime.token_budget import RunTokenBudget
 
 
 def register(store, run_id="run1", **metadata):
@@ -26,6 +27,33 @@ def register(store, run_id="run1", **metadata):
 
 def read(store, **kw):
     return store.get_events("run1", owner_id="owner", session_id="session", **kw)
+
+
+@pytest.mark.parametrize("event", ["agent.completed", "skill.completed", "skill.failed"])
+def test_child_completion_does_not_make_parent_terminal_on_recovery(tmp_path, event):
+    store = RunEventStore(tmp_path)
+    register(store)
+    store.append("run1", "run.running", data={"status": "running"})
+    store.append("run1", event, agent="data_analysis")
+    recovered = RunEventStore(tmp_path).recover()[0]
+    assert recovered["status"] == "failed" and recovered["error_code"] == "process_restarted"
+
+
+def test_budget_metadata_rejects_private_fields_and_preserves_terminal_error(tmp_path):
+    store = RunEventStore(tmp_path)
+    register(store, guard_version="2.0")
+    ledger = RunTokenBudget(100)
+    ticket = ledger.reserve(80, 20)
+    store.append("run1", "budget.admitted", data={"token_budget": ledger.snapshot().model_dump()})
+    store.append("run1", "run.cancelled", data={"status": "cancelled", "error_code": "cancelled"})
+    ledger.settle(ticket)
+    data = ledger.snapshot().model_dump()
+    store.append("run1", "budget.settled", data={"token_budget": data, "error_code": None})
+    with pytest.raises(SkillError):
+        store.append("run1", "budget.settled", data={"token_budget": {**data, "prompt": "PRIVATE"}})
+    recovered = RunEventStore(tmp_path).recover()[0]
+    assert recovered["status"] == recovered["error_code"] == "cancelled"
+    assert recovered["token_budget"] == data and recovered["guard_version"] == "2.0"
 
 
 def test_owned_replay_and_copy_isolation():
@@ -357,3 +385,50 @@ def test_partial_harness_header_fails_closed_on_recovery(tmp_path):
     with pytest.raises(SkillError) as error:
         RunEventStore(tmp_path).recover()
     assert error.value.code == "trace_unavailable"
+
+
+def test_rejection_recovery_keys_are_whitelisted(tmp_path):
+    store = RunEventStore(tmp_path)
+    register(store)
+    draft, review = "art_" + "a" * 32, "art_" + "b" * 32
+    store.append(
+        "run1",
+        "agent.action_rejected",
+        agent="report_writer",
+        data={
+            "skill": "report_generation",
+            "error_code": "draft_awaiting_review",
+            "error_rule": "publication.candidate_keys",
+            "draft_ref": draft,
+            "expected_previous_draft_ref": draft,
+            "expected_previous_review_ref": review,
+        },
+    )
+    event = read(store)[-1]
+    assert event.data["draft_ref"] == draft
+    assert event.data["expected_previous_draft_ref"] == draft
+    assert event.data["expected_previous_review_ref"] == review
+    assert event.data["error_rule"] == "publication.candidate_keys"
+    assert read(store)[-1].data["expected_previous_draft_ref"] is not None
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"message": "Revise the current draft using its failed review."},
+        {"error_rule": "Not a stable code"},
+        {"error_rule": 7},
+        {"expected_previous_draft_ref": "not-a-ref"},
+        {"expected_previous_review_ref": True},
+    ],
+)
+def test_recovery_guidance_text_never_reaches_the_journal(tmp_path, data):
+    store = RunEventStore(tmp_path)
+    register(store)
+    path = tmp_path / "run1.jsonl"
+    before = path.read_bytes()
+    with pytest.raises(SkillError) as error:
+        store.append("run1", "agent.action_rejected", agent="report_writer", data=data)
+    assert error.value.code == "invalid_trace_event"
+    assert path.read_bytes() == before
+    assert store.latest_id("run1") == 0
