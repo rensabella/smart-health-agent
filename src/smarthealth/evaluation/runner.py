@@ -43,13 +43,26 @@ class MeteredBackend(DecisionBackend):
         self.mode, self.model_name = inner.mode, inner.model_name
 
     async def decide(self, request):
+        return await self._decide(request)
+
+    def prepare(self, request):
+        return self.inner.prepare(request)
+
+    async def decide_prepared(self, prepared):
+        return await self._decide(prepared.request, prepared)
+
+    async def _decide(self, request, prepared=None):
         if self.mode == "live":
             if self.meter.used >= self.meter.limit:
                 raise SkillError(
                     "evaluation_live_budget_exceeded", "Evaluation request limit reached."
                 )
             self.meter.used += 1
-        return await self.inner.decide(request)
+        return (
+            await self.inner.decide_prepared(prepared)
+            if prepared is not None
+            else await self.inner.decide(request)
+        )
 
     async def aclose(self):
         await self.inner.aclose()
@@ -86,7 +99,7 @@ class TimedEvents(RunEventStore):
 
 
 def _service(predictor, retrieval, harness):
-    store = ArtifactStore()
+    store = ArtifactStore(lineage_enforced=harness.baseline != "no_lineage")
     return AnalysisService(
         store,
         predictor,
@@ -95,9 +108,10 @@ def _service(predictor, retrieval, harness):
     )
 
 
-async def evaluate_system_case(case, predictor, retrieval, content, make_backend):
+async def evaluate_system_case(case, predictor, retrieval, content, make_backend, baseline="full_guard"):
     harness = HarnessValidator(
-        load_config("configs/report" if case.harness_profile == "report" else "configs")
+        load_config("configs/report" if case.harness_profile == "report" else "configs"),
+        baseline=baseline,
     )
     service = _service(predictor, retrieval if case.retrieval_enabled else None, harness)
     registry = create_registry(service, harness=harness)
@@ -222,8 +236,8 @@ async def _analysis_fixture(service, registry, context, content):
     return previous
 
 
-async def evaluate_safety_case(case, predictor, chunks, content, make_backend):
-    harness = HarnessValidator(load_config("configs/report"))
+async def evaluate_safety_case(case, predictor, chunks, content, make_backend, baseline="full_guard"):
+    harness = HarnessValidator(load_config("configs/report"), baseline=baseline)
     service = _service(predictor, None, harness)
     registry = create_registry(service, harness=harness)
     backend = make_backend()
@@ -320,9 +334,13 @@ async def evaluate_safety_case(case, predictor, chunks, content, make_backend):
         review = checked.data
         result["safe"] = review["safe"]
         result["warnings"] = review["warnings"]
-        if review["safe"]:
+        result["review_enforced"] = baseline != "guard_off"
+        if review["safe"] or baseline == "guard_off":
             published = service.reports.publication(
-                draft["draft_ref"], review["review_ref"], context
+                draft["draft_ref"],
+                review["review_ref"],
+                context,
+                enforce_review=baseline != "guard_off",
             )
             result["published"] = True
             result["published_citation_pairs"] = sum(len(c.evidence_ids) for c in published.claims)
@@ -355,6 +373,7 @@ async def evaluate_suite(
     meter=None,
     make_backend=None,
     corpus_root=Path("."),
+    baseline="full_guard",
 ):
     corpus = load_corpus(corpus_root / suite.corpus.path)
     if retrieval.manifest.corpus_hash != canonical_hash(
@@ -368,18 +387,23 @@ async def evaluate_suite(
     started = time.perf_counter()
     system = []
     for case in suite.system_cases:
-        system.append(await evaluate_system_case(case, predictor, retrieval, content, make_backend))
+        system.append(
+            await evaluate_system_case(case, predictor, retrieval, content, make_backend, baseline)
+        )
     system_wall = time.perf_counter() - started
     retrieved = [evaluate_retrieval_case(case, retrieval) for case in suite.retrieval_cases]
     safety = []
     for case in suite.safety_cases:
-        safety.append(await evaluate_safety_case(case, predictor, chunks, content, make_backend))
+        safety.append(
+            await evaluate_safety_case(case, predictor, chunks, content, make_backend, baseline)
+        )
     return {
         "schema_version": "1.0",
         "suite_version": suite.suite_version,
         "suite_hash": canonical_hash(suite.model_dump(mode="json")),
         "created_at": datetime.now(timezone.utc).isoformat(),
         "mode": mode,
+        "baseline": baseline,
         "reference_labels": "project_curated_reference_labels",
         "human_review_status": "pending",
         "python": platform.python_version(),

@@ -59,7 +59,7 @@ class BenchmarkTask(Contract):
     task_id: str = Field(pattern=r"^[a-z][a-z0-9_]{1,63}$")
     category: Literal["basic", "workflow", "rag", "failure", "safety", "unsupported"]
     user_request: str = Field(min_length=1, max_length=4000)
-    fixture: Literal["none", "synthetic_csv", "invalid_csv"]
+    fixture: Literal["none", "synthetic_csv", "invalid_csv", "wesad_csv"]
     expected_behavior: str = Field(min_length=1, max_length=2000)
     expected: Expected
     required_skills: list[str] = Field(default_factory=list)
@@ -91,21 +91,38 @@ class BenchmarkTask(Contract):
         return self
 
 
+SUITE_FIXTURES = {
+    "live-synthetic-v1": frozenset({"none", "synthetic_csv", "invalid_csv"}),
+    "live-wesad-v1": frozenset({"none", "wesad_csv", "invalid_csv"}),
+}
+SUITE_FILES = {
+    "synthetic": "live_llm_tasks.json",
+    "wesad": "live_llm_wesad_tasks.json",
+}
+
+
 class BenchmarkSuite(Contract):
     schema_version: Literal["1.0"] = "1.0"
-    version: Literal["live-synthetic-v1"] = "live-synthetic-v1"
+    version: Literal["live-synthetic-v1", "live-wesad-v1"] = "live-synthetic-v1"
     tasks: list[BenchmarkTask] = Field(min_length=20, max_length=20)
 
     @model_validator(mode="after")
     def unique_tasks(self):
         if len({t.task_id for t in self.tasks}) != len(self.tasks):
             raise ValueError("Benchmark task IDs must be unique")
+        allowed = SUITE_FIXTURES[self.version]
+        if any(task.fixture not in allowed for task in self.tasks):
+            raise ValueError("Fixture inputs must match the benchmark suite version")
         return self
 
 
-def load_tasks() -> tuple[BenchmarkSuite, str]:
+def load_tasks(suite: str = "synthetic") -> tuple[BenchmarkSuite, str]:
     # Only reviewed packaged requests and generated fixtures are accepted by the
     # CLI. There is deliberately no arbitrary patient CSV or query input option.
-    data = Path(resource_path("evaluation", "live_llm_tasks.json")).read_bytes()
+    try:
+        filename = SUITE_FILES[suite]
+    except KeyError:
+        raise ValueError(f"Unknown benchmark suite: {suite!r}") from None
+    data = Path(resource_path("evaluation", filename)).read_bytes()
     suite = BenchmarkSuite.model_validate(json.loads(data), strict=True)
     return suite, hashlib.sha256(data).hexdigest()

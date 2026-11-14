@@ -23,6 +23,7 @@ from smarthealth.examples.demo_policy import scripted_analysis
 from smarthealth.examples.report_policy import scripted_report
 from smarthealth.pipeline.inference import analyze_csv
 from smarthealth.retrieval.retrieval import RetrievalService, build_index
+from smarthealth.runtime.token_budget import RunTokenBudget
 
 
 def task_named(name):
@@ -89,6 +90,8 @@ async def test_dry_run_ignores_credentials_and_cannot_construct_provider_or_mode
         repetitions=2,
         concurrency=2,
         model=None,
+        method=None,
+        suite=None,
         live=False,
         task=None,
         output=output,
@@ -149,6 +152,33 @@ async def test_actual_pipeline_and_grader_detect_phantom_or_wrong_results(predic
     forged = copy.deepcopy(record)
     forged["events"] = [e for e in forged["events"] if e["event"] != "publication.checked"]
     assert not grade_task(task, forged)["checks"]["publication_verified"]
+
+
+@pytest.mark.parametrize(
+    "late_event", ["agent.thinking", "skill.dispatched", "publication.checked"]
+)
+async def test_guard_v2_grader_rejects_work_after_terminal_event(predictor, late_event):
+    record = await execute("score_definition", predictor)
+    assert record["grades"]["invariants"]["terminal_quiescence"]
+    corrupted = copy.deepcopy(record)
+    corrupted["events"].append({"event": late_event, "data": {}})
+    grade = grade_task(task_named("score_definition"), corrupted)
+    assert not grade["invariants"]["terminal_quiescence"] and not grade["success"]
+
+
+async def test_guard_v2_grader_does_not_hide_observed_token_overrun(predictor):
+    record = await execute("score_definition", predictor)
+    # Corrupt an explicitly infrastructure-only record to exercise the grader,
+    # not to create a measured live result.
+    ledger = RunTokenBudget(65536)
+    ticket = ledger.reserve(100, 20)
+    ledger.settle(ticket, 70000, 5)
+    record["snapshot"].update(
+        backend_mode="live", llm_requests=1, token_budget=ledger.snapshot().model_dump()
+    )
+    grade = grade_task(task_named("score_definition"), record)
+    assert not grade["invariants"]["token_admission"]
+    assert "token_admission" in grade["invariant_violations"] and not grade["success"]
 
 
 @pytest.mark.parametrize(

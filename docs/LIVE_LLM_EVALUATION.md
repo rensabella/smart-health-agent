@@ -1,10 +1,12 @@
 # Live LLM end-to-end evaluation
 
 This evaluator exercises the existing SmartHealth Agent. It does not replace its
-planner, tool implementations, retrieval or publication policy. **No live model
-performance has been verified in this implementation.** Local infrastructure
-tests use labeled scripted policies/HTTP mocks. The checked-in report is a dry
-run, with no executed tasks and no external provider calls.
+planner, tool implementations, retrieval or publication policy. Local infrastructure
+tests use labeled scripted policies/HTTP mocks. **The checked-in framework
+verification report is a dry run**, with no executed tasks and no external
+provider calls. Separately authorized live pilots belong in the ignored
+`evaluation/live_runs/` directory; their task outcomes must be assessed separately
+from infrastructure tests and must not be presented as a full benchmark pass.
 
 The [integration plan](LIVE_LLM_EVALUATION_PLAN.md) records the repository analysis
 performed before implementation. Historical [system evaluation](evaluation.md)
@@ -44,7 +46,11 @@ not an HTTP/SSE deployment or throughput benchmark.
 
 No expected answers, grader labels, failure rationale or success criteria are
 sent to the model. The normal production prompt and permission-scoped decision
-view remain unchanged. Optional temperature, output-token cap and provider seed
+view remain unchanged. Guard feedback to the model consists of constant error
+messages, trusted schema-metadata projections (including enum values) and stable
+rule identifiers; raw input, claim or provider text is never echoed back, and
+exported provider-attempt rows carry the same sanitized reason/rule codes.
+Optional temperature, output-token cap and provider seed
 are additive adapter settings; application defaults retain their previous wire
 format. Providers may reject unsupported parameters rather than silently ignore
 them; use YAML `null` to omit temperature/seed where necessary.
@@ -102,21 +108,60 @@ settings are 20 tasks, 10 repetitions and concurrency four, still subject to one
 shared request/token/cost allowance. Use a new output directory for each run;
 existing results are never overwritten.
 
+## The WESAD real-data suite
+
+`--suite wesad` (or `suite: wesad` in the YAML, see `configs/live_llm.wesad.yaml`)
+selects the second packaged suite: the same 20-task structure, rewritten for the
+stress-analysis context, running against the deployed WESAD stress bundle
+(`model_dir: models_saved/wesad_v1/lightgbm_v1.0`, produced by
+`smarthealth-train --profile wesad --cv loso`; see
+[evaluation.md](evaluation.md) for the dataset, LOSO protocol and results). The
+suite is defined for the full-guard gated method only.
+
+The data fixture is **real derived data, never seed-generated**: a reviewed 600-row
+contiguous chest-signal segment of the held-out subject's canonical table, packaged
+as `evaluation/wesad_fixture.csv` with `wesad_fixture_manifest.json` (CC-BY-4.0
+attribution, source-table hash, derivation parameters, and
+`label_column_absent: true` — the fixture carries no ground truth and is used for
+infrastructure validation only, never accuracy claims). The runner verifies the
+manifest field by field and pins the fixture sha256; any mismatch fails closed as
+`evaluation_configuration_error` with no silent fallback to synthetic data. A
+`wesad` dry-run additionally re-verifies the packaged fixture hashes.
+
+This phase authorizes **dry-run and scripted infrastructure tests only** — no live
+provider budget is configured for the WESAD suite. The scripted full-chain
+validation (real AgentRuntime, deploy bundle, packaged fixture, publication gate,
+memory write, `suite="wesad"` grading) is recorded under
+`evaluation/wesad/scripted_validation/`; a future live run requires separate
+authorization through the same process as the synthetic suite.
+
 ## Providers and live execution
 
 The supported interface is the existing **OpenAI-compatible Chat Completions
 function-calling protocol**: one required tool call per decision, strict control
 schemas, `max_completion_tokens`, and JSON usage counters when available.
 Compatibility with a particular provider/model must be established with an
-approved small live run; it has not been verified here. Native Anthropic, Gemini,
+approved small live run; this protocol description alone is not evidence of
+compatibility. Native Anthropic, Gemini,
 Responses API and arbitrary text-only servers are not implemented adapters.
 HTTPS is required except for loopback HTTP. Credentials come only from
 `HEALTH_LLM_API_KEY`; redirects and environment proxy discovery remain disabled.
+
+For DashScope Qwen, explicitly set `HEALTH_LLM_API_PROFILE=dashscope` (default:
+`standard`). This profile uses `tool_choice=auto`, `enable_thinking=false` and
+`max_tokens`, and omits the unsupported provider-side function `strict` hint and
+`store` field. The unchanged local parser still requires exactly one permitted
+tool call with no free text, and the Runtime/Registry still validates arguments,
+permissions, lineage, and publication. There is no text-to-action fallback or
+automatic model/provider substitution. The evaluator records the effective
+profile and HTTP status codes without provider response bodies or credentials.
+Token reservation uses the actual profile-specific serialized payload.
 
 After separately approving provider spending, configure your environment locally:
 
 ```bash
 export HEALTH_AGENT_BACKEND=openai_compatible
+export HEALTH_LLM_API_PROFILE=standard  # Use dashscope for Alibaba Cloud Qwen.
 export HEALTH_LLM_BASE_URL='https://YOUR_PROVIDER_API_ROOT/v1'
 export HEALTH_LLM_MODEL='YOUR_TOOL_CALLING_MODEL'
 # Set HEALTH_LLM_API_KEY through your local secret mechanism; never commit it.
@@ -150,10 +195,19 @@ corpus identity must match the reviewed packaged benchmark corpus. Do not run
 this evaluator and the application against the same process-owned Qdrant path.
 
 The `--live` switch authorizes requests for that invocation only. Installation,
-CI, `make eval-dry` and normal tests cannot trigger paid evaluation. No live call
-was made while implementing this feature.
+CI, `make eval-dry` and normal tests cannot trigger paid evaluation. The original
+framework implementation verification made no live calls; a later live pilot
+requires its own configuration, allowance and result directory.
 
 ## Budget, retries and failure injection
+
+[Runtime Guard v2](runtime_guard_v2.md) adds per-run admission before the existing
+cross-task evaluator allowance. Both layers use the same prepared payload; the
+effective run ceiling remains the minimum of experiment overrides and Harness
+limits. V2 snapshots expose charged/unknown usage separately from known counters.
+Its graders also check token-admission accounting and absence of work after
+terminal events. Historical reports are retained under their original guard
+version and are not retroactively regraded.
 
 The experiment reserves the exact serialized request's byte length as a
 conservative input-token estimate plus the configured output cap **before** each

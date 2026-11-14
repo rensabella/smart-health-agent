@@ -28,7 +28,13 @@ class EvalConfig(BaseModel):
     input_price_per_million: float | None = Field(default=None, ge=0)
     output_price_per_million: float | None = Field(default=None, ge=0)
     max_estimated_cost: float | None = Field(default=None, gt=0)
-    baseline: Literal["full_guard"] = "full_guard"
+    baseline: Literal["full_guard", "guard_off", "no_lineage", "no_budget"] = "full_guard"
+    # Phase 3 comparison method. Baseline ablations mutate the gated system and
+    # are therefore undefined for the ungated loops.
+    method: Literal["full_guard", "b1_ungated_react", "b2_no_rag"] = "full_guard"
+    # Phase 4 WESAD suite: packaged reviewed fixture plus a deployed bundle.
+    suite: Literal["synthetic", "wesad"] = "synthetic"
+    model_dir: str | None = Field(default=None, max_length=512)
 
     @model_validator(mode="after")
     def prices_together(self):
@@ -36,6 +42,21 @@ class EvalConfig(BaseModel):
             raise ValueError("Both operator-supplied token prices are required together")
         if self.max_estimated_cost is not None and self.input_price_per_million is None:
             raise ValueError("A spending estimate cap requires both token prices")
+        return self
+
+    @model_validator(mode="after")
+    def wesad_suite_is_gated_full_guard(self):
+        if self.suite == "wesad":
+            if self.method != "full_guard" or self.baseline != "full_guard":
+                raise ValueError("The WESAD suite is only defined for the full-guard method")
+            if not self.model_dir:
+                raise ValueError("The WESAD suite requires the deployed model bundle directory")
+        return self
+
+    @model_validator(mode="after")
+    def baselines_require_full_guard_method(self):
+        if self.method != "full_guard" and self.baseline != "full_guard":
+            raise ValueError("Baseline ablations are only defined for the full-guard method")
         return self
 
 

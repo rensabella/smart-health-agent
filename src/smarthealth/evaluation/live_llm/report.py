@@ -24,6 +24,17 @@ def _metric_table(metrics):
     return lines
 
 
+def _outcome_table(outcome):
+    """Ratio rows with optional decomposition keys beyond the plain triple."""
+    lines = ["| Outcome metric | Numerator | Denominator | Value |", "|---|---:|---:|---:|"]
+    for key, value in outcome.items():
+        if not isinstance(value, dict) or "numerator" not in value:
+            continue
+        shown = "unavailable" if value.get("value") is None else f"{value['value']:.4f}"
+        lines.append(f"| {_cell(key)} | {value['numerator']} | {value['denominator']} | {shown} |")
+    return lines
+
+
 def render_markdown(report: dict) -> str:
     """Render only reviewed metadata fields, never arbitrary config or raw traces."""
     records = report.get("records", [])
@@ -52,8 +63,10 @@ def render_markdown(report: dict) -> str:
         "provider",
         "model",
         "baseline",
+        "method",
         "dataset_hash",
         "benchmark_hash",
+        "grading_contract_version",
         "model_manifest_hash",
         "config_hash",
         "corpus_hash",
@@ -92,6 +105,46 @@ def render_markdown(report: dict) -> str:
             f"known output tokens: {_cell(tokens.get('known_output_tokens'))}; "
             f"usage complete: {_cell(tokens.get('complete'))}.",
         ]
+    outcome = metrics.get("outcome") or {}
+    if outcome:
+        lines += [
+            "",
+            "## Outcome partition (all methods)",
+            "",
+            "Deterministic detectors applied identically to every method's released text and "
+            "shared trace fields.",
+            "",
+        ]
+        lines += _outcome_table(outcome)
+        unsafe = outcome.get("unsafe_release_on_safety_tasks") or {}
+        if unsafe:
+            lines += [
+                "",
+                f"Unsafe-release decomposition on safety tasks: released {unsafe.get('released')}, "
+                f"guard regex {unsafe.get('guard_violations')}, affirmative label claims "
+                f"{unsafe.get('label_violations')}, ungrounded decimals "
+                f"{unsafe.get('fabricated_quantitative')}, fabricated citations "
+                f"{unsafe.get('text_citation_fabrication')}.",
+            ]
+    methods = metrics.get("by_method", {})
+    if methods and (len(methods) > 1 or "full_guard" not in methods):
+        for method, summary in methods.items():
+            label = {
+                "full_guard": "full guard — gated runtime, contract and outcome grading",
+                "b1_ungated_react": "B1 ungated ReAct — outcome-partition grading only",
+                "b2_no_rag": "B2 no-RAG — outcome-partition grading only",
+            }.get(method, method)
+            lines += ["", f"## Method: {_cell(label)}", ""] + _metric_table(summary)
+            method_outcome = summary.get("outcome") or {}
+            if method_outcome:
+                lines += ["", "Outcome partition:", ""]
+                lines += _outcome_table(method_outcome)
+            lines += [
+                "",
+                "Method note: contract-layer metrics are unavailable (zero denominator) for "
+                "ungated baselines by construction; this is a partition boundary, not a zero "
+                "score.",
+            ]
     lines += [
         "",
         "## Budget and cost",
@@ -200,11 +253,16 @@ def render_markdown(report: dict) -> str:
         "reported separately. An untriggered fault is unexercised, never recovered.",
         "- Citation identity and provenance do not establish semantic entailment or medical "
         "truth. Semantic grounding and clinical safety remain unverified; no LLM judge is used.",
+        "- Contract-layer metrics apply only to full-guard records. Ungated comparison "
+        "baselines (B1 ReAct, B2 no-RAG) are graded on the outcome partition with identical "
+        "deterministic detectors; absent contract keys are never counted as passed.",
+        "- The unsafe-release rate counts released answers on safety-contract tasks that trip "
+        "the production guard regexes, affirmative clinical-validation or safety-review claims, "
+        "or ungrounded decimal numbers. Rewritten diagnostics and wrong-but-integer values stay "
+        "outside these detectors; text citation fabrication is reported separately.",
         "- First-token latency is unavailable for nonstreaming provider decisions. SSE progress "
         "events are not model tokens. Throughput requires measured suite wall time and is not "
         "inferred by adding concurrent per-task latencies.",
-        "- Only the full-guard configuration is available. Guard-off and retry-only variants "
-        "cannot fairly isolate this runtime's coupled permissions, lineage and publication rules.",
         "- The controlled synthetic corpus does not support authentic conflicting-source "
         "resolution or general medical question answering benchmarks.",
         "",

@@ -1,4 +1,4 @@
-"""Run reviewed synthetic tasks through the production AgentRuntime entry points."""
+"""Run reviewed packaged benchmark tasks through the production AgentRuntime entry points."""
 
 from __future__ import annotations
 
@@ -22,10 +22,11 @@ from smarthealth.agents.router import HealthRouter
 from smarthealth.cli.generate_demo_data import GENERATOR_VERSION, generate_dataset
 from smarthealth.config.resources import resource_path
 from smarthealth.config.settings import Settings
+from smarthealth.evaluation.baselines.prompts import NO_RAG_ADDENDUM, UNGATED_SYSTEM_PROMPT
 from smarthealth.evaluation.live_llm.budget import EvaluationBudget
 from smarthealth.evaluation.live_llm.config import EvalConfig, load_config
 from smarthealth.evaluation.live_llm.fault_injection import FaultInjector
-from smarthealth.evaluation.live_llm.graders import grade_task
+from smarthealth.evaluation.live_llm.graders import GRADING_CONTRACT_VERSION, grade_task
 from smarthealth.evaluation.live_llm.metrics import aggregate
 from smarthealth.evaluation.live_llm.report import render_markdown
 from smarthealth.evaluation.live_llm.tasks import BenchmarkTask, load_tasks
@@ -84,15 +85,86 @@ def synthetic_input(seed: int) -> bytes:
     return frame.to_csv(index=False, float_format="%.8f").encode("utf-8")
 
 
-def task_record(task, repetition, mode):
+def load_wesad_fixture() -> tuple[bytes, dict]:
+    """Read the packaged WESAD-derived fixture and verify its reviewed manifest.
+
+    The fixture is a packaged operator-reviewed asset derived from the real
+    archive; it is never generated from a seed, and any structural or byte
+    mismatch is a configuration error rather than a silent fallback.
+    """
+    from smarthealth.pipeline.profiles import WESAD_V1
+
+    try:
+        content = Path(resource_path("evaluation", "wesad_fixture.csv")).read_bytes()
+        manifest_bytes = Path(resource_path("evaluation", "wesad_fixture_manifest.json")).read_bytes()
+    except OSError as error:
+        raise SkillError(
+            "evaluation_configuration_error", "The packaged WESAD fixture is not installed."
+        ) from error
+    document = json.loads(manifest_bytes)
+    columns = document.get("columns")
+    problems = []
+    if document.get("schema_version") != "1.0" or document.get("fixture") != "wesad_fixture.csv":
+        problems.append("schema")
+    if document.get("label_column_absent") is not True:
+        problems.append("label_column_absent")
+    dataset = document.get("dataset") or {}
+    if (
+        dataset.get("name") != "WESAD"
+        or dataset.get("license") != "CC-BY-4.0"
+        or not isinstance(dataset.get("citation"), str)
+        or not dataset.get("citation").strip()
+        or not isinstance(dataset.get("source_subject"), str)
+        or not dataset["source_subject"].strip()
+    ):
+        problems.append("dataset_attribution")
+    derivation = document.get("derivation") or {}
+    if derivation.get("profile") != WESAD_V1.name:
+        problems.append("derivation_profile")
+    if not isinstance(columns, list) or not all(isinstance(name, str) for name in columns):
+        problems.append("columns")
+    else:
+        header = set(columns)
+        if (
+            not set(WESAD_V1.signal_columns).issubset(header)
+            or not header.issubset(set(WESAD_V1.allowed_columns))
+        ):
+            problems.append("columns")
+    if not isinstance(document.get("rows"), int) or document["rows"] <= 0:
+        problems.append("rows")
+    if document.get("fixture_sha256") != hashlib.sha256(content).hexdigest():
+        problems.append("fixture_sha256")
+    if problems:
+        raise SkillError(
+            "evaluation_configuration_error",
+            "The packaged WESAD fixture does not match its reviewed manifest.",
+        )
+    return content, {
+        "suite": "wesad",
+        "fixture": "evaluation/wesad_fixture.csv",
+        "fixture_sha256": document["fixture_sha256"],
+        "manifest_sha256": hashlib.sha256(manifest_bytes).hexdigest(),
+        "dataset": dataset,
+        "derivation": derivation,
+        "rows": document["rows"],
+        "columns": columns,
+        "label_column_absent": True,
+    }
+
+
+def task_record(task, repetition, mode, method="full_guard", suite="synthetic"):
     return {
         "schema_version": "1.0",
         "task_id": task.task_id,
         "category": task.category,
         "repetition": repetition,
         "mode": mode,
+        "method": method,
+        "suite": suite,
         "status": "dry_run" if mode == "dry_run" else "executed",
         "task_hash": canonical_hash(task.model_dump(mode="json")),
+        "requires_rag": task.requires_rag,
+        "require_citations": task.expected.require_citations,
         "snapshot": None,
         "events": [],
         "registry_events": [],
@@ -127,6 +199,7 @@ def new_backend(config, settings, transport):
         temperature=config.temperature,
         max_completion_tokens=config.max_completion_tokens,
         seed=config.seed,
+        api_profile=settings.llm_api_profile,
     )
 
 
@@ -154,12 +227,12 @@ async def execute_task(
         make_backend and mode != "infrastructure_test"
     ):
         raise ValueError("Custom backends are limited to infrastructure tests")
-    record = task_record(task, repetition, mode)
+    record = task_record(task, repetition, mode, method=config.method, suite=config.suite)
     if task.requires_rag and retrieval is None:
         record.update(status="skipped", skip_reason="real_rag_assets_unavailable")
         record["grades"] = grade_task(task, record)
         return record
-    store = ArtifactCollector()
+    store = ArtifactCollector(lineage_enforced=config.baseline != "no_lineage")
     runtime = registry = memory = backend = None
     transport = None
     initial = None
@@ -168,9 +241,11 @@ async def execute_task(
         task.fault if not task.fault.startswith("backend_") else "none", task.fault_target
     )
     context = SkillContext(
-        owner_id="synthetic_live_evaluation",
+        owner_id=(
+            "wesad_live_evaluation" if config.suite == "wesad" else "synthetic_live_evaluation"
+        ),
         session_id=f"{task.task_id}_{repetition}",
-        input_version="synthetic_v1",
+        input_version="wesad_v1" if config.suite == "wesad" else "synthetic_v1",
     )
     trace_sink = InMemoryTraceSink()
     try:
@@ -185,7 +260,7 @@ async def execute_task(
             run_timeout_seconds=task.timeout_seconds,
             decision_timeout_seconds=config.decision_timeout_seconds,
         )
-        harness = HarnessValidator(base, limits=limits)
+        harness = HarnessValidator(base, limits=limits, baseline=config.baseline)
         service = AnalysisService(
             store,
             predictor,
@@ -212,7 +287,9 @@ async def execute_task(
         )
         uploads = []
         if task.fixture != "none":
-            value = content if task.fixture == "synthetic_csv" else b"unexpected_column\ninvalid\n"
+            # The suite validator pins data fixtures to one suite; only the
+            # malformed-CSV case is shared bytes across suites.
+            value = content if task.fixture != "invalid_csv" else b"unexpected_column\ninvalid\n"
             uploads.append(service.create_upload(value, context))
         request = CreateRunRequest(
             query=task.user_request,
@@ -341,9 +418,17 @@ def fingerprint_file(path):
 
 
 def metadata(config, suite, suite_hash, selected, mode):
+    prompt_hash = (
+        canonical_hash([prompts.SYSTEM_PROMPT, prompts.REPORT_ROLE_PROMPTS])
+        if config.method == "full_guard"
+        else canonical_hash([UNGATED_SYSTEM_PROMPT, NO_RAG_ADDENDUM])
+    )
     return {
         "schema_version": "1.0",
+        "grading_contract_version": GRADING_CONTRACT_VERSION,
         "mode": mode,
+        "method": config.method,
+        "suite": config.suite,
         "evaluation_date": utcnow(),
         "benchmark_version": suite.version,
         "benchmark_hash": suite_hash,
@@ -351,7 +436,7 @@ def metadata(config, suite, suite_hash, selected, mode):
         "selected_task_ids": [t.task_id for t in selected],
         "config": config.model_dump(mode="json"),
         "config_hash": canonical_hash(config.model_dump(mode="json")),
-        "prompt_hash": canonical_hash([prompts.SYSTEM_PROMPT, prompts.REPORT_ROLE_PROMPTS]),
+        "prompt_hash": prompt_hash,
         "generator_version": GENERATOR_VERSION,
         "fixture_seed": config.fixture_seed,
         "python": platform.python_version(),
@@ -368,11 +453,28 @@ def metadata(config, suite, suite_hash, selected, mode):
             )
         },
         "comparison": {
-            "available": False,
-            "reason": "Guard-off and retry-only modes would change integral authorization and publication semantics.",
+            "available": config.baseline != "full_guard" or config.method != "full_guard",
+            "baseline": config.baseline,
+            "method": config.method,
+            "reason": (
+                "Ungated comparison method active: the runtime routing, decision validation "
+                "and publication gates are absent by construction."
+                if config.method != "full_guard"
+                else (
+                    "Ablation baseline active: exactly one guard mechanism is disabled for this "
+                    "run; scripted and live results remain non-mixable."
+                    if config.baseline != "full_guard"
+                    else "Guard-off and retry-only modes would change integral authorization and publication semantics."
+                )
+            ),
         },
         "limitations": [
-            "Only synthetic fixtures; no clinical or production-quality claim.",
+            (
+                "WESAD-derived fixture from laboratory stress protocols; "
+                "no clinical or production-quality claim."
+                if config.suite == "wesad"
+                else "Only synthetic fixtures; no clinical or production-quality claim."
+            ),
             "Router-only outcomes are not live LLM evidence; mocks remain infrastructure_test.",
             "Citation identity checks do not establish semantic entailment; no LLM judge used.",
             "No independently labeled conflicting-evidence cases or standalone single-Skill final objective.",
@@ -423,11 +525,11 @@ async def run(args):
     config = load_config(args.config)
     overrides = {
         key: getattr(args, key)
-        for key in ("max_tasks", "repetitions", "concurrency", "model")
+        for key in ("max_tasks", "repetitions", "concurrency", "model", "method", "suite")
         if getattr(args, key) is not None
     }
     config = EvalConfig.model_validate({**config.model_dump(), **overrides})
-    suite, suite_hash = load_tasks()
+    suite, suite_hash = load_tasks(config.suite)
     tasks = select_tasks(suite, args.task, config.max_tasks)
     mode = "live" if args.live else "dry_run"
     # Dry-run never reads credentials, instantiates HTTP clients or loads model/index assets.
@@ -455,14 +557,22 @@ async def run(args):
         writer.report(report)
 
     try:
+        content = None
+        if config.suite == "wesad":
+            # Verified in every mode: the dry-run still loads no credentials, HTTP
+            # clients, model bundles or retrieval indexes - only the packaged
+            # fixture bytes and their reviewed manifest.
+            content, provenance = load_wesad_fixture()
+            report["fixture_provenance"] = provenance
         if not args.live:
             for repetition in range(1, config.repetitions + 1):
                 for task in tasks:
-                    record = task_record(task, repetition, "dry_run")
+                    record = task_record(
+                        task, repetition, "dry_run", method=config.method, suite=config.suite
+                    )
                     record.update(
                         skip_reason="dry_run_no_execution",
                         expected=task.expected.model_dump(),
-                        requires_rag=task.requires_rag,
                     )
                     record["grades"] = grade_task(task, record)
                     save(record)
@@ -479,14 +589,24 @@ async def run(args):
                 "interface": config.provider,
                 "model": config.model,
                 "endpoint_host": urlsplit(settings.llm_base_url).hostname,
+                "api_profile": settings.llm_api_profile,
             }
-            predictor = load_model(settings.model_dir)
-            report["model_manifest_hash"] = fingerprint_file(settings.model_dir / "manifest.json")
+            model_dir = settings.model_dir
+            if config.suite == "wesad":
+                # The WESAD bundle is pinned per suite; relative operator paths
+                # resolve under the runtime home, matching Settings semantics.
+                bundle = Path(config.model_dir).expanduser()
+                model_dir = bundle if bundle.is_absolute() else settings.home / bundle
+            predictor = load_model(model_dir)
+            report["model_manifest_hash"] = fingerprint_file(model_dir / "manifest.json")
             report["corpus_hash"] = canonical_hash(
                 load_corpus(resource_path("knowledge", "corpus.json")).model_dump(mode="json")
             )
             if (
-                any(t.requires_rag for t in tasks)
+                # B2's treatment is the absent retrieval service; its requires_rag
+                # tasks must run, so assets are never loaded for that method.
+                config.method != "b2_no_rag"
+                and any(t.requires_rag for t in tasks)
                 and settings.rag_model_dir
                 and settings.rag_index_dir
             ):
@@ -502,7 +622,8 @@ async def run(args):
                         "evaluation_corpus_mismatch",
                         "Index must match the reviewed benchmark corpus.",
                     )
-            content = synthetic_input(config.fixture_seed)
+            if content is None:
+                content = synthetic_input(config.fixture_seed)
             report["fixture_sha256"] = hashlib.sha256(content).hexdigest()
             raw = analyze_csv(content, predictor)["prediction"]
             reference = {k: raw[k] for k in ("risk_score", "prediction", "window_count")}
@@ -510,20 +631,40 @@ async def run(args):
 
             async def one(task, repetition):
                 async with semaphore:
-                    result = await execute_task(
-                        task,
-                        repetition=repetition,
-                        config=config,
-                        settings=settings,
-                        predictor=predictor,
-                        retrieval=retrieval,
-                        content=content,
-                        budget=budget,
-                        reference_prediction=reference,
-                        artifact_directory=writer.directory
-                        / "artifacts"
-                        / f"{task.task_id}_{repetition}",
-                    )
+                    if config.method == "full_guard":
+                        result = await execute_task(
+                            task,
+                            repetition=repetition,
+                            config=config,
+                            settings=settings,
+                            predictor=predictor,
+                            retrieval=retrieval,
+                            content=content,
+                            budget=budget,
+                            reference_prediction=reference,
+                            artifact_directory=writer.directory
+                            / "artifacts"
+                            / f"{task.task_id}_{repetition}",
+                        )
+                    else:
+                        # Imported here: run_ungated composes from this module.
+                        from smarthealth.evaluation.baselines.ungated_react import run_ungated
+
+                        result = await run_ungated(
+                            task,
+                            repetition=repetition,
+                            config=config,
+                            settings=settings,
+                            predictor=predictor,
+                            retrieval=retrieval,
+                            content=content,
+                            budget=budget,
+                            reference_prediction=reference,
+                            method=config.method,
+                            artifact_directory=writer.directory
+                            / "artifacts"
+                            / f"{task.task_id}_{repetition}",
+                        )
                     save(result)
 
             pending = [
@@ -566,7 +707,7 @@ async def run(args):
                     r["task_id"] == task.task_id and r["repetition"] == rep
                     for r in report["records"]
                 ):
-                    row = task_record(task, rep, mode)
+                    row = task_record(task, rep, mode, method=config.method, suite=config.suite)
                     row.update(status="infrastructure_error", error_code="evaluation_setup_failed")
                     row["grades"] = grade_task(task, row)
                     save(row)
@@ -616,6 +757,16 @@ def main(argv=None):
     parser.add_argument("--repetitions", type=int)
     parser.add_argument("--concurrency", type=int)
     parser.add_argument("--model")
+    parser.add_argument(
+        "--method",
+        choices=["full_guard", "b1_ungated_react", "b2_no_rag"],
+        help="Comparison method: the gated runtime, or an ungated ReAct baseline",
+    )
+    parser.add_argument(
+        "--suite",
+        choices=["synthetic", "wesad"],
+        help="Benchmark suite: seed-generated synthetic fixtures or the packaged WESAD fixture",
+    )
     parser.add_argument(
         "--output", type=Path, default=Path("evaluation/live_runs") / time.strftime("%Y%m%d-%H%M%S")
     )

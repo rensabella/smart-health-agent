@@ -10,7 +10,7 @@ limits:
   max_decisions: 32
   max_llm_requests: 32
   max_delegations: 8
-  max_total_tokens: 65536
+  max_total_tokens: 131072
   run_timeout_seconds: 180.0
   decision_timeout_seconds: 30.0
 roles:

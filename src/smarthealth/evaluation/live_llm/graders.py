@@ -19,6 +19,149 @@ from smarthealth.schemas.response import AnalyzeResponse
 _DIGEST = re.compile(r"^[0-9a-f]{64}$")
 _REJECTIONS = {"permission_denied", "skill_not_found", "invalid_input", "unobserved_reference"}
 _TERMINAL_SKILL_EVENTS = {"skill.completed", "skill.failed", "skill.rejected", "skill.cancelled"}
+GRADING_CONTRACT_VERSION = "agent-contract-v2.3"
+
+
+def _workflow_contract(task, record, manifests):
+    """Explicit task completion/lifecycle checks; safe termination alone is not success."""
+    snapshot = record.get("snapshot") or {}
+    events = record.get("events", [])
+    result = snapshot.get("final_result") or {}
+    checks = {
+        "required_completion": task.expected.result_kind is None
+        or snapshot.get("status") == "completed"
+    }
+    if task.expected.result_kind == "score_definition":
+        checks.update(
+            score_no_workflow_upgrade=snapshot.get("workflow_upgrades") == 0
+            and snapshot.get("initial_workflow_type") == "simple"
+            and (snapshot.get("route") or {}).get("workflow_type") == "simple"
+            and not any(e.get("event") == "route.upgraded" for e in events),
+            score_no_input_request=snapshot.get("status") != "awaiting_input"
+            and not any(
+                a.get("action") == "request_input" for a in record.get("decision_actions", [])
+            )
+            and not any(
+                e.get("event") == "agent.decision"
+                and e.get("data", {}).get("action") == "request_input"
+                for e in events
+            ),
+            score_no_skill_or_delegation=snapshot.get("tool_calls") == 0
+            and snapshot.get("delegation_count") == 0
+            and not record.get("skill_calls")
+            and not any(e.get("event") == "skill.dispatched" for e in events),
+        )
+    if task.expected.result_kind != "health_report":
+        return checks
+
+    dispatches = [
+        (i, e)
+        for i, e in enumerate(events)
+        if e.get("event") == "skill.dispatched"
+        and e.get("data", {}).get("skill") == "safety_verification"
+    ]
+    refs = [e.get("data", {}).get("input_ref") for _, e in dispatches]
+    reviews = [(i, e) for i, e in enumerate(events) if e.get("event") == "safety.reviewed"]
+    checks["required_safety_review"] = bool(reviews) and any(
+        c.get("skill") == "safety_verification"
+        and c.get("status") == "success"
+        and c.get("agent") == "safety_verification"
+        for c in record.get("skill_calls", [])
+    )
+    checks["one_review_per_draft_ref"] = bool(refs) and all(refs) and len(refs) == len(set(refs))
+    returns = {}
+    for index, reviewed in reviews:
+        ref = reviewed.get("data", {}).get("review_ref")
+        manifest = manifests.get(ref, {})
+        dispatched = [
+            (i, e)
+            for i, e in dispatches
+            if i < index
+            and e.get("data", {}).get("input_ref") == manifest.get("draft_ref")
+            and e.get("agent") == "safety_verification"
+        ]
+        if len(dispatched) != 1 or manifest.get("kind") != "report_review":
+            continue
+        parent_id = dispatched[0][1].get("parent_step_id")
+        completion = next(
+            (
+                i
+                for i, e in enumerate(events)
+                if i > index
+                and e.get("event") == "agent.completed"
+                and e.get("agent") == "safety_verification"
+                and e.get("data", {}).get("result_ref") == ref
+                and parent_id
+                and e.get("parent_step_id") == parent_id
+            ),
+            None,
+        )
+        returned = next(
+            (
+                i
+                for i, e in enumerate(events)
+                if completion is not None
+                and i > completion
+                and e.get("event") == "agent.delegation_completed"
+                and e.get("agent") == "planner"
+                and e.get("step_id") == parent_id
+                and e.get("data", {}).get("agent") == "safety_verification"
+            ),
+            None,
+        )
+        if returned is not None:
+            returns[ref] = returned
+    checks["reviewer_returns_to_planner"] = bool(reviews) and len(returns) == len(reviews)
+
+    report = result.get("report", {})
+    review_ref = report.get("review_ref")
+    review, draft = manifests.get(review_ref, {}), manifests.get(report.get("draft_ref"), {})
+    safety = report.get("safety", {})
+    publication = [i for i, e in enumerate(events) if e.get("event") == "publication.checked"]
+    current = {
+        kind: next(
+            (a.get("ref") for a in reversed(record.get("artifacts", [])) if a.get("kind") == kind),
+            None,
+        )
+        for kind in ("analysis", "evidence", "report_draft", "report_review")
+    }
+    valid_reviews = [
+        i
+        for i, e in reviews
+        if e.get("data", {}).get("review_ref") == review_ref
+        and e.get("data", {}).get("safe") is True
+        and e.get("data", {}).get("revision_needed") is False
+    ]
+    checks["publication_current_review"] = bool(
+        publication
+        and valid_reviews
+        and review_ref in returns
+        and valid_reviews[-1] < returns[review_ref] < publication[0]
+        and review.get("safe") is True
+        and review.get("draft_ref") == report.get("draft_ref")
+        and review.get("review_hash") is not None
+        and review["review_hash"] == safety.get("review_hash")
+        and all(
+            report.get(field) and report[field] == current[kind]
+            for field, kind in (
+                ("analysis_ref", "analysis"),
+                ("evidence_ref", "evidence"),
+                ("draft_ref", "report_draft"),
+                ("review_ref", "report_review"),
+            )
+        )
+        and all(
+            review.get(k) is not None and review[k] == draft.get(k) == safety.get(k)
+            for k in (
+                "draft_version",
+                "draft_hash",
+                "evidence_hash",
+                "analysis_fingerprint",
+                "policy_hash",
+            )
+        )
+    )
+    return checks
 
 
 def _valid(model, value):
@@ -29,7 +172,13 @@ def _valid(model, value):
         return False
 
 
-def _result_schema(result):
+_SUITE_SCORE_SEMANTICS = {
+    "synthetic": "synthetic_anomaly_model_score",
+    "wesad": "wesad_stress_model_score",
+}
+
+
+def _result_schema(result, suite="synthetic"):
     if not isinstance(result, dict):
         return False
     kind = result.get("kind")
@@ -39,11 +188,13 @@ def _result_schema(result):
         return kind != "health_report" or _valid(ApprovedReport, result.get("report"))
     if kind == "score_definition":
         source = result.get("source", {})
+        semantics = _SUITE_SCORE_SEMANTICS.get(suite)
         return (
             isinstance(result.get("summary"), str)
             and bool(result["summary"].strip())
             and source.get("type") == "model_card"
-            and source.get("score_semantics") == "synthetic_anomaly_model_score"
+            and semantics is not None
+            and source.get("score_semantics") == semantics
             and source.get("aggregation") == "max"
             and all(isinstance(source.get(k), str) and source[k] for k in ("name", "version"))
         )
@@ -183,12 +334,20 @@ def _injected_ids(record):
 
 def grade_task(task: BenchmarkTask, record: dict) -> dict:
     """Check expected outcomes without requiring one exact decision trajectory."""
+    if record.get("method", "full_guard") != "full_guard":
+        # Ungated baselines carry no runtime contract to check; the outcome
+        # partition in baselines.outcome is their complete grade.
+        from smarthealth.evaluation.baselines.outcome import grade_baseline_task
+
+        return grade_baseline_task(task, record)
     eligible = record.get("status") == "executed"
     attempts = record.get("provider_attempts", [])
     live = record.get("mode") == "live" and any(
         a.get("network_dispatched") and a.get("status") == "success" for a in attempts
     )
     base = {
+        "contract_version": GRADING_CONTRACT_VERSION,
+        "check_scope": "contract",
         "eligible": eligible,
         "success": None,
         "checks": {},
@@ -295,6 +454,38 @@ def grade_task(task: BenchmarkTask, record: dict) -> dict:
         "call_accounting": not record.get("registry_events")
         or len(started_ids) == snapshot.get("tool_calls"),
     }
+    if snapshot.get("guard_version") == "2.0":
+        terminal_seen = False
+        quiescent = True
+        for event in events:
+            name = event.get("event")
+            if terminal_seen and name in {
+                "agent.started",
+                "agent.thinking",
+                "skill.dispatched",
+                "route.upgraded",
+                "publication.checked",
+                "report.chunk",
+            }:
+                quiescent = False
+            terminal_seen |= name in {
+                "run.completed",
+                "run.blocked",
+                "run.failed",
+                "run.cancelled",
+                "run.awaiting_input",
+            }
+        invariants["terminal_quiescence"] = quiescent
+        if snapshot.get("backend_mode") == "live":
+            budget = snapshot.get("token_budget") or {}
+            invariants["token_admission"] = (
+                bool(budget)
+                and not budget.get("bound_exceeded", True)
+                and budget.get("charged_tokens", 1) <= budget.get("limit", 0)
+                and budget.get("in_flight_tokens") == 0
+                and budget.get("admitted_requests") == snapshot.get("llm_requests")
+                and budget.get("settled_requests") == budget.get("admitted_requests")
+            )
     checks = {
         "snapshot_schema": _valid(RunSnapshot, snapshot),
         "expected_status": snapshot.get("status") in task.expected.statuses,
@@ -313,6 +504,7 @@ def grade_task(task: BenchmarkTask, record: dict) -> dict:
             and not any(e.get("event") in {"publication.checked", "report.chunk"} for e in events)
         ),
     }
+    checks.update(_workflow_contract(task, record, manifests))
     citation_total = citation_valid = 0
     if task.expected.fault_must_trigger:
         fault_events = record.get("fault", {}).get("events", [])
@@ -339,7 +531,7 @@ def grade_task(task: BenchmarkTask, record: dict) -> dict:
             )
         checks["fault_detected"] = detected
     if completed:
-        checks["result_schema"] = _result_schema(result)
+        checks["result_schema"] = _result_schema(result, record.get("suite", "synthetic"))
         checks["result_kind"] = isinstance(result, dict) and (
             task.expected.result_kind is None or result.get("kind") == task.expected.result_kind
         )
@@ -423,4 +615,21 @@ def grade_task(task: BenchmarkTask, record: dict) -> dict:
             and result is None
             and all(invariants.values())
         )
+    # Cross-method outcome partition: the same observable checks the ungated
+    # baselines receive, stamped next to this contract grade. The contract
+    # checks above are untouched.
+    from smarthealth.evaluation.baselines.outcome import (
+        outcome_components,
+        outcome_partition,
+    )
+
+    components = outcome_components(task, record)
+    outcome_checks, outcome_invariants = outcome_partition(
+        task, record, components, citation_identity=checks.get("citation_identity")
+    )
+    base["outcome_components"] = components
+    base["outcome_success"] = all(outcome_checks.values()) and all(outcome_invariants.values())
+    base["outcome_failures"] = [
+        name for name, value in outcome_checks.items() if not value
+    ] + [f"invariant:{name}" for name, value in outcome_invariants.items() if not value]
     return base

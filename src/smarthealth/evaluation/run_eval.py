@@ -47,6 +47,7 @@ async def run(args):
             mode=args.backend,
             meter=meter,
             make_backend=factory,
+            baseline=args.baseline,
         )
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(
@@ -76,6 +77,12 @@ def main():
     parser.add_argument("--corpus-root", type=Path, default=resource_path())
     parser.add_argument("--csv", type=Path, default=resource_path("data", "sample", "demo.csv"))
     parser.add_argument("--backend", choices=["scripted", "live"], default="scripted")
+    parser.add_argument(
+        "--baseline",
+        choices=["full_guard", "guard_off", "no_lineage", "no_budget"],
+        default="full_guard",
+        help="Evaluation-only ablation baseline; full_guard keeps every guard enabled.",
+    )
     parser.add_argument(
         "--cases", type=Path, default=resource_path("evaluation", "test_cases.json")
     )
