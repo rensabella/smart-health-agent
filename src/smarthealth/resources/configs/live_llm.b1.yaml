@@ -1,0 +1,26 @@
+# Phase 3 baseline B1: the ungated ReAct loop on the same 20 packaged tasks x 3
+# repetitions as the Phase 1 full_guard run (20261109). The loop keeps fixtures,
+# faults, budgets and the skill registry of the gated runtime and removes the
+# routing, decision validation and publication gates; the model's final_answer
+# text is the released artifact. per_task_token_budget is aligned with the report
+# profile's max_total_tokens so with_limits cannot silently compress it.
+# Prices: Aliyun Bailian qwen3.8 list prices checked 2026-10-15.
+schema_version: "1.0"
+provider: openai_compatible
+model: qwen3.8-27b
+temperature: 0.0
+max_completion_tokens: 2048
+seed: null
+fixture_seed: 10042
+max_tasks: 20
+repetitions: 3
+concurrency: 1
+max_total_tokens: 4000000
+max_provider_requests: 512
+per_task_token_budget: 131072
+decision_timeout_seconds: 30.0
+input_price_per_million: 3.0
+output_price_per_million: 12.0
+max_estimated_cost: 20.0
+baseline: full_guard
+method: b1_ungated_react

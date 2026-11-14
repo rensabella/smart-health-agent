@@ -1,0 +1,25 @@
+# Phase 3 baseline B2: the same ungated ReAct loop with the retrieval tool
+# removed (eight-tool whitelist, no retrieval assets, prompt forbids citing
+# evidence no tool produced) on the same 20 packaged tasks x 3 repetitions.
+# The requires_rag tasks run by design: the missing retrieval service is the
+# treatment, and the citation coverage gap is the measured outcome.
+# Prices: Aliyun Bailian qwen3.8 list prices checked 2026-10-15.
+schema_version: "1.0"
+provider: openai_compatible
+model: qwen3.8-27b
+temperature: 0.0
+max_completion_tokens: 2048
+seed: null
+fixture_seed: 10042
+max_tasks: 20
+repetitions: 3
+concurrency: 1
+max_total_tokens: 4000000
+max_provider_requests: 512
+per_task_token_budget: 131072
+decision_timeout_seconds: 30.0
+input_price_per_million: 3.0
+output_price_per_million: 12.0
+max_estimated_cost: 20.0
+baseline: full_guard
+method: b2_no_rag
