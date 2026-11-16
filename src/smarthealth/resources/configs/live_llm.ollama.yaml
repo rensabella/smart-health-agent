@@ -1,0 +1,21 @@
+# Local self-hosted backend validation (2026-11-14): Ollama 0.17.2 (OpenAI-compatible
+# /v1 endpoint with tool calling) serving qwen2.5:3b on Apple Silicon (Metal).
+# Zero provider cost: token prices omitted, so no cost estimation is performed.
+# decision_timeout_seconds raised to the 120 s maximum for local inference latency.
+# Env: source .env.ollama (HEALTH_LLM_API_PROFILE=dashscope sends tool_choice=auto
+# and omits `store`, the conservative shape for OpenAI-compatible servers).
+schema_version: "1.0"
+provider: openai_compatible
+model: qwen2.5:3b
+temperature: 0.0
+max_completion_tokens: 2048
+seed: null
+fixture_seed: 10042
+max_tasks: 20
+repetitions: 1
+concurrency: 1
+max_total_tokens: 4000000
+max_provider_requests: 512
+per_task_token_budget: 400000
+decision_timeout_seconds: 120.0
+baseline: full_guard

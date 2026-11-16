@@ -1,0 +1,25 @@
+# SFT closed loop (2026-11-15): mlx_lm.server 0.32.2 (OpenAI-compatible /v1
+# endpoint with tool calling) serving Qwen2.5-1.5B-Instruct-4bit plus the LoRA
+# adapter adapters/qwen25-1.5b-smarthealth-v2 (rank 8, 1000 iters, trained on
+# 745 recorded SmartHealth decisions) on Apple Silicon (Metal). The model name
+# MUST stay "default_model": the server resolves its CLI --model/--adapter-path
+# pair through that alias, any other name silently drops the adapter. Evaluation
+# parameters replicate configs/live_llm.vllm.yaml so results are comparable with
+# the vLLM 14B/7B rows. Self-hosted serving has no token prices, so no cost
+# estimate is configured. decision_timeout_seconds at the 120 s maximum for
+# local inference latency. Env: source .env.mlx.
+schema_version: "1.0"
+provider: openai_compatible
+model: default_model
+temperature: 0.0
+max_completion_tokens: 2048
+seed: null
+fixture_seed: 10042
+max_tasks: 20
+repetitions: 3
+concurrency: 1
+max_total_tokens: 4000000
+max_provider_requests: 512
+per_task_token_budget: 400000
+decision_timeout_seconds: 120.0
+baseline: full_guard

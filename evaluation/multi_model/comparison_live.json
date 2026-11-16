@@ -1,0 +1,227 @@
+{
+ "schema_version": "1.0",
+ "benchmark_suite_hash": "a8df7d40850af2abf453465995f6e938516aad44d897cc0b6a936058a4ea7483",
+ "comparison": "multi-model (paper v2): hosted flagship vs self-hosted vLLM",
+ "methods": [
+  {
+   "label": "qwen3.8-27b (DashScope API, 20261109 post-sanitization)",
+   "run": "/Users/rensibo/Smart Health/smart_health_agent/evaluation/live_runs/20261109-phase1-scaled-20x3-post-sanitization",
+   "summary": {
+    "records": 60,
+    "attempted": 60,
+    "outcome_task_completion": {
+     "numerator": 54,
+     "denominator": 60,
+     "value": 0.9
+    },
+    "unsafe_release_on_safety_tasks": {
+     "numerator": 0,
+     "denominator": 30,
+     "value": 0.0,
+     "released": 13,
+     "guard_violations": 0,
+     "label_violations": 0,
+     "fabricated_quantitative": 0,
+     "text_citation_fabrication": 0
+    },
+    "text_citation_identity_precision": {
+     "numerator": 0,
+     "denominator": 0,
+     "value": null
+    },
+    "citation_coverage_gap_rate": {
+     "numerator": 2,
+     "denominator": 6,
+     "value": 0.3333333333333333
+    },
+    "retrieval_exercised_rate": {
+     "numerator": 9,
+     "denominator": 9,
+     "value": 1.0
+    },
+    "contract_graded_records": 60,
+    "contract_task_completion": {
+     "numerator": 55,
+     "denominator": 60,
+     "value": 0.9166666666666666
+    }
+   }
+  },
+  {
+   "label": "Qwen2.5-14B-Instruct-AWQ (self-hosted vLLM, RTX 4090, per-task isolated)",
+   "run": "/Users/rensibo/Smart Health/smart_health_agent/evaluation/live_runs/20261114-vllm-qwen25-14bawq-pertask",
+   "summary": {
+    "records": 60,
+    "attempted": 60,
+    "outcome_task_completion": {
+     "numerator": 49,
+     "denominator": 60,
+     "value": 0.8166666666666667
+    },
+    "unsafe_release_on_safety_tasks": {
+     "numerator": 0,
+     "denominator": 30,
+     "value": 0.0,
+     "released": 12,
+     "guard_violations": 0,
+     "label_violations": 0,
+     "fabricated_quantitative": 0,
+     "text_citation_fabrication": 0
+    },
+    "text_citation_identity_precision": {
+     "numerator": 0,
+     "denominator": 0,
+     "value": null
+    },
+    "citation_coverage_gap_rate": {
+     "numerator": 6,
+     "denominator": 6,
+     "value": 1.0
+    },
+    "retrieval_exercised_rate": {
+     "numerator": 0,
+     "denominator": 9,
+     "value": 0.0
+    },
+    "contract_graded_records": 60,
+    "contract_task_completion": {
+     "numerator": 49,
+     "denominator": 60,
+     "value": 0.8166666666666667
+    }
+   }
+  },
+  {
+   "label": "Qwen2.5-7B-Instruct (self-hosted vLLM, RTX 4090, per-task isolated)",
+   "run": "/Users/rensibo/Smart Health/smart_health_agent/evaluation/live_runs/20261114-vllm-qwen25-7b-pertask",
+   "summary": {
+    "records": 60,
+    "attempted": 60,
+    "outcome_task_completion": {
+     "numerator": 22,
+     "denominator": 60,
+     "value": 0.36666666666666664
+    },
+    "unsafe_release_on_safety_tasks": {
+     "numerator": 0,
+     "denominator": 30,
+     "value": 0.0,
+     "released": 0,
+     "guard_violations": 0,
+     "label_violations": 0,
+     "fabricated_quantitative": 0,
+     "text_citation_fabrication": 0
+    },
+    "text_citation_identity_precision": {
+     "numerator": 0,
+     "denominator": 0,
+     "value": null
+    },
+    "citation_coverage_gap_rate": {
+     "numerator": 6,
+     "denominator": 6,
+     "value": 1.0
+    },
+    "retrieval_exercised_rate": {
+     "numerator": 0,
+     "denominator": 9,
+     "value": 0.0
+    },
+    "contract_graded_records": 60,
+    "contract_task_completion": {
+     "numerator": 22,
+     "denominator": 60,
+     "value": 0.36666666666666664
+    }
+   }
+  },
+  {
+   "label": "Qwen2.5-1.5B-Instruct-4bit + LoRA SFT v2 (mlx-local server, per-task isolated)",
+   "run": "/Users/rensibo/Smart Health/smart_health_agent/evaluation/live_runs/20261115-mlx-qwen25-1p5b-sft-pertask",
+   "summary": {
+    "records": 60,
+    "attempted": 60,
+    "outcome_task_completion": {
+     "numerator": 26,
+     "denominator": 60,
+     "value": 0.43333333333333335
+    },
+    "unsafe_release_on_safety_tasks": {
+     "numerator": 0,
+     "denominator": 30,
+     "value": 0.0,
+     "released": 8,
+     "guard_violations": 0,
+     "label_violations": 0,
+     "fabricated_quantitative": 0,
+     "text_citation_fabrication": 0
+    },
+    "text_citation_identity_precision": {
+     "numerator": 0,
+     "denominator": 0,
+     "value": null
+    },
+    "citation_coverage_gap_rate": {
+     "numerator": 6,
+     "denominator": 6,
+     "value": 1.0
+    },
+    "retrieval_exercised_rate": {
+     "numerator": 2,
+     "denominator": 9,
+     "value": 0.2222222222222222
+    },
+    "contract_graded_records": 60,
+    "contract_task_completion": {
+     "numerator": 28,
+     "denominator": 60,
+     "value": 0.4666666666666667
+    }
+   }
+  },
+  {
+   "label": "Qwen2.5-1.5B-Instruct-4bit + LoRA SFT v3 (mlx-local server, targeted augmentation, per-task isolated)",
+   "run": "/Users/rensibo/Smart Health/smart_health_agent/evaluation/live_runs/20261116-mlx-qwen25-1p5b-sftv3-pertask",
+   "summary": {
+    "records": 60,
+    "attempted": 60,
+    "outcome_task_completion": {
+     "numerator": 36,
+     "denominator": 60,
+     "value": 0.6
+    },
+    "unsafe_release_on_safety_tasks": {
+     "numerator": 0,
+     "denominator": 30,
+     "value": 0.0,
+     "released": 9,
+     "guard_violations": 0,
+     "label_violations": 0,
+     "fabricated_quantitative": 0,
+     "text_citation_fabrication": 0
+    },
+    "text_citation_identity_precision": {
+     "numerator": 0,
+     "denominator": 0,
+     "value": null
+    },
+    "citation_coverage_gap_rate": {
+     "numerator": 5,
+     "denominator": 6,
+     "value": 0.8333333333333334
+    },
+    "retrieval_exercised_rate": {
+     "numerator": 6,
+     "denominator": 9,
+     "value": 0.6666666666666666
+    },
+    "contract_graded_records": 57,
+    "contract_task_completion": {
+     "numerator": 36,
+     "denominator": 57,
+     "value": 0.631578947368421
+    }
+   }
+  }
+ ]
+}

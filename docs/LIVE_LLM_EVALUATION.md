@@ -199,6 +199,31 @@ CI, `make eval-dry` and normal tests cannot trigger paid evaluation. The origina
 framework implementation verification made no live calls; a later live pilot
 requires its own configuration, allowance and result directory.
 
+## Self-hosted vLLM replication
+
+The framework's live protocol also runs against a self-hosted
+[ vLLM ](https://docs.vllm.ai) server with no per-token cost. The recorded
+replication served `Qwen2.5-14B-Instruct-AWQ` and `Qwen2.5-7B-Instruct`
+on one RTX 4090 with hermes tool parsing:
+
+```bash
+vllm serve /path/to/model --served-model-name MODEL_NAME \
+  --api-key "$HEALTH_LLM_API_KEY" --enable-auto-tool-choice \
+  --tool-call-parser hermes --max-model-len 32768 \
+  --gpu-memory-utilization 0.90 --host 127.0.0.1 --port 8000
+```
+
+Point `HEALTH_LLM_BASE_URL` at the server (an SSH tunnel to loopback is
+fine) and use `HEALTH_LLM_API_PROFILE=standard`. The packaged configs
+`configs/live_llm.vllm.yaml` and `configs/live_llm.vllm14.yaml` mirror the
+main-run parameters with no price fields. Because weaker models require
+more requests than a single evaluator run admits (`max_provider_requests`
+is capped at 512), the vLLM rows were recorded as 20 isolated per-task
+executions—one `--task` invocation per task, each with a fresh request
+budget—and merged afterwards; task definitions, guards and graders are
+byte-identical to the single-run protocol. The merged three-model
+comparison lives in `evaluation/multi_model/comparison_live.{json,md}`.
+
 ## Budget, retries and failure injection
 
 [Runtime Guard v2](runtime_guard_v2.md) adds per-run admission before the existing
