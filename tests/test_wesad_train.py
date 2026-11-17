@@ -48,9 +48,7 @@ def test_bundle_metadata_pins_the_wesad_contract(wesad_bundles):
     assert report["windowing"]["deploy_subjects"] == 3
     for backend in ("random_forest", "lightgbm"):
         assert (output / f"{backend}_v1.0" / "metadata.json").is_file()
-    metadata = json.loads(
-        (output / "random_forest_v1.0" / "metadata.json").read_text()
-    )
+    metadata = json.loads((output / "random_forest_v1.0" / "metadata.json").read_text())
     assert metadata["input_profile"] == "wesad_physiology_v1"
     assert metadata["task_scope"] == "wesad_stress_only"
     assert metadata["score_semantics"] == "wesad_stress_model_score"
@@ -84,9 +82,7 @@ def test_bundles_load_and_predict_three_classes(wesad_bundles, wesad_training_cs
         probabilities = predictor.estimator.predict_proba(features)
         stress_column = list(predictor.estimator.classes_).index(1)
         for index, window in enumerate(windows):
-            assert window["risk_score"] == pytest.approx(
-                float(probabilities[index, stress_column])
-            )
+            assert window["risk_score"] == pytest.approx(float(probabilities[index, stress_column]))
             assert (window["risk_score"] >= threshold) == (window["prediction"] == "stress")
         highest = windows[int(np.argmax([w["risk_score"] for w in windows]))]
         assert result["prediction"] == highest["prediction"]
@@ -102,17 +98,11 @@ def test_bundles_load_and_predict_three_classes(wesad_bundles, wesad_training_cs
 
 
 def test_train_wesad_refuses_overwrite_and_unknown_holdout(wesad_training_csv, tmp_path):
-    train_wesad(
-        wesad_training_csv, tmp_path, holdout_subject="S5", backends=("random_forest",)
-    )
+    train_wesad(wesad_training_csv, tmp_path, holdout_subject="S5", backends=("random_forest",))
     with pytest.raises(FileExistsError):
-        train_wesad(
-            wesad_training_csv, tmp_path, holdout_subject="S5", backends=("random_forest",)
-        )
+        train_wesad(wesad_training_csv, tmp_path, holdout_subject="S5", backends=("random_forest",))
     with pytest.raises(ValueError):
-        train_wesad(
-            wesad_training_csv, tmp_path / "other", holdout_subject="S99", backends=()
-        )
+        train_wesad(wesad_training_csv, tmp_path / "other", holdout_subject="S99", backends=())
 
 
 def test_internal_loso_never_trains_on_the_holdout(wesad_training_csv, tmp_path, monkeypatch):
@@ -135,9 +125,7 @@ def test_internal_loso_never_trains_on_the_holdout(wesad_training_csv, tmp_path,
         return estimator
 
     monkeypatch.setattr(train_module, "make_estimator", recording)
-    train_wesad(
-        wesad_training_csv, tmp_path, holdout_subject="S5", backends=("random_forest",)
-    )
+    train_wesad(wesad_training_csv, tmp_path, holdout_subject="S5", backends=("random_forest",))
     # Three internal folds (16 windows each) plus the final deploy fit (24 windows);
     # the eight holdout windows never enter any training pool.
     assert [count for count, _ in fits] == [16, 16, 16, 24]

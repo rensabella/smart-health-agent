@@ -108,7 +108,9 @@ def _service(predictor, retrieval, harness):
     )
 
 
-async def evaluate_system_case(case, predictor, retrieval, content, make_backend, baseline="full_guard"):
+async def evaluate_system_case(
+    case, predictor, retrieval, content, make_backend, baseline="full_guard"
+):
     harness = HarnessValidator(
         load_config("configs/report" if case.harness_profile == "report" else "configs"),
         baseline=baseline,
@@ -236,7 +238,9 @@ async def _analysis_fixture(service, registry, context, content):
     return previous
 
 
-async def evaluate_safety_case(case, predictor, chunks, content, make_backend, baseline="full_guard"):
+async def evaluate_safety_case(
+    case, predictor, chunks, content, make_backend, baseline="full_guard"
+):
     harness = HarnessValidator(load_config("configs/report"), baseline=baseline)
     service = _service(predictor, None, harness)
     registry = create_registry(service, harness=harness)

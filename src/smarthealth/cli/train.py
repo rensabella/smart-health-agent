@@ -157,9 +157,7 @@ def train_models(
         val_scores = estimator.predict_proba(val_x)[:, 1]
         thresholds = np.linspace(0.2, 0.8, 61)
         # Stable tie-break prefers the threshold closest to 0.5. Test labels never select it.
-        threshold = max(
-            thresholds, key=lambda t: (f1_score(val_y, val_scores >= t), -abs(t - 0.5))
-        )
+        threshold = max(thresholds, key=lambda t: (f1_score(val_y, val_scores >= t), -abs(t - 0.5)))
         threshold = float(threshold)
         evaluation = {
             name: metrics(y, estimator.predict_proba(x)[:, 1], threshold)
@@ -305,8 +303,7 @@ def train_wesad(
                     )
                 ),
                 "class_windows": {
-                    LABEL_NAMES[value]: int((holdout["labels"] == value).sum())
-                    for value in labels
+                    LABEL_NAMES[value]: int((holdout["labels"] == value).sum()) for value in labels
                 },
             }
         normal = train_x.loc[train_y == 0]

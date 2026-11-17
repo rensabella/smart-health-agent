@@ -428,9 +428,7 @@ def parse_reply(mutate=None):
             "tool_not_available",
         ),
         (
-            lambda r: r["choices"][0]["message"]["tool_calls"][0]["function"].update(
-                arguments=5
-            ),
+            lambda r: r["choices"][0]["message"]["tool_calls"][0]["function"].update(arguments=5),
             "backend_invalid_response",
             "arguments_type",
         ),
@@ -558,4 +556,3 @@ def test_action_diagnostics_project_trusted_schema_metadata(
     assert issue["field_path"] == field_path
     assert expected_fragment in issue["expected"]
     assert "SECRET" not in json.dumps(report)
-

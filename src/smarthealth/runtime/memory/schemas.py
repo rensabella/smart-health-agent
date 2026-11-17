@@ -38,9 +38,9 @@ class ScoreProtocol(SkillModel):
     task_scope: Literal["synthetic_anomaly_only", "wesad_stress_only"] = "synthetic_anomaly_only"
     window_seconds: Literal[30, 60] = 30
     aggregation: Literal["max"] = "max"
-    score_semantics: Literal[
-        "synthetic_anomaly_model_score", "wesad_stress_model_score"
-    ] = "synthetic_anomaly_model_score"
+    score_semantics: Literal["synthetic_anomaly_model_score", "wesad_stress_model_score"] = (
+        "synthetic_anomaly_model_score"
+    )
 
 
 class ScoreSummary(ScoreProtocol):

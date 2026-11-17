@@ -469,9 +469,7 @@ async def _run(args):
             ("b1_ungated_react", "b1"),
             ("b2_no_rag", "b2"),
         ):
-            method_records = [
-                record for record in records.values() if record["method"] == method
-            ]
+            method_records = [record for record in records.values() if record["method"] == method]
             suites[method] = {
                 "schema_version": "1.0",
                 "created_at": probe_report["created_at"],
@@ -561,9 +559,7 @@ def main(argv=None):
             json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
             encoding="utf-8",
         )
-        (args.output / f"{stem}.md").write_text(
-            _render_suite_markdown(report), encoding="utf-8"
-        )
+        (args.output / f"{stem}.md").write_text(_render_suite_markdown(report), encoding="utf-8")
     print(
         json.dumps(
             {

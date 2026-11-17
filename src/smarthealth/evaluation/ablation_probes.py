@@ -221,9 +221,7 @@ async def _run(args):
         content = args.csv.read_bytes()
         probes = {
             "budget": probe_budget(),
-            "review_gate": await probe_review_gate(
-                suite, predictor, chunks, content, make_backend
-            ),
+            "review_gate": await probe_review_gate(suite, predictor, chunks, content, make_backend),
             "lineage": await probe_lineage(
                 lineage_case, predictor, retrieval, content, make_backend
             ),
@@ -271,9 +269,7 @@ def main():
         print(f"Ablation probes could not complete: {code}")
         return 2
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
-    )
+    args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False) + "\n")
     print(
         json.dumps(
             {

@@ -77,9 +77,7 @@ def test_budget_probe_observes_exactly_the_budget_seam():
     assert probe["results"]["full_guard"]["role_budget_exhausted"] == "budget_exceeded"
     assert probe["results"]["no_budget"]["global_budget_exhausted"] is None
     assert probe["results"]["no_budget"]["role_budget_exhausted"] is None
-    assert (
-        probe["results"]["no_budget"]["permission_denied_still_enforced"] == "permission_denied"
-    )
+    assert probe["results"]["no_budget"]["permission_denied_still_enforced"] == "permission_denied"
 
 
 async def test_guard_off_flips_blocked_negative_to_published(predictor, csv_bytes, eval_index):
@@ -93,16 +91,18 @@ async def test_guard_off_flips_blocked_negative_to_published(predictor, csv_byte
         case, predictor, chunks, csv_bytes, lambda: ScriptedDecisionBackend(scripted_report)
     )
     off = await evaluate_safety_case(
-        case, predictor, chunks, csv_bytes, lambda: ScriptedDecisionBackend(scripted_report),
+        case,
+        predictor,
+        chunks,
+        csv_bytes,
+        lambda: ScriptedDecisionBackend(scripted_report),
         "guard_off",
     )
     assert not full["published"] and full["correct"] and full["review_enforced"]
     assert off["published"] and not off["correct"] and not off["review_enforced"]
 
 
-async def test_review_gate_probe_observes_mechanism_and_residual(
-    predictor, csv_bytes, eval_index
-):
+async def test_review_gate_probe_observes_mechanism_and_residual(predictor, csv_bytes, eval_index):
     _, chunks = eval_index
     suite = load_cases(Path("evaluation/test_cases.json"))
     probe = await probe_review_gate(
@@ -327,13 +327,16 @@ async def test_lineage_redisplay_across_input_versions(predictor, csv_bytes, eva
     async def flow(baseline):
         runtime, _, service = await _stack(analysis, predictor, retrieval, baseline=baseline)
         try:
-            first = await _run_case(
-                analysis, runtime, service, csv_bytes, session_id="lineage_e2e"
-            )
+            first = await _run_case(analysis, runtime, service, csv_bytes, session_id="lineage_e2e")
             assert first.status == "completed"
             return await _run_case(
-                display, runtime, service, csv_bytes, input_version="v2",
-                session_id="lineage_e2e", extra={"source_run_id": first.run_id},
+                display,
+                runtime,
+                service,
+                csv_bytes,
+                input_version="v2",
+                session_id="lineage_e2e",
+                extra={"source_run_id": first.run_id},
             )
         finally:
             await _teardown(runtime)
@@ -370,7 +373,10 @@ async def test_duplicate_review_is_rejected_and_run_still_completes(
         return base
 
     runtime, _, service = await _stack(
-        case, predictor, retrieval, baseline="full_guard",
+        case,
+        predictor,
+        retrieval,
+        baseline="full_guard",
         backend=ScriptedDecisionBackend(policy),
     )
     try:
@@ -378,7 +384,8 @@ async def test_duplicate_review_is_rejected_and_run_still_completes(
         assert final.status == "completed"
         trace = runtime.get_events(final.run_id, owner_id="ablation_probe", session_id=case.id)
         assert any(
-            e.event == "agent.action_rejected" and e.data.get("error_code") == "review_already_exists"
+            e.event == "agent.action_rejected"
+            and e.data.get("error_code") == "review_already_exists"
             for e in trace
         ), [
             (e.event, e.data.get("error_code") or e.data.get("skill"))
@@ -441,28 +448,57 @@ def test_assess_flags_inconsistent_and_unsupported_reviews():
     draft = SimpleNamespace(claims=[SimpleNamespace(claim_id="c1", text="皮电可能随活动变化。")])
     safe, warnings = ReportService._assess(
         draft,
-        [ClaimReview(claim_id="c1", supported=True, within_scope=True, no_diagnosis=True,
-                     reason="supported")],
+        [
+            ClaimReview(
+                claim_id="c1",
+                supported=True,
+                within_scope=True,
+                no_diagnosis=True,
+                reason="supported",
+            )
+        ],
     )
     assert safe and warnings == []
 
     unsafe, warnings = ReportService._assess(
         draft,
-        [ClaimReview(claim_id="c1", supported=True, within_scope=True, no_diagnosis=True,
-                     reason="insufficient_support")],
+        [
+            ClaimReview(
+                claim_id="c1",
+                supported=True,
+                within_scope=True,
+                no_diagnosis=True,
+                reason="insufficient_support",
+            )
+        ],
     )
     assert not unsafe
     assert "inconsistent_review:c1" in warnings and "insufficient_support:c1" in warnings
 
     unsafe, warnings = ReportService._assess(
         draft,
-        [ClaimReview(claim_id="c1", supported=True, within_scope=False, no_diagnosis=True,
-                     reason="supported")],
+        [
+            ClaimReview(
+                claim_id="c1",
+                supported=True,
+                within_scope=False,
+                no_diagnosis=True,
+                reason="supported",
+            )
+        ],
     )
     assert not unsafe and "inconsistent_review:c1" in warnings
 
     unsafe, warnings = ReportService._assess(
-        draft, [ClaimReview(claim_id="c1", supported=False, within_scope=True, no_diagnosis=True,
-                            reason="insufficient_support")]
+        draft,
+        [
+            ClaimReview(
+                claim_id="c1",
+                supported=False,
+                within_scope=True,
+                no_diagnosis=True,
+                reason="insufficient_support",
+            )
+        ],
     )
     assert not unsafe and "insufficient_support:c1" in warnings

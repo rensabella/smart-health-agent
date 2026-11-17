@@ -81,9 +81,7 @@ def main():
         )
         assert "smarthealth/resources/configs/report/agent.yaml" in archive.namelist()
         assert "smarthealth/resources/evaluation/wesad_fixture.csv" in archive.namelist()
-        assert (
-            "smarthealth/resources/evaluation/wesad_fixture_manifest.json" in archive.namelist()
-        )
+        assert "smarthealth/resources/evaluation/wesad_fixture_manifest.json" in archive.namelist()
     with tempfile.TemporaryDirectory(prefix="smarthealth-wheel-") as temporary:
         root = Path(temporary).resolve()
         venv = root / "venv"

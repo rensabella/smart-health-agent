@@ -51,9 +51,7 @@ def _chest_signals(
     temp = 36.5 + 0.05 * np.sin(2 * np.pi * phase / 60.0)
     acc = np.tile([0.1, 0.2, 0.3], (n, 1)) + 0.01 * np.sin(2 * np.pi * phase / 30.0)[:, None]
     if column_vectors:
-        ecg, eda, emg, resp, temp = (
-            values[:, None] for values in (ecg, eda, emg, resp, temp)
-        )
+        ecg, eda, emg, resp, temp = (values[:, None] for values in (ecg, eda, emg, resp, temp))
     return {"ACC": acc, "ECG": ecg, "EDA": eda, "EMG": emg, "Resp": resp, "Temp": temp}
 
 
@@ -141,9 +139,7 @@ def canonical_frame(
             wiggle = 2.0 * np.sin((index + seed * 13) / 5.0)
             rows.append(
                 {
-                    "timestamp": (base + timedelta(seconds=index)).strftime(
-                        "%Y-%m-%dT%H:%M:%SZ"
-                    ),
+                    "timestamp": (base + timedelta(seconds=index)).strftime("%Y-%m-%dT%H:%M:%SZ"),
                     "subject_id": subject,
                     "session_id": session,
                     "label": np.nan if label is None else float(label),
@@ -151,7 +147,9 @@ def canonical_frame(
                     "eda": 3.5 + 1.1 * (label or 0) + 0.2 * np.sin(index / 7.0 + seed),
                     "emg": 0.05 + 0.02 * (label or 0) + 0.005 * np.sin(index / 3.0),
                     "temp": 36.4 + 0.15 * (label or 0) + 0.02 * np.sin(index / 40.0),
-                    "resp": 0.5 + 0.1 * (label or 0) + 0.15 * np.sin(2 * np.pi * index / 20.0 + seed),
+                    "resp": 0.5
+                    + 0.1 * (label or 0)
+                    + 0.15 * np.sin(2 * np.pi * index / 20.0 + seed),
                     "acc_mag": 1.0 + 0.05 * (label or 0) + 0.02 * np.sin(index / 4.0),
                     "scr": 1.0 if (label == 1 and index % 6 == 0) else 0.0,
                 }

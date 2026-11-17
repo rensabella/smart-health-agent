@@ -79,9 +79,7 @@ def _validated_reply(value: Any) -> DecisionReply:
         return DecisionReply(decision=ACTION_ADAPTER.validate_python(value))
     except Exception:
         candidate = (
-            value.get("decision")
-            if isinstance(value, dict) and "decision" in value
-            else value
+            value.get("decision") if isinstance(value, dict) and "decision" in value else value
         )
         raise _error(
             "backend_invalid_decision",

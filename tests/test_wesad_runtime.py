@@ -129,7 +129,9 @@ async def test_service_pins_profiles_to_the_dataset_lineage(wesad_deploy, wesad_
     windows = service.process_signal(dataset_ref, context)
     assert windows["window_count"] == 12
     with pytest.raises(SkillError) as exc_info:
-        service.extract(windows["window_set_ref"], context, feature_profile="physiology_statistics_v1")
+        service.extract(
+            windows["window_set_ref"], context, feature_profile="physiology_statistics_v1"
+        )
     assert exc_info.value.details == {"expected_feature_profile": "wesad_physiology_statistics_v1"}
     extracted = service.extract(windows["window_set_ref"], context)
     assert extracted["window_count"] == 12

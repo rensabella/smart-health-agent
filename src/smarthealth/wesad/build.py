@@ -128,8 +128,7 @@ def corpus_dataset(frame: pd.DataFrame, *, profile=None) -> dict:
         if datasets
         else np.empty(0, dtype=int),
         "subjects": {
-            subject: item
-            for subject, item in zip(sorted(frame["subject_id"].unique()), datasets)
+            subject: item for subject, item in zip(sorted(frame["subject_id"].unique()), datasets)
         },
         "mixed_label_windows": sum(item["mixed_label_windows"] for item in datasets),
         "dirty_windows": sum(item["dirty_windows"] for item in datasets),

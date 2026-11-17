@@ -103,8 +103,7 @@ def _classification_metrics(y_true, y_pred) -> dict:
             f1_score(y_true, y_pred, labels=CANONICAL_LABELS, average="macro", zero_division=0)
         ),
         "per_class_f1": {
-            LABEL_NAMES[value]: float(score)
-            for value, score in zip(CANONICAL_LABELS, per_class)
+            LABEL_NAMES[value]: float(score) for value, score in zip(CANONICAL_LABELS, per_class)
         },
         "confusion": confusion_matrix(y_true, y_pred, labels=CANONICAL_LABELS).tolist(),
         "window_count": int(len(y_true)),
@@ -153,8 +152,7 @@ def loso_evaluate(data_path: Path, *, seed: int = 42, backends: tuple = BACKENDS
                 **fold,
                 **_classification_metrics(test["labels"], prediction),
                 "train_classes": [
-                    LABEL_NAMES[value]
-                    for value in sorted({int(cls) for cls in estimator.classes_})
+                    LABEL_NAMES[value] for value in sorted({int(cls) for cls in estimator.classes_})
                 ],
             }
             oof_true.append(test["labels"])

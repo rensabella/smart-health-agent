@@ -85,8 +85,7 @@ def _observed_facts(skill: str, data: dict, refs: dict) -> dict:
             facts[name] = deepcopy(data[name])
     if skill == "signal_processing":
         facts["quality"] = {
-            key: data["cleaning_report"][key]
-            for key in ("imputed_values", "dropped_tail_rows")
+            key: data["cleaning_report"][key] for key in ("imputed_values", "dropped_tail_rows")
         }
     if skill == "feature_explanation":
         facts["important_features"] = [
@@ -245,9 +244,7 @@ async def run_ungated(
                     ],
                     tools=list(tools),
                     allowed_delegates=[],
-                    remaining_tool_calls=max(
-                        0, task.max_tool_calls - skill_context.budget.used
-                    ),
+                    remaining_tool_calls=max(0, task.max_tool_calls - skill_context.budget.used),
                     remaining_decisions=task.max_execution_steps - decision_index + 1,
                     remaining_tokens=token_budget.snapshot().available_tokens
                     if token_budget is not None
@@ -258,11 +255,10 @@ async def run_ungated(
                 try:
                     prepared = backend.prepare(request) if backend.mode == "live" else None
                     if prepared is not None:
-                        ticket = token_budget.reserve(
-                            prepared.input_bound, prepared.output_bound
-                        )
+                        ticket = token_budget.reserve(prepared.input_bound, prepared.output_bound)
                     reply = await asyncio.wait_for(
-                        backend.decide_prepared(prepared) if prepared is not None
+                        backend.decide_prepared(prepared)
+                        if prepared is not None
                         else backend.decide(request),
                         timeout=min(
                             config.decision_timeout_seconds,
@@ -270,9 +266,7 @@ async def run_ungated(
                         ),
                     )
                 except asyncio.TimeoutError:
-                    _observation(
-                        observations, "decision", status="error", error_code="llm_timeout"
-                    )
+                    _observation(observations, "decision", status="error", error_code="llm_timeout")
                     continue
                 except SkillError as exc:
                     if exc.code == "backend_context_too_large":
@@ -332,9 +326,7 @@ async def run_ungated(
                 result = await registry.execute(action.skill, action.arguments, skill_context)
                 data = {}
                 if result.error and result.error.validation_error is not None:
-                    data["validation_error"] = result.error.validation_error.model_dump(
-                        mode="json"
-                    )
+                    data["validation_error"] = result.error.validation_error.model_dump(mode="json")
                 if not result.error:
                     data = _observed_facts(action.skill, result.data, refs)
                     if action.skill == "rag_retrieval":
@@ -410,8 +402,6 @@ async def run_ungated(
         else:
             record["fault"].update(triggered=injector.triggered, events=injector.events)
         store.clear()
-    record["outcome_status"] = (
-        "answered" if record["final_answer"]["text"] else "no_answer"
-    )
+    record["outcome_status"] = "answered" if record["final_answer"]["text"] else "no_answer"
     record["grades"] = grade_task(task, record)
     return record

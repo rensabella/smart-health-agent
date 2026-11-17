@@ -288,13 +288,9 @@ def test_lineage_mismatch_reports_stable_rule_id(facts):
     service, context = facts["service"], facts["context"]
     parent = service.store.put({"kind": "parent"}, kind="dataset", context=context)
     other = service.store.put({"kind": "other"}, kind="dataset", context=context)
-    child = service.store.put(
-        {"kind": "child"}, kind="dataset", context=context, source_ref=parent
-    )
+    child = service.store.put({"kind": "child"}, kind="dataset", context=context, source_ref=parent)
     with pytest.raises(SkillError) as error:
-        service.store.check_source(
-            child, source_ref=other, kind="dataset", context=context
-        )
+        service.store.check_source(child, source_ref=other, kind="dataset", context=context)
     assert error.value.code == "harness_invalid_output"
     assert error.value.details == {"rule": "lineage.source_ref_mismatch"}
     assert error.value.message == "Artifact source does not match input."

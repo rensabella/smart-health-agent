@@ -104,21 +104,15 @@ def _window_features(window: pd.DataFrame) -> dict:
     record["temp_range"] = float(series["temp"].max() - series["temp"].min())
     record["eda_range"] = float(series["eda"].max() - series["eda"].min())
     record["hr_diff_std"] = float(np.diff(series["hr"]).std(ddof=0))
-    hr_freqs, hr_power = periodogram(
-        series["hr"], fs=WESAD_SAMPLE_RATE_HZ, detrend="linear"
-    )
+    hr_freqs, hr_power = periodogram(series["hr"], fs=WESAD_SAMPLE_RATE_HZ, detrend="linear")
     lf = _band_power(hr_freqs, hr_power, 0.04, 0.15)
     hf = _band_power(hr_freqs, hr_power, 0.15, 0.4)
     record["hr_lf_power"] = lf
     record["hr_hf_power"] = hf
     record["hr_lf_hf_ratio"] = lf / hf if hf > 0.0 else 0.0
-    resp_freqs, resp_power = periodogram(
-        series["resp"], fs=WESAD_SAMPLE_RATE_HZ, detrend="linear"
-    )
+    resp_freqs, resp_power = periodogram(series["resp"], fs=WESAD_SAMPLE_RATE_HZ, detrend="linear")
     record["resp_dominant_frequency"] = _dominant_frequency(resp_freqs, resp_power, 0.1, 0.5)
-    eda_freqs, eda_power = periodogram(
-        series["eda"], fs=WESAD_SAMPLE_RATE_HZ, detrend="linear"
-    )
+    eda_freqs, eda_power = periodogram(series["eda"], fs=WESAD_SAMPLE_RATE_HZ, detrend="linear")
     record["eda_spectral_slope"] = _spectral_slope(eda_freqs, eda_power)
     record["scr_count"] = float(window["scr"].sum())
     return record
@@ -136,8 +130,7 @@ def extract_wesad_features(windows: list[pd.DataFrame]) -> pd.DataFrame:
         ):
             raise SkillError(
                 "invalid_features",
-                "Feature extraction requires complete, finite "
-                f"{WESAD_WINDOW_ROWS}-row windows.",
+                f"Feature extraction requires complete, finite {WESAD_WINDOW_ROWS}-row windows.",
             )
         records.append(_window_features(window))
     result = pd.DataFrame.from_records(records, columns=WESAD_FEATURE_NAMES)

@@ -77,18 +77,62 @@ def test_legacy_imports_share_module_identity(old, new):
     assert importlib.import_module(old) is importlib.import_module(new)
 
 
-def test_bundled_defaults_match_reviewed_source_assets():
+def assert_bundled_defaults_match_source(source: Path, bundled: Path):
     # These root directories remain operator examples; changes must update wheel assets too.
     roots = [
-        Path("configs"),
-        Path("knowledge"),
-        Path("data/sample/demo.csv"),
-        Path("evaluation/test_cases.json"),
+        source / "configs",
+        source / "knowledge",
+        source / "data/sample/demo.csv",
+        source / "evaluation/test_cases.json",
     ]
     for root in roots:
         files = [root] if root.is_file() else [p for p in root.rglob("*") if p.is_file()]
         for path in files:
-            assert resource_path(*path.parts).read_bytes() == path.read_bytes(), str(path)
+            relative = path.relative_to(source)
+            # .gitignore reserves this exact path for private operator settings.
+            # It must not be copied into the wheel to make this check pass.
+            if relative == Path("configs/live_llm.local.yaml"):
+                assert not (bundled / relative).exists(), "Private config must not be bundled."
+                continue
+            assert (bundled / relative).read_bytes() == path.read_bytes(), str(relative)
+
+
+def test_bundled_defaults_match_reviewed_source_assets():
+    assert_bundled_defaults_match_source(Path.cwd(), resource_path())
+
+
+def test_source_asset_check_excludes_local_config_without_reading_it(tmp_path, monkeypatch):
+    source = tmp_path / "source"
+    bundled = tmp_path / "bundled"
+    for root in (source, bundled):
+        (root / "configs").mkdir(parents=True)
+        (root / "configs/agent.yaml").write_text("agent: reviewed\n")
+    private = source / "configs/live_llm.local.yaml"
+    private.write_text("synthetic private operator config")
+    read_bytes = Path.read_bytes
+
+    def reject_private_read(path):
+        assert path != private, "The source asset check must not read private settings."
+        return read_bytes(path)
+
+    monkeypatch.setattr(Path, "read_bytes", reject_private_read)
+    assert_bundled_defaults_match_source(source, bundled)
+    (bundled / "configs/live_llm.local.yaml").write_text("synthetic private operator config")
+    with pytest.raises(AssertionError, match="Private config must not be bundled"):
+        assert_bundled_defaults_match_source(source, bundled)
+
+
+@pytest.mark.parametrize("missing", [False, True])
+def test_source_asset_check_still_rejects_missing_or_changed_reviewed_assets(tmp_path, missing):
+    source = tmp_path / "source"
+    bundled = tmp_path / "bundled"
+    for root in (source, bundled):
+        (root / "configs").mkdir(parents=True)
+    (source / "configs/agent.yaml").write_text("agent: reviewed\n")
+    if not missing:
+        (bundled / "configs/agent.yaml").write_text("agent: stale\n")
+    with pytest.raises(FileNotFoundError if missing else AssertionError):
+        assert_bundled_defaults_match_source(source, bundled)
 
 
 def test_packaged_resources_under_symlinked_install_prefix(monkeypatch, tmp_path):

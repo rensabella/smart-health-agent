@@ -49,9 +49,12 @@ def uncertainty_text(profile: DataProfile | None = None) -> str:
 
 
 def analysis_summary(predicted: Prediction, *, profile_name: str | None = None) -> str:
-    profile = get_profile(profile_name) if profile_name is not None else _profile_or_none(
-        predicted.model.metadata.get("input_profile")
-    ) or _profile_or_none("synthetic_physiology_v1")
+    profile = (
+        get_profile(profile_name)
+        if profile_name is not None
+        else _profile_or_none(predicted.model.metadata.get("input_profile"))
+        or _profile_or_none("synthetic_physiology_v1")
+    )
     return profile.guard_text.analysis_summary_template.format(
         window_count=predicted.window_count,
         window_seconds=profile.window_seconds,
@@ -272,7 +275,9 @@ class HarnessValidator:
                 service.store.check_source(
                     data[ref_field], source_ref=payload[parent_field], kind=kind, context=context
                 )
-                _require(stored[parent_field] == payload[parent_field], rule=f"{name}.lineage_parent")
+                _require(
+                    stored[parent_field] == payload[parent_field], rule=f"{name}.lineage_parent"
+                )
                 if name == "csv_analysis":
                     _require(
                         data["row_count"] == len(stored["frame"]) > 0,
@@ -303,9 +308,7 @@ class HarnessValidator:
                     window_set = service.store.get(
                         stored["window_set_ref"], kind="window_set", context=context
                     )
-                    profile = _profile_or_none(
-                        window_set["cleaning_report"].get("input_profile")
-                    )
+                    profile = _profile_or_none(window_set["cleaning_report"].get("input_profile"))
                     _require(profile is not None, rule="feature_extraction.input_profile")
                     _require(
                         data["window_count"] == len(stored["frame"]) > 0,
@@ -561,9 +564,7 @@ class HarnessValidator:
                 "harness_hash": self.fingerprint,
                 "evidence": evidence,
                 "uncertainty": uncertainty_text(profile),
-                "recommendations": (
-                    [profile.guard_text.high_score_recommendation] if high else []
-                ),
+                "recommendations": ([profile.guard_text.high_score_recommendation] if high else []),
                 "medical_review": "not_performed",
             }
             return result

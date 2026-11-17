@@ -49,8 +49,7 @@ def extract_synthetic_features(windows: list[pd.DataFrame]) -> pd.DataFrame:
         ):
             raise SkillError(
                 "invalid_features",
-                "Feature extraction requires complete, finite "
-                f"{window_rows}-row windows.",
+                f"Feature extraction requires complete, finite {window_rows}-row windows.",
             )
         record = {}
         centered_time = np.arange(len(window), dtype=float) - (len(window) - 1) / 2

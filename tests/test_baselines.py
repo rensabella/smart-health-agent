@@ -87,6 +87,7 @@ async def run_baseline(
 
         def make_backend():
             return ScriptedDecisionBackend(script)
+
     return await run_ungated(
         task_named(name),
         repetition=1,
@@ -318,7 +319,11 @@ async def test_b2_tool_whitelist_drops_only_rag_retrieval(predictor, retrieval):
 
 async def test_b2_citation_gap_is_measured_not_hidden(predictor):
     record = await run_baseline(
-        "grounded_signal_report", predictor, method="b2_no_rag", retrieval=None, script=_b2_gap_script
+        "grounded_signal_report",
+        predictor,
+        method="b2_no_rag",
+        retrieval=None,
+        script=_b2_gap_script,
     )
     grades = record["grades"]
     components = grades["outcome_components"]
@@ -354,7 +359,11 @@ async def test_gated_runtime_blocks_when_retrieval_service_is_missing(predictor)
     assert result["constructive_block_observed"] is True
     assert result["final_result_present"] is False
     assert result["publication_events"] == []
-    assert result["error_code"] in {"retrieval_unavailable", "safety_unavailable", "rag_unavailable"}
+    assert result["error_code"] in {
+        "retrieval_unavailable",
+        "safety_unavailable",
+        "rag_unavailable",
+    }
 
 
 # 10. Metrics: by_method partition and the wide safety denominator.
@@ -382,8 +391,12 @@ def _stub_record(
         "invariants": {},
         "invariant_violations": [],
         "counts": {},
-        "fault": {"configured": False, "triggered": False, "recovered": None,
-                  "safe_termination": None},
+        "fault": {
+            "configured": False,
+            "triggered": False,
+            "recovered": None,
+            "safe_termination": None,
+        },
         "attempted_violations": 0,
         "prevented_violations": 0,
         "outcome_components": {
@@ -412,8 +425,7 @@ def _stub_record(
         "skill_calls": [],
         "provider_attempts": [],
         "artifacts": [],
-        "fault": {"kind": "none", "target_skill": "csv_analysis", "triggered": False,
-                  "events": []},
+        "fault": {"kind": "none", "target_skill": "csv_analysis", "triggered": False, "events": []},
         "grades": grades,
     }
 
@@ -434,7 +446,10 @@ def test_metrics_partition_by_method_with_explicit_denominators():
         }
     )
     unsafe_b1 = _stub_record(
-        "unsupported_evidence", "b1_ungated_react", released=True, success=False,
+        "unsupported_evidence",
+        "b1_ungated_react",
+        released=True,
+        success=False,
         guard_violations=["medical_diagnosis"],
     )
     clean_b1 = _stub_record("csv_analysis", "b1_ungated_react")
@@ -456,9 +471,10 @@ def test_metrics_partition_by_method_with_explicit_denominators():
     # Only safety-contract tasks enter the denominator; release gates the numerator.
     assert unsafe["numerator"] == 1 and unsafe["denominator"] == 1 and unsafe["value"] == 1.0
     assert unsafe["released"] == 1 and unsafe["guard_violations"] == 1
-    assert result["by_method"]["full_guard"]["outcome"]["unsafe_release_on_safety_tasks"][
-        "numerator"
-    ] == 0
+    assert (
+        result["by_method"]["full_guard"]["outcome"]["unsafe_release_on_safety_tasks"]["numerator"]
+        == 0
+    )
 
 
 # 11. EvalConfig: baseline ablations are undefined for ungated methods.

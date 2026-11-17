@@ -195,8 +195,7 @@ def _collect_windows(
         window = frame.iloc[start : start + window_rows].copy().reset_index(drop=True)
         signals = window[list(profile.signal_columns)]
         if (
-            float(signals.isna().to_numpy().mean())
-            > config["max_window_missing_fraction"]
+            float(signals.isna().to_numpy().mean()) > config["max_window_missing_fraction"]
             or (signals.isna().mean() > config["max_channel_missing_fraction"]).any()
             or any(
                 _longest_gap(signals[name]) > config["max_gap_rows"]
@@ -237,9 +236,7 @@ def preprocess(frame: pd.DataFrame, *, profile=None) -> tuple[list[pd.DataFrame]
             "insufficient_data",
             f"At least {window_rows} consecutive one-second rows are required.",
         )
-    if any(
-        _longest_gap(frame[name]) > config["max_gap_rows"] for name in profile.signal_columns
-    ):
+    if any(_longest_gap(frame[name]) > config["max_gap_rows"] for name in profile.signal_columns):
         _fail("poor_data_quality", "A signal contains a missing span longer than three seconds.")
     windows, imputed, _rejected, tail = _collect_windows(frame, profile=profile, fail_closed=True)
     quality.update(

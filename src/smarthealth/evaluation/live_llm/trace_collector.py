@@ -263,11 +263,9 @@ class ObservedBackend(DecisionBackend):
                 safe["arguments_valid"] = False
                 if skill or final:
                     try:
-                        (
-                            skill.input_schema
-                            if skill
-                            else FinalAnswerInput
-                        ).model_validate(action.arguments, strict=True)
+                        (skill.input_schema if skill else FinalAnswerInput).model_validate(
+                            action.arguments, strict=True
+                        )
                         safe["arguments_valid"] = True
                     except (ValidationError, ValueError, TypeError):
                         pass

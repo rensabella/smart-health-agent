@@ -407,9 +407,7 @@ class ReportService:
         title = profile.guard_text.report_title
         summary = analysis_summary(predicted, profile_name=profile.name)
         recommendations = (
-            [profile.guard_text.high_score_recommendation]
-            if predicted.risk_level == "high"
-            else []
+            [profile.guard_text.high_score_recommendation] if predicted.risk_level == "high" else []
         )
         uncertainty = uncertainty_text(profile) + profile.guard_text.report_uncertainty_suffix
         body = "\n\n".join(

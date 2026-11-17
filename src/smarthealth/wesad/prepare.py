@@ -61,8 +61,7 @@ def _subject_summary(record, frame: pd.DataFrame, pkl_sha256: str) -> dict:
         "rows": int(len(frame)),
         "dropped_partial_samples": int(record.dropped_partial_samples),
         "label_seconds": {
-            str(canonical): int(np.count_nonzero(labels == canonical))
-            for canonical in (0, 1, 2)
+            str(canonical): int(np.count_nonzero(labels == canonical)) for canonical in (0, 1, 2)
         },
         "unlabeled_seconds": int(np.count_nonzero(np.isnan(labels))),
         "hr": {
@@ -141,8 +140,7 @@ def prepare(source: Path, manifest: Path, output: Path, *, holdout_subject: str)
             "rows": int(sum(item["rows"] for item in subjects_manifest.values())),
             "label_seconds": {
                 str(canonical): sum(
-                    item["label_seconds"][str(canonical)]
-                    for item in subjects_manifest.values()
+                    item["label_seconds"][str(canonical)] for item in subjects_manifest.values()
                 )
                 for canonical in (0, 1, 2)
             },
@@ -181,7 +179,10 @@ def main(argv=None):
     try:
         print(json.dumps(prepare(**vars(args)), indent=2))
     except SkillError as error:
-        print(json.dumps({"error_code": error.code, "message": error.message}), file=__import__("sys").stderr)
+        print(
+            json.dumps({"error_code": error.code, "message": error.message}),
+            file=__import__("sys").stderr,
+        )
         return 2
     return 0
 

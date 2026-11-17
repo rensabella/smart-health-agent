@@ -96,7 +96,9 @@ def load_wesad_fixture() -> tuple[bytes, dict]:
 
     try:
         content = Path(resource_path("evaluation", "wesad_fixture.csv")).read_bytes()
-        manifest_bytes = Path(resource_path("evaluation", "wesad_fixture_manifest.json")).read_bytes()
+        manifest_bytes = Path(
+            resource_path("evaluation", "wesad_fixture_manifest.json")
+        ).read_bytes()
     except OSError as error:
         raise SkillError(
             "evaluation_configuration_error", "The packaged WESAD fixture is not installed."
@@ -125,9 +127,8 @@ def load_wesad_fixture() -> tuple[bytes, dict]:
         problems.append("columns")
     else:
         header = set(columns)
-        if (
-            not set(WESAD_V1.signal_columns).issubset(header)
-            or not header.issubset(set(WESAD_V1.allowed_columns))
+        if not set(WESAD_V1.signal_columns).issubset(header) or not header.issubset(
+            set(WESAD_V1.allowed_columns)
         ):
             problems.append("columns")
     if not isinstance(document.get("rows"), int) or document["rows"] <= 0:

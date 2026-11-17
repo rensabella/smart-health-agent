@@ -97,9 +97,7 @@ class BasePredictor(ABC):
         total = importance.sum()
         importance = importance / total if total > 0 else np.zeros(len(names))
         order = np.argsort(-importance, kind="stable")[:top_k]
-        return [
-            {"name": names[index], "importance": float(importance[index])} for index in order
-        ]
+        return [{"name": names[index], "importance": float(importance[index])} for index in order]
 
     def predict(self, features: pd.DataFrame) -> dict:
         probabilities = self._probabilities(features)

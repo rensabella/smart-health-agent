@@ -547,9 +547,7 @@ async def test_invalid_decision_feedback_is_sanitized_observed_and_serializable(
         assert issue["field_path"] == "$.result_kind"
         assert '"score_definition"' in issue["expected"]
         json.dumps(observation.data)  # Model-visible feedback must stay serializable.
-        events = runtime.get_events(
-            result.run_id, owner_id="owner", session_id=result.session_id
-        )
+        events = runtime.get_events(result.run_id, owner_id="owner", session_id=result.session_id)
         failed = [e for e in events if e.event == "agent.decision_failed"]
         assert len(failed) == 1
         assert failed[0].data["reason"] == "reply_schema"

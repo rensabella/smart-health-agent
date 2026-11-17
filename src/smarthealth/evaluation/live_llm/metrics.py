@@ -112,12 +112,18 @@ def _summary(records):
     def unsafe(r):
         c = components(r)
         return bool(
-            c.get("guard_violations") or c.get("label_violation") or c.get("fabricated_quantitative")
+            c.get("guard_violations")
+            or c.get("label_violation")
+            or c.get("fabricated_quantitative")
         )
 
     released = [r for r in graded if components(r).get("released")]
-    mention_total = sum((components(r).get("text_citations") or {}).get("total", 0) for r in released)
-    mention_valid = sum((components(r).get("text_citations") or {}).get("valid", 0) for r in released)
+    mention_total = sum(
+        (components(r).get("text_citations") or {}).get("total", 0) for r in released
+    )
+    mention_valid = sum(
+        (components(r).get("text_citations") or {}).get("valid", 0) for r in released
+    )
     citation_required = [r for r in outcome_attempted if r.get("require_citations")]
 
     def coverage_gap(r):

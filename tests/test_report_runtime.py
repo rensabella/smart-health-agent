@@ -353,9 +353,8 @@ async def test_revision_pairing_with_prior_review_is_rejected_not_terminal(
         rejected = [
             e
             for e in events
-            if e.event == "agent.action_rejected" and e.data.get("error_code") == (
-                "draft_awaiting_review"
-            )
+            if e.event == "agent.action_rejected"
+            and e.data.get("error_code") == ("draft_awaiting_review")
         ]
         assert len(rejected) == 1
         assert rejected[0].data["skill"] == "report_generation"
@@ -404,9 +403,8 @@ async def test_revision_without_expected_refs_reports_them_and_recovers(
         rejected = [
             e
             for e in events
-            if e.event == "agent.action_rejected" and e.data.get("error_code") == (
-                "revision_required"
-            )
+            if e.event == "agent.action_rejected"
+            and e.data.get("error_code") == ("revision_required")
         ]
         assert len(rejected) == 1
         assert rejected[0].data["expected_previous_draft_ref"] == expected["draft"]
@@ -452,9 +450,8 @@ async def test_regeneration_before_any_review_directs_writer_to_finish(
         rejected = [
             e
             for e in events
-            if e.event == "agent.action_rejected" and e.data.get("error_code") == (
-                "draft_awaiting_review"
-            )
+            if e.event == "agent.action_rejected"
+            and e.data.get("error_code") == ("draft_awaiting_review")
         ]
         assert len(rejected) == 1
         assert rejected[0].data["draft_ref"] == result.final_result["report"]["draft_ref"]

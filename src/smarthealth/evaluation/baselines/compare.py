@@ -60,9 +60,7 @@ def _outcome_view(task, record):
     components = outcome_components(task, record)
     citation_identity = None
     if record.get("method", "full_guard") == "full_guard":
-        citation_identity = (record.get("grades") or {}).get("checks", {}).get(
-            "citation_identity"
-        )
+        citation_identity = (record.get("grades") or {}).get("checks", {}).get("citation_identity")
     checks, invariants = outcome_partition(
         task, record, components, citation_identity=citation_identity
     )
@@ -116,9 +114,7 @@ def method_summary(tasks: dict, records: list[dict]) -> dict:
     return {
         "records": len(records),
         "attempted": len(rows),
-        "outcome_task_completion": ratio(
-            sum(outcome_success(row) for row in rows), len(rows)
-        ),
+        "outcome_task_completion": ratio(sum(outcome_success(row) for row in rows), len(rows)),
         "unsafe_release_on_safety_tasks": {
             **ratio(sum(unsafe(row) for row in safety_rows), len(safety_rows)),
             "released": sum(row[2]["released"] for row in safety_rows),
@@ -143,10 +139,7 @@ def method_summary(tasks: dict, records: list[dict]) -> dict:
         ),
         "contract_graded_records": len(contract_graded),
         "contract_task_completion": ratio(
-            sum(
-                (record.get("grades") or {}).get("success") is True
-                for record in contract_graded
-            ),
+            sum((record.get("grades") or {}).get("success") is True for record in contract_graded),
             len(contract_graded),
         ),
     }
@@ -183,8 +176,7 @@ def _ratio_cell(node) -> str:
 def render_comparison_markdown(table: dict) -> str:
     entries = table["methods"]
     labels = [
-        " + ".join(entry["methods_present"]) + f" ({Path(entry['run']).name})"
-        for entry in entries
+        " + ".join(entry["methods_present"]) + f" ({Path(entry['run']).name})" for entry in entries
     ]
     lines = [
         "# Phase 3 method comparison",
@@ -205,19 +197,27 @@ def render_comparison_markdown(table: dict) -> str:
 
     def row(label, pick, cell=str):
         lines.append(
-            f"| {label} | "
-            + " | ".join(cell(pick(entry["summary"])) for entry in entries)
-            + " |"
+            f"| {label} | " + " | ".join(cell(pick(entry["summary"])) for entry in entries) + " |"
         )
 
     row("Attempted records", lambda s: s["attempted"])
     row("Outcome task completion", lambda s: s["outcome_task_completion"], _ratio_cell)
-    row("Unsafe release on safety tasks", lambda s: s["unsafe_release_on_safety_tasks"], _ratio_cell)
-    row("Text citation identity precision", lambda s: s["text_citation_identity_precision"], _ratio_cell)
+    row(
+        "Unsafe release on safety tasks", lambda s: s["unsafe_release_on_safety_tasks"], _ratio_cell
+    )
+    row(
+        "Text citation identity precision",
+        lambda s: s["text_citation_identity_precision"],
+        _ratio_cell,
+    )
     row("Citation coverage gap rate", lambda s: s["citation_coverage_gap_rate"], _ratio_cell)
     row("Retrieval exercised rate", lambda s: s["retrieval_exercised_rate"], _ratio_cell)
     row("Contract graded records (full_guard only)", lambda s: s["contract_graded_records"])
-    row("Contract task completion (full_guard only)", lambda s: s["contract_task_completion"], _ratio_cell)
+    row(
+        "Contract task completion (full_guard only)",
+        lambda s: s["contract_task_completion"],
+        _ratio_cell,
+    )
     lines += [
         "",
         "Unsafe-release decomposition (numerator = released with a guard-regex hit, an",
@@ -237,7 +237,8 @@ def render_comparison_markdown(table: dict) -> str:
         lines.append(
             f"| {label} | "
             + " | ".join(
-                str(entry["summary"]["unsafe_release_on_safety_tasks"].get(key)) for entry in entries
+                str(entry["summary"]["unsafe_release_on_safety_tasks"].get(key))
+                for entry in entries
             )
             + " |"
         )

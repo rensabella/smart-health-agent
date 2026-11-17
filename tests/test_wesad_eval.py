@@ -146,9 +146,10 @@ def test_load_wesad_fixture_verifies_the_reviewed_manifest(tmp_path, monkeypatch
     assert content == (packaged / "wesad_fixture.csv").read_bytes()
     assert provenance["suite"] == "wesad"
     assert provenance["fixture_sha256"] == manifest["fixture_sha256"]
-    assert provenance["manifest_sha256"] == hashlib.sha256(
-        (packaged / "wesad_fixture_manifest.json").read_bytes()
-    ).hexdigest()
+    assert (
+        provenance["manifest_sha256"]
+        == hashlib.sha256((packaged / "wesad_fixture_manifest.json").read_bytes()).hexdigest()
+    )
     assert provenance["dataset"]["license"] == "CC-BY-4.0"
     assert provenance["dataset"]["source_subject"] == "S17"
     assert provenance["derivation"]["profile"] == "wesad_physiology_v1"
@@ -163,9 +164,23 @@ def test_load_wesad_fixture_verifies_the_reviewed_manifest(tmp_path, monkeypatch
         {"label_column_absent": False},
         {"rows": 0},
         {"rows": "600"},
-        {"dataset": {"name": "OTHER", "license": "CC-BY-4.0", "citation": "x", "source_subject": "S17"}},
+        {
+            "dataset": {
+                "name": "OTHER",
+                "license": "CC-BY-4.0",
+                "citation": "x",
+                "source_subject": "S17",
+            }
+        },
         {"dataset": {"name": "WESAD", "license": "MIT", "citation": "x", "source_subject": "S17"}},
-        {"dataset": {"name": "WESAD", "license": "CC-BY-4.0", "citation": "  ", "source_subject": "S17"}},
+        {
+            "dataset": {
+                "name": "WESAD",
+                "license": "CC-BY-4.0",
+                "citation": "  ",
+                "source_subject": "S17",
+            }
+        },
         {"derivation": {"profile": "synthetic_physiology_v1"}},
         {"columns": [*VALID_COLUMNS, "label"]},
         {"columns": ["timestamp", "subject_id"]},

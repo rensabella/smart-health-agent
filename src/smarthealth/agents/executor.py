@@ -1011,17 +1011,13 @@ class AgentRuntime:
                     payload = value.model_dump(warnings=False)
                 except Exception:
                     payload = None
-                candidate = (
-                    payload.get("decision") if isinstance(payload, dict) else payload
-                )
+                candidate = payload.get("decision") if isinstance(payload, dict) else payload
                 raise SkillError(
                     "invalid_decision",
                     "Decision did not match the action contract.",
                     details={
                         "reason": "reply_schema",
-                        "validation_error": action_diagnostics(candidate).model_dump(
-                            mode="json"
-                        ),
+                        "validation_error": action_diagnostics(candidate).model_dump(mode="json"),
                     },
                 ) from None
         finally:
@@ -1403,9 +1399,7 @@ class AgentRuntime:
                 # revision here; otherwise the writer must return the draft for review.
                 current = False
                 if review:
-                    prior = self.service.store.get(
-                        review, kind="report_review", context=context
-                    )
+                    prior = self.service.store.get(review, kind="report_review", context=context)
                     current = prior.get("draft_ref") == draft
                 if current:
                     if (
@@ -1731,9 +1725,7 @@ class AgentRuntime:
         predictor = self.service.predictor
         if predictor is None:
             raise SkillError("model_unavailable", "A loaded model card is required.")
-        return score_definition(
-            predictor.metadata, profile_name=predictor.profile.name
-        )
+        return score_definition(predictor.metadata, profile_name=predictor.profile.name)
 
     async def aclose(self):
         self._closed = True

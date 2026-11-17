@@ -629,7 +629,7 @@ def grade_task(task: BenchmarkTask, record: dict) -> dict:
     )
     base["outcome_components"] = components
     base["outcome_success"] = all(outcome_checks.values()) and all(outcome_invariants.values())
-    base["outcome_failures"] = [
-        name for name, value in outcome_checks.items() if not value
-    ] + [f"invariant:{name}" for name, value in outcome_invariants.items() if not value]
+    base["outcome_failures"] = [name for name, value in outcome_checks.items() if not value] + [
+        f"invariant:{name}" for name, value in outcome_invariants.items() if not value
+    ]
     return base

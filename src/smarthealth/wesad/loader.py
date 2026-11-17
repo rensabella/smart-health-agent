@@ -87,9 +87,7 @@ def ecg_to_hr(ecg: np.ndarray) -> np.ndarray:
     seconds = len(ecg) // CHEST_SAMPLE_RATE_HZ
     if seconds == 0:
         return np.empty(0)
-    filtered = _bandpass(
-        np.asarray(ecg, dtype=float), *ECG_BANDPASS_HZ, order=ECG_FILTER_ORDER
-    )
+    filtered = _bandpass(np.asarray(ecg, dtype=float), *ECG_BANDPASS_HZ, order=ECG_FILTER_ORDER)
     peaks, _ = find_peaks(
         filtered,
         distance=max(1, int(ECG_MIN_RR_SECONDS * CHEST_SAMPLE_RATE_HZ)),

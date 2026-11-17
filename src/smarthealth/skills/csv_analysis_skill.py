@@ -36,7 +36,5 @@ class CSVAnalysisSkill(BaseSkill[CSVAnalysisInput, CSVAnalysisOutput]):
 
     def execute(self, input: CSVAnalysisInput, context: SkillContext) -> CSVAnalysisOutput:
         return CSVAnalysisOutput.model_validate(
-            self.service.inspect_csv(
-                input.upload_ref, context, data_profile=input.data_profile
-            )
+            self.service.inspect_csv(input.upload_ref, context, data_profile=input.data_profile)
         )
